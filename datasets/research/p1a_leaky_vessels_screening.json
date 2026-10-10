@@ -20,7 +20,8 @@
     "Red Hat 2019 background revision and independence not audited",
     "Palo Alto February 2024 later report not isolated as immutable gold labels; novelty not assessed",
     "No versioned historical ATT&CK/Falco taxonomy or alias set attached",
-    "No real semantic CTI extraction or human labels; this is not a pilot case manifest"
+    "No real semantic CTI extraction or human labels; this is not a pilot case manifest",
+    "Exact 2024 and 2019 Openwall email archive bytes, original message headers/delivery proof and retention rights have not been independently approved; the 2019 maintainer message is correlated with the 2024 maintainer release."
   ],
   "git_provenance_anchor": {
     "release_url": "https://github.com/opencontainers/runc/releases/tag/v1.1.12",
@@ -131,6 +132,40 @@
       "archived_sha256": null,
       "verified_available_at": null,
       "rights_review": "pending"
+    },
+    {
+      "source_version_id": "candidate:runc-2024-openwall-disclosure:unfrozen",
+      "source_id": "src:runc-2024-openwall-disclosure",
+      "url": "https://www.openwall.com/lists/oss-security/2024/01/31/6",
+      "publisher": "Aleksa Sarai / runc maintainers via oss-security (Openwall)",
+      "independence_group": "runc-maintainer-releases",
+      "proposed_role": "excluded",
+      "observed_publication_date": "2024-01-31",
+      "published_timestamp_observation": null,
+      "date_observation_basis": "Openwall's public oss-security archive indexed this email on Jan 31 2024. Message Date is Feb 1 07:33:01 +1100 (Jan 31 20:33:01 UTC); sender-supplied Date does not independently prove delivery time or original HTML bytes.",
+      "revision_risk": "A durable public archived original public maintainer announcement with a Message-ID; current HTML wrapper and attachment links have not been frozen or independently shown unchanged. Same upstream maintainer independence group as the runc release.",
+      "triage_decision": "backup_early_maintainer_candidate_not_independent_of_release",
+      "approved": false,
+      "archived_sha256": null,
+      "verified_available_at": null,
+      "rights_review": "pending"
+    },
+    {
+      "source_version_id": "candidate:runc-2019-openwall-disclosure:unfrozen",
+      "source_id": "src:runc-2019-openwall-disclosure",
+      "url": "https://www.openwall.com/lists/oss-security/2019/02/11/2",
+      "publisher": "Aleksa Sarai / runc maintainers via oss-security (Openwall)",
+      "independence_group": "runc-maintainer-releases",
+      "proposed_role": "excluded",
+      "observed_publication_date": "2019-02-11",
+      "published_timestamp_observation": null,
+      "date_observation_basis": "Original oss-security public archive indexed on Feb 11 2019. Message Date Feb 12 00:05:20 +1100 corresponds to Feb 11 13:05:20 UTC; sender-supplied date is not independent list delivery proof.",
+      "revision_risk": "Older distinct CVE-2019-5736, not a contemporary observation of the 2024 CVE. Same runc maintainer origin as 2024 runc release, so it cannot be counted as independent background under current conservative grouping.",
+      "triage_decision": "historical_context_only_not_independent_background",
+      "approved": false,
+      "archived_sha256": null,
+      "verified_available_at": null,
+      "rights_review": "pending"
     }
   ],
   "notes_on_selection": [
@@ -138,7 +173,8 @@
     "Upstream runc maintainers and Snyk Research are distinct publishers but co-disclosure teams may share underlying findings; screen source-level factual independence rather than assume statistical independence.",
     "An independent Feb 5 article does not automatically provide a novel fact. Reject this case if held-out facts are merely repeated early facts or cannot be judged without post-cutoff knowledge.",
     "Later Snyk deep dive must never be a separate independent gold source when Snyk is included in the early report group.",
-    "Never infer that a CVE disclosure is a successful incident, observed compromise or deployed attack telemetry."
+    "Never infer that a CVE disclosure is a successful incident, observed compromise or deployed attack telemetry.",
+    "Original publicly indexed oss-security mail messages provide historical timestamp/context anchors, but sender-controlled Date headers and modern HTML wrappers alone cannot establish exact original byte versions."
   ],
   "approval_state": {
     "verified_historical_source_versions": 0,
