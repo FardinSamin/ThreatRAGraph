@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
   "dataset_version": "0.1.0-candidate",
-  "description": "Candidate public URLs discovered during initial research; no historical source version has been frozen or approved, and no study cases have been selected.",
+  "description": "Candidate public URLs only; 17 candidate versions as of 2026-10-10. The Leaky Vessels P1a source screen adds maintainer/research background but has NOT approved any version, UTC availability, source rights or case.",
   "sources": [
     {
       "source_id": "src:crio-crowdstrike",
@@ -241,6 +241,57 @@
       "sha256": null,
       "redistribution": "unknown",
       "selection_rationale": "Potential richer later analysis for comparison with vendor-only baseline"
+    },
+    {
+      "source_id": "src:runc-maintainer-release",
+      "source_version_id": "candidate:runc-maintainer-release:unfrozen",
+      "source_kind": "cve_advisory",
+      "title": "Official runc v1.1.12 security release notes (CVE-2024-21626)",
+      "publisher": "opencontainers/runc maintainers",
+      "url": "https://github.com/opencontainers/runc/releases/tag/v1.1.12",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "GitHub Releases API (observed 2026-10-10) published_at=2024-01-31T20:06:08Z. Annotated tag OID 20381324e21b5b232fea74d448b5975d85d34d25 points at commit 51d5e94601ceffbbd85688df1c928ecccbfa4685 and has tagger date 2024-01-23; that pre-publication Git timestamp MUST NOT be treated as public availability. Exact eligible release-note bytes/rights not yet frozen.",
+      "independence_group": "runc-maintainer-releases",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "Potential early maintainer advisory with exact public GitHub release timestamp; recover source-version bytes and independent public date evidence"
+    },
+    {
+      "source_id": "src:runc-2019-redhat",
+      "source_version_id": "candidate:runc-2019-redhat:unfrozen",
+      "source_kind": "cti_report",
+      "title": "Red Hat: It starts with Linux — CVE-2019-5736 container security",
+      "publisher": "Red Hat",
+      "url": "https://www.redhat.com/en/blog/it-starts-linux-how-red-hat-helping-counter-linux-container-security-flaws",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "Publisher currently displays February 11, 2019. This is an observed page publication date, not verified first-public availability of the present body; exact February 2019 revision SHA not yet archived.",
+      "independence_group": "runc-2019-redhat",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "Historical, non-target container-breakout context and candidate background neighbor, subject to exact contemporaneous revision and independence checks"
+    },
+    {
+      "source_id": "src:runc-ghsa-21626",
+      "source_version_id": "candidate:runc-ghsa-21626:unfrozen",
+      "source_kind": "cve_advisory",
+      "title": "GHSA-xr7r-f8xq-vfvv — runc process.cwd and leaked fds",
+      "publisher": "opencontainers/runc security advisory",
+      "url": "https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "GitHub advisory shows January 31, 2024 initial publication; GitHub Advisory Database is currently marked updated July 21, 2026. Its current body is NOT demonstrably the original January version. Archive and reconstruct an original dated revision before eligibility.",
+      "independence_group": "runc-maintainer-releases",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "Alternative original maintainer advisory; must not be counted as independent of upstream runc release or treated as historically unchanged"
     }
   ]
 }
