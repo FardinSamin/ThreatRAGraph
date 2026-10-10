@@ -56,7 +56,7 @@ Require exact stored bytes for all approved records:
 python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require-all
 ~~~
 
-On the current **14-candidate, zero-approved** corpus, these commands cannot establish any real source validity. In particular, an exit code 0 with zero approved sources is **not** a research-readiness result. The strict data-readiness check must also pass:
+On the current **17-candidate, zero-approved** corpus, these commands cannot establish any real source validity. In particular, an exit code 0 with zero approved sources is **not** a research-readiness result. The strict data-readiness check must also pass:
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json --strict
