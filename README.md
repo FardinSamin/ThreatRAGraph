@@ -11,6 +11,7 @@
 - [SRS](docs/SRS.md) — software requirements, research hypotheses, functional and nonfunctional criteria, acceptance gates.
 - [SDD](docs/SDD.md) — proposed architecture, claim/evidence graph schema, time-safe snapshots, similarity engine, baseline, evaluation, deployment options.
 - [M0 prototype intake](docs/M0_PROTOTYPE_INTAKE.md) — safe procedure for bringing the existing prototype into the repository and auditing it.
+- [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
 ## Research plan
@@ -36,6 +37,17 @@ python -m unittest discover -s tests -v
 ~~~
 
 No application dependencies, API tokens, AWS account or paid cloud services are needed for this preparatory script.
+
+## Research manifests (draft only)
+
+The M1 registries are intentionally **empty**; no real corpus or case study has been curated yet. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
+
+~~~powershell
+python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
+python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json --strict
+~~~
+
+The first command should validate the draft with warnings. The strict readiness check is **expected to fail** until 25–40 verified sources and 4–6 cases are populated and reviewed. This is an intentional quality gate, not a completed research dataset.
 
 ## Cloud services and licensing
 
