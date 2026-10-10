@@ -129,7 +129,7 @@ For an actual case, document the exact timestamp evidence for each source, justi
 4. Select 4–6 evaluable cases with independently verified early cutoff and later material. Record the case splits.
 5. Run non-strict validation after each edit, strict validation before freezing the pilot.
 6. Subject selections, historical timestamps and outcome-label protocol to faculty/research review. Freeze manifest content hashes for experiments, and track revisions rather than silently changing source history.
-7. Pass validated registries to the imported existing extractor/graph prototype when available; **do not rewrite the original implementation merely to match these templates**.
+7. Connect validated registries to the greenfield extraction and graph modules already implemented in this repository; evolve adapters against real CTI sources rather than inventing another codebase.
 
 ## 6. Additional research acceptance gates not fully automated here
 
@@ -140,6 +140,6 @@ For an actual case, document the exact timestamp evidence for each source, justi
 - Ensure exact early report choice, held-out scoring criteria, annotation adjudication and exclusions are approved.
 - Separate observed facts, hypotheses and later ground-truth labels.
 - Re-run case leakage checks in the final graph snapshot system; passing a metadata validator is only an initial safeguard.
-- Complete M0 prototype import and technical audit before integrating manifest schemas with an existing graph database or extraction pipeline.
+- Audit and extend the actual repository extraction/graph implementation against M1 schema requirements; no pre-existing prototype import is needed.
 
 **Status note:** The source registry contains 14 unapproved, unfrozen candidates; the case registry is empty. Neither the manifests nor the new byte-integrity tool constitute a completed dataset or empirical result.
