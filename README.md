@@ -18,6 +18,7 @@
 - [M2 evidence alignment](docs/M2_EVIDENCE_ALIGNMENT.md) — source-byte-backed text and JSON citation validation before graph insertion.
 - [M2 HTML/Falco normalization](docs/M2_HTML_FALCO_NORMALIZATION.md) — deterministic source-linked HTML visible text and safe pinned Falco YAML citation parsing.
 - [M2 PDF page evidence](docs/M2_PDF_PAGE_PROVENANCE.md) — pinned page-by-page PDF text extraction from approved archived bytes with verifiable page/offset citations.
+- [M2 semantic claim review](docs/M2_SEMANTIC_REVIEW.md) — explicit reviewer attestations bound to exact claim IDs, archive evidence, and strict graph readiness gates.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
@@ -81,7 +82,7 @@ The repository now includes a **standalone, testable sourced-claim graph** in `s
 python -m scripts.project_case_graph --help
 ~~~
 
-For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**, and the CLI now verifies source citation spans against archived UTF-8 text/JSON bytes. It does **not** yet predict novel behavior or implement a full extraction pipeline. HTML visible-text, pinned Falco YAML, and **extractable PDF page-text citation verification** are now supported; OCR, PDF visual layout interpretation, and semantic claim review remain pending. Real corpus, cases, and original local prototype integration are still pending.
+For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**. The CLI verifies archived source citations (UTF-8 text, JSON, HTML, Falco YAML, and extractable PDF text) and now requires **claim-bound human semantic reviews** for strict research runs. It does **not** yet predict novel behavior or implement a full extraction pipeline. HTML visible-text, pinned Falco YAML, and **extractable PDF page-text citation verification** are now supported; OCR, PDF visual layout interpretation, independent reviewer authentication, and real semantic review annotations remain pending. Real corpus, cases, and original local prototype integration are still pending.
 
 ## Cloud services and licensing
 
