@@ -208,7 +208,7 @@ class BaselineTests(unittest.TestCase):
             build_b0_profile(v, graph_for(v, [edge()]))
         v = view()
         graph = graph_for(v, [edge()])
-        graph["outcome_labels"] = {"secret": "post-cutoff"}
+        graph["outcome_labels"] = {"heldout_answer": "post-cutoff"}
         with self.assertRaises(ValueError):
             build_b0_profile(v, graph)
 
