@@ -25,10 +25,10 @@
   "git_provenance_anchor": {
     "release_url": "https://github.com/opencontainers/runc/releases/tag/v1.1.12",
     "github_release_published_at_observed": "2024-01-31T20:06:08Z",
-    "git_annotated_tag_oid_sha1": "20381324e21b5b232fea74d448b5975d85d34d25",
-    "tagged_commit_oid_sha1": "51d5e94601ceffbbd85688df1c928ecccbfa4685",
     "annotated_tag_tagger_at": "2024-01-23T13:13:42Z",
-    "warning": "SHA-1 Git object IDs are not the study-required archived-source SHA-256. Tagger/commit/created_at before embargo are NOT evidence of public availability. Published release timestamp does not prove a later-retrieved HTML version was publicly available then."
+    "warning": "Abbreviated Git SHA-1 prefixes are discovery clues, NOT uniquely verified immutable archive IDs or study-required SHA-256. Resolve and independently audit complete upstream tag/commit identities before approving any source. Tagger/commit timestamps before embargo do not establish public availability; release timestamp does not prove today's HTML existed at release.",
+    "git_annotated_tag_oid_prefix": "20381324e21b",
+    "tagged_commit_oid_prefix": "51d5e94601ce"
   },
   "sources": [
     {
