@@ -26,6 +26,39 @@ The **release published_at** and **Jan 23 tagger time** were inspected with GitH
 
 No source byte SHA-256, first-public-availability timestamp of the frozen content, reviewer approval or redistribution license has been inferred. Every registered manifest entry remains `status=candidate` with `sha256=null`, `published_at=null`, `available_at=null` and `date_confidence=unknown`. A date observation in the screening register is deliberately **not** the executable `available_at` required by the case schema.
 
+
+## P1a archival update — original oss-security public messages (2026-10-10)
+
+Two further **candidate-only** sources were identified from the [Openwall oss-security archive](https://www.openwall.com/lists/oss-security/); unlike the updated current Snyk HTML, they are public mailing-list messages indexed to the original disclosure days:
+
+| Original disclosure | Public archive | Historical context and limits |
+|---|---|---|
+| **runc CVE-2024-21626** | [2024-01-31 message 6](https://www.openwall.com/lists/oss-security/2024/01/31/6) | The archive shows the dated public runc maintainer announcement and its Message-ID. Author-supplied header \`Thu, 1 Feb 2024 07:33:01 +1100\` corresponds to **Jan 31 20:33:01 UTC**, after the reported GitHub release time. Email \`Date\` and the modern archive page alone **do not independently verify receipt time or original HTML body bytes**. Same runc-maintainer group as v1.1.12—not a third independent early report |
+| **runc CVE-2019-5736** | [2019-02-11 message 2](https://www.openwall.com/lists/oss-security/2019/02/11/2) | The archive shows the original older runc vulnerability disclosure. Message \`Date\` converts to **Feb 11 13:05:20 UTC**. This is a **distinct vulnerability**, not 2024 incident evidence; same maintainer group as the 2024 runc release, so exclude as an *independent* background source under the current grouping |
+
+**Important chronology:** The 2024 message mentions advance disclosure to a security-announcement list before public release. **Embargoed/private distribution is not public historical availability**; do not use any earlier mailing date or security list access to predate the public cutoff. Only the official release publication time and public oss-security archive day are independent candidate anchors. A plain message header can be forged, and the date on the hosted HTML wrapper cannot by itself freeze the 2024 content.
+
+The exact **current** page copies for both messages have not been saved, and their historical byte identity and storage/republication rights remain pending. Neither record has \`status=approved\`, an archived hash, or a validated \`available_at\`.
+
+### Safe manual source-byte preservation (private, not approval)
+
+To reduce the gap between finding public source references and verifiable source-byte identity, the repository now includes an **offline candidate capture tool**. On your **own Windows PC**, you can obtain a page body you are permitted to retain, then preserve its exact downloaded bytes in the ignored artifact store:
+
+~~~powershell
+# Downloads CURRENT page bytes. Does not reconstruct what was on the site in 2024.
+New-Item -ItemType Directory -Force -Path ".\data\private" | Out-Null
+Invoke-WebRequest -Uri "https://www.openwall.com/lists/oss-security/2024/01/31/6" -OutFile ".\data\private\runc-2024-openwall.html"
+
+# Archives exact local bytes and emits a private, UNAPPROVED candidate receipt.
+python -m scripts.capture_candidate_snapshot --source-version-id "candidate:runc-2024-openwall-disclosure:unfrozen" --input-file ".\data\private\runc-2024-openwall.html"
+~~~
+
+The capture tool has **no HTTP access itself**. It accepts a bounded local file, checks its unapproved source registry identity, writes byte-for-byte content to the existing ignored SHA-256 layout, and writes an idempotent **private** receipt with the computed SHA-256, byte count and **local import timestamp**. It will not overwrite an altered archived object or change an earlier receipt. Crucially, **local imported_at is not historical published_at or available_at**; the receipt intentionally has \`research_ready=false\`, \`source_rights_verified=false\` and \`historical_available_at=null\`.
+
+If you lack permission to retain even a private copy, **do not download/archive the source**; record only the public URL and provenance observations. Do not upload source text, original page bodies, proprietary PDFs, mailing-list attachments or exploit demonstrations into GitHub by default. Archive sampling, public chronology review, original message-body attribution, terms and licensing still need investigator/mentor signoff.
+
+The above capture is an implementation capability; **no archived source bytes have been collected in the GitHub repository**, and this PR **does not** promote sources to the experimental manifest. Authentic archived original-version verification remains P1a's next substantive blocker.
+
 ## Why this candidate and not the others *yet*
 
 - **CRI-O cr8escape (2022):** same-day coverage may lack strong independent *later new information*. Screen separately; don't reject permanently.
