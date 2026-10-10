@@ -123,3 +123,7 @@ This deliverable is **sourced graph infrastructure**, not a completed research e
 ## 7. Evidence-alignment update
 
 The end-to-end CLI now attaches the [M2 citation verifier](M2_EVIDENCE_ALIGNMENT.md) to the SQLite claim ledger: an approved source archive must match its own SHA-256, and a supported text-span or JSON-pointer locator must reproduce the claimed evidence digest. Otherwise the claim is rejected before insertion. The graph edge exposes `evidence_status=aligned`; direct test/developer ledger insertions without a verifier are labeled `unverified`. **Byte alignment is not semantic correctness or independently verified truth.** YAML/PDF normalizers and historical alias controls remain outstanding.
+
+## 8. HTML and Falco normalization update
+
+The evidence verifier now recomputes a versioned HTML visible-text view or safely parses a pinned Falco YAML rules file from the **original, hash-verified archive bytes** at insertion time. Those derived locators carry explicit normalizer versions. Falco YAML citations must remain `rule_semantics`, not observations of an incident. See [M2 normalization](M2_HTML_FALCO_NORMALIZATION.md). Raw PDF/OCR and semantic extraction verification are still not covered.
