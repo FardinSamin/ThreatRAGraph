@@ -54,7 +54,7 @@ def read_api_json(path):
     path = Path(path)
     if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_JSON_BYTES:
         raise ValueError("Input must be a bounded, regular, non-symlink JSON file")
-    with path.open(encoding="utf-8") as stream:
+    with path.open(encoding="utf-8-sig") as stream:
         result = json.load(stream)
     return _obj(result, "GitHub API document")
 
