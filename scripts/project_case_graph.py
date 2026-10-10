@@ -4,9 +4,9 @@
 This is NOT GraphRAG similarity/prediction. Source evidence locators and digests are checked against exact archive bytes
 for supported UTF-8/JSON types; this runner also enforces source-byte integrity,
 historical source partitions and restrictions on which claims may be loaded.
-Strict research runs require explicit manual semantic review of every claim;
+Strict structural runs require explicit manual semantic review of every claim;
 development-only runs may emit visibly unreviewed/uncertain claims, but cannot
-be labeled research ready. No cloud/network/model calls or raw report output.
+be labeled empirically research ready; even strict structural runs need\nindependent scientific approval outside this CLI. No network/model calls or raw report output.
 """
 import argparse
 import json
@@ -20,6 +20,7 @@ from scripts.validate_research_manifests import load_json, validate
 from src.threatragraph.evidence_graph import EvidenceGraph
 from src.threatragraph.evidence_alignment import EvidenceVerifier
 from src.threatragraph.semantic_reviews import SemanticReviewLedger, read_review_jsonl
+from src.threatragraph.readiness import readiness_disclosure
 
 MAX_CLAIMS_BYTES = 5 * 1024 * 1024
 MAX_CLAIMS = 10000
@@ -94,8 +95,9 @@ def run(sources, cases, case_id, raw_claims_path, archives, development=False,
         raise ValueError("B0 evidence is not a subset of G1 evidence")
 
     return {
-        "status": "development_only" if development else "sourced_graph_projection",
-        "research_ready": not development,
+        "status": "development_only" if development else "structurally_validated_graph",
+        "research_ready": False,
+        "readiness": readiness_disclosure(development_only=development),
         "case_id": case_id,
         "warnings": warnings,
         "scope": (
@@ -118,7 +120,7 @@ def main(argv=None):
     parser.add_argument("--reviews", help="JSONL human semantic evidence reviews; required for strict research runs")
     parser.add_argument(
         "--development-only", action="store_true",
-        help="Allow fewer than pilot source/case counts for synthetic fixtures; never mark research ready",
+        help="Relax only pilot counts for synthetic fixtures; neither mode grants scientific readiness",
     )
     args = parser.parse_args(argv)
     try:
