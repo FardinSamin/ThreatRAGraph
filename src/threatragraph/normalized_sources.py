@@ -10,7 +10,6 @@ Falco YAML v1 uses PyYAML 6.0.3 SafeLoader rules with stricter input checks.
 from __future__ import annotations
 
 from html.parser import HTMLParser
-import json
 import re
 from typing import Any
 
