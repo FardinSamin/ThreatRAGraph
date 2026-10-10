@@ -16,9 +16,9 @@ These checks guarantee byte alignment **only**. They do not prove that the extra
 |---|---|---|
 | `text_span` | Original UTF-8 plain-text bytes | `segment_id` must be `seg:` + the exact source-version ID. Unicode code-point offsets `[start,end)` locate a nonblank substring within the **original entire file**. SHA-256 is calculated over the substring's UTF-8 bytes. |
 | `json_pointer` | Original UTF-8 JSON bytes | RFC 6901-style absolute path including escaped `~0` and `~1` and array indices, selecting a scalar. Strings hash as UTF-8 text; other scalars hash as deterministic JSON. |
-| `yaml_path` | Falco rule YAML | **Rejected in v1**, even if the user provided a digest. Requires a trusted safe YAML parser tied to a frozen rule revision. |
+| `yaml_path` | Archived Falco rule YAML | **Now supported through the pinned strict parser** with required `normalizer_version=`falco-safe-yaml-v1-pyyaml-6.0.3``; only for `rule_semantics` fields. See [normalization contract](M2_HTML_FALCO_NORMALIZATION.md). |
 
-Binary PDFs, HTML extraction, OCR, UTF-16 reports, and *derived normalized text segments* are **not** supported in this version. They require a separately versioned, reproducible normalizer that retains a checked lineage to the archived original. **Do not simply label a derived PDF paragraph as a raw-text segment.**
+Binary PDFs, OCR, UTF-16 reports, and *external derived normalized text segments* are **not** supported in this version. **Archived UTF-8 HTML** now supports a deterministic, versioned `html_text_span` derived view, explained in [M2 normalization](M2_HTML_FALCO_NORMALIZATION.md). They require a separately versioned, reproducible normalizer that retains a checked lineage to the archived original. **Do not simply label a derived PDF paragraph as a raw-text segment.**
 
 ## Integrity and historical boundaries
 
@@ -41,7 +41,7 @@ The sourced-claim ledger now records an explicit `evidence_status` field:
 
 The end-to-end graph CLI **always uses the verifier**. It will not insert a sourced claim if the supplied evidence locator or digest does not match the approved archive. The developer API still permits clearly labeled unverified claims to enable prototype experimentation; those claims must never be reported as validated extraction.
 
-Falco rule descriptions/conditions represent potential detection patterns, not actual observed malicious runtime events. Aligned text also does **not** turn a source assertion into confirmed incident truth.
+Falco rule descriptions/conditions represent potential detection patterns, not actual observed malicious runtime events. YAML is now parsed through the pinned SafeLoader; a YAML-field claim must use `assertion_kind=rule_semantics`. Aligned text also does **not** turn a source assertion into confirmed incident truth.
 
 ## Example research workflow
 
@@ -84,4 +84,4 @@ python -m compileall -q src scripts
 
 Synthetic tests cover correct Unicode offsets, JSON pointer paths and escaping, spoofed quotes/hashes, wrong source segments, malformed/binary text, missing or mutated archived versions, unapproved sources, unsupported YAML paths, prompt injection as plain data, direct-ledger `unverified` vs. checked `aligned` statuses, and the full graph runner refusing fabricated citations.
 
-Still outstanding: original prototype import and extractor audit (#1), true historical source/case corpus (#3), deterministic HTML/PDF/Falco YAML normalization, semantic claim correctness review, time-valid aliases and embeddings, and actual GraphRAG similarity/evaluation. A source match alone does not establish a correct extracted CTI relationship.
+Still outstanding: original prototype import and extractor audit (#1), true historical source/case corpus (#3), deterministic PDF/OCR and advanced normalization, semantic claim correctness review, time-valid aliases and embeddings, and actual GraphRAG similarity/evaluation. HTML visible-text and Falco YAML normalization are now implemented with explicit versioning. A source match alone does not establish a correct extracted CTI relationship.
