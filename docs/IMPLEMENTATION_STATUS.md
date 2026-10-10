@@ -70,7 +70,7 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | EV-01–10 | Scoring/evidence policy designed; no independent real evaluation | P2 extraction labels and P5 paired evaluator |
 | NFR-01/04 | Synthetic hashes and local integrity code | Clean-room real-corpus reproducibility |
 | NFR-02/03 | Synthetic attribution and source-level cutoff protections | P3 full derived-leak audit, scored 100% provenance |
-| NFR-05/06 | `.gitignore`, heuristic preflight, bounded parsers | Real secret/dependency scan and full untrusted-input sandbox |
+| NFR-05/06 | `.gitignore`, heuristic preflight, bounded parsers; **P0.2 tracked-content detect-secrets and runtime pip-audit gates** | Historical Git secrets, full untrusted-input sandbox and deeper supply-chain review |
 | NFR-07/08/09 | Offline reference components; cloud off | Complete offline workflow, retries/quarantine and cloud opt-in budget guards if enabled |
 | NFR-10/11/12 | Some exact parser versions, no full lock/benchmark | P0 locked reproducible environment and measured latency |
 | NFR-13/14/15 | Explicit no-calibration/no-offensive defaults; JSON artifacts | G1 outputs and reporter UX |

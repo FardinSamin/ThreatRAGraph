@@ -9,6 +9,32 @@ permissions:
   contents: read
 
 jobs:
+  security-and-quality:
+    name: Security, supply chain and Python lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned quality and audit tools
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+      - name: Install exact runtime dependencies without unrequested transitive packages
+        run: python -m pip install --disable-pip-version-check --no-deps -r requirements-normalization.txt
+      - name: Check installed parser version pins
+        run: python -m scripts.check_dependency_versions
+      - name: Check environment package consistency
+        run: python -m pip check
+      - name: Ruff error, import and undefined-name checks
+        run: python -m ruff check --select E4,E9,F src scripts tests
+      - name: Scan tracked files for credential patterns and high entropy
+        run: python -m scripts.check_secrets
+      - name: Audit runtime package advisories (PyPI)
+        run: python -m pip_audit -r requirements-normalization.txt --no-deps --strict --progress-spinner off
+
   preflight-and-tests:
     strategy:
       fail-fast: false
@@ -24,8 +50,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Install pinned Falco YAML parser
-        run: python -m pip install --disable-pip-version-check -r requirements-normalization.txt
+      - name: Install pinned runtime format parsers without transitive dependencies
+        run: python -m pip install --disable-pip-version-check --no-deps -r requirements-normalization.txt
+      - name: Verify installed runtime dependency versions
+        run: python -m scripts.check_dependency_versions
       - name: Show interpreter and resolved parser versions
         run: |
           python --version
