@@ -1,13 +1,13 @@
 # ThreatRAGraph — Software Design Document (SDD)
 
 **Document ID:** TRG-SDD-001  
-**Version:** 0.1.0 (proposed architecture)  
+**Version:** 0.2.0 (greenfield reference architecture + verified implementation delta)  
 **Date:** 2026-10-10  
-**Status:** Draft for implementation planning; not an as-built architecture  
-**Design authority:** docs/SRS.md, version 0.1.0  
+**Status:** Controlled architecture draft with an as-built mapping (`18); unimplemented flows remain explicit designs, not capabilities  
+**Design authority:** docs/SRS.md, version 0.2.0; execution/exit gates: docs/BUILD_PLAN.md, version 0.2.0  
 **Project:** ThreatRAGraph — A GraphRAG-Based Cyber Threat Intelligence Knowledge Graph System
 
-> **Status and source of truth:** The repository was empty when docs/SRS.md was first committed. The investigator confirmed **there is no pre-existing local Python prototype**. ThreatRAGraph is being implemented from scratch **in this repository**. This original SDD describes the proposed target architecture; evaluate progress against actual committed modules and CI (now including M1–M4 reference components), and do not assume unimplemented features exist.
+> **Source of truth (2026-10-10):** ThreatRAGraph is **greenfield**. There is **no separate prior local prototype**; this GitHub repository is the implementation. The SRS/SDD design predates now-committed **synthetic-tested source validation, archive integrity, bounded normalization, SQLite sourced claims, manual-review contract, source-level historical views and B0 reference baseline**. Those modules are **not a completed data collector, free-text extractor, as-of entity resolver, G1 predictor or empirical research platform**. `18 maps actual code to remaining gaps; [BUILD_PLAN](BUILD_PLAN.md) defines measurable go/no-go conditions.
 
 ## 1. Design objectives and decisions
 
@@ -28,18 +28,18 @@ ThreatRAGraph is a **research platform first**, a prototype second. Its defining
 
 | ADR | Choice | Rationale | State |
 |---|---|---|---|
-| ADR-001 | Python 3.12+ reference implementation **[DESIGN]** | Supports the greenfield Python implementation in this repository; verify interpreter and dependencies in CI | Proposed |
-| ADR-002 | Batch/CLI orchestrator first, optional FastAPI read API | Research reproducibility without hosting dependency | Proposed |
-| ADR-003 | SQLite with FTS5 + immutable filesystem artifacts as local system of record; NetworkX MultiDiGraph as in-memory analytical projection | Small corpus, straightforward provenance, no cloud bill | Proposed |
+| ADR-001 | Python 3.12 reference runtime **[IMPLEMENTED IN CI]** | Current workflow explicitly selects Python 3.12; another platform requires separate smoke validation | Implemented reference / portability pending |
+| ADR-002 | Batch/CLI-first, optional FastAPI read API | Standalone source validation, graph, snapshot and B0 scripts exist; full orchestrated ingest/evaluate CLI is pending | Partially implemented |
+| ADR-003 | SQLite sourced-claim ledger + content-addressed local archives; FTS5/NetworkX only if shown necessary | SQLite claim/review tables and in-memory attributed graph JSON implemented; FTS5/NetworkX are **not** presently demonstrated dependencies | Partial; defer unused complexity |
 | ADR-004 | Optional Amazon Neptune **property graph** backend using an adapter; openCypher/Gremlin compatibility reviewed before use | Proposal mentions Neptune; backend-independent evidence logic | Conditional |
-| ADR-005 | Rule-based/STIX-native extraction plus swappable model-assisted extractor | Minimize variance, cost and hallucination | Proposed |
-| ADR-006 | Typed claim/evidence model with explicit date-time uncertainty | Supports contradictions, source provenance and historical snapshots | Proposed |
+| ADR-005 | Deterministic source parser first, then rules/STIX-native extraction; model assistance optional | Format parsing/citation verification implemented, but automatic typed candidate extraction remains pending | Partially implemented |
+| ADR-006 | Typed source/evidence claim records with explicit date-time uncertainty | Limited typed ontology, source version, evidence and polarity ledger exists; fuller event-time/alias model missing | Partially implemented |
 | ADR-007 | Interpretable weighted graph-feature ranking before embeddings or LLM synthesis | Falsifiable similarity treatment and meaningful ablations | Proposed |
-| ADR-008 | Offline scoring pipeline and human-reviewed reference facts | Research integrity and reproducibility | Proposed |
-| ADR-009 | Frozen manifests + content hashes + exact release revisions | Prevent silent dataset changes | Proposed |
+| ADR-008 | Offline scoring pipeline and human-reviewed reference facts | Human **source-claim** review contract exists, but held-out gold labels and metric scorer are not implemented | Partially implemented |
+| ADR-009 | Frozen manifests + content hashes + exact release revisions | Source-byte hashes and source-level input hashes implemented; historical taxonomy, aliases, real archives and freeze signoff missing | Partially implemented |
 | ADR-010 | One-user local-first greenfield implementation; hosted dashboard deferred | Matches focused pilot size and scope | Proposed |
 
-*These decisions should be revisited against the actual repository implementation and faculty methodological feedback. An ADR describes a selected reference design, not proof of implementation.*
+*An ADR documents a design choice; its state above distinguishes implemented code from targets. Revisit open decisions against the actual repository/test evidence and faculty methodological feedback. This SDD does not claim that a component exists merely because it appears in a Mermaid diagram.*
 
 ## 2. Context and high-level architecture
 
@@ -122,7 +122,7 @@ flowchart TB
 
 ## 3. Suggested repository structure
 
-**Illustrative target layout only; some paths now exist in the greenfield repository. Verify against the actual current tree before adding or moving files.**
+**Illustrative target layout (not the as-built file tree).** Actual modules live at `src/threatragraph/`, `scripts/` and `tests/`; see `18 for the code inventory. Do not create a parallel project structure when extending existing modules.
 
 ~~~text
 ThreatRAGraph/
@@ -203,7 +203,7 @@ ThreatRAGraph/
 
 ## 4. End-to-end data and control flows
 
-### 4.1 Ingest and build graph
+### 4.1 Ingest and build graph — **target flow, not yet complete**
 
 ~~~mermaid
 sequenceDiagram
@@ -228,7 +228,7 @@ sequenceDiagram
 
 **Failure semantics:** Each step records input hash, adapter version, output hash, status and error category. Invalid records are quarantined; valid batch items continue. Retry uses idempotency key **source_version_id + pipeline_config_hash + extractor_version**. The ledger never silently overwrites a previous claim.
 
-### 4.2 Historical experiment
+### 4.2 Historical experiment — **planned full run; only source-level views and B0 currently implemented**
 
 ~~~mermaid
 sequenceDiagram
@@ -249,7 +249,7 @@ sequenceDiagram
   E-->>C: immutable paired-run report
 ~~~
 
-The baseline and G branch cannot access the gold-label store by API design; only the scorer joins it after predictions are finalized.
+**Target isolation, not yet a complete deployed guarantee:** the intended B0/G1 profiler processes must be unable to read gold-label files at all. The current repository has source-level B0/G1 graph views and a standalone B0 CLI but no finished G1 or gold-label evaluator process. Implement OS/filesystem/process separation and an adversarial read-access test before treating this boundary as verified.
 
 ## 5. Storage and identity design
 
@@ -261,7 +261,7 @@ The baseline and G branch cannot access the gold-label store by API design; only
 
 A sourced edge cannot be directly overwritten by a predicted edge; edge labels and claim IDs remain separately queryable.
 
-### 5.2 Primary record contracts **[DESIGN]**
+### 5.2 Target record contracts **[DESIGN illustrations; not executable schemas]**
 
 SourceDocument:
 ~~~json
@@ -328,9 +328,9 @@ Prediction:
 }
 ~~~
 
-All illustrative IDs/values are examples, not real evidence or observed research outcomes. **Score 0.67 is not a probability** unless a separate calibration study supports that interpretation.
+**These JSON examples are future target shapes, not actual input schemas.** The current sourced-claim ID has the form `claim:<64-lowercase-hex>` (not `claim:sha256:...`); source manifests use `source_version_id`, `status=approved/candidate` and hash fields; M3 B0/G1 source views and M4 B0 profiles have their own versioned structures. Read the actual validators/fixtures before integrating. Prediction format above is **not implemented**. A sample score (0.67) is never a probability without calibration and is not a measured result.
 
-### 5.3 Suggested SQLite record schema
+### 5.3 Target SQLite record schema (**not all tables exist yet**)
 
 | Logical table | Key / important fields | Indexes / constraints |
 |---|---|---|
@@ -394,7 +394,7 @@ References: https://falco.org/docs/concepts/rules/basic-elements/ and https://fa
 
 ## 6. Connector/extraction design
 
-### 6.1 Source adapter protocol
+### 6.1 Source adapter protocol (**planned; parsing helpers alone are not adapters**)
 
 **SourceAdapter** supports discover/list (optional), fetch, transform-to-source-version and validate. Adapters run independently and emit standardized metadata. Recommended:
 - **MITRE ATT&CK STIX 2.1:** pin a specific release from https://github.com/mitre-attack/attack-stix-data, preserve STIX IDs, modified time, ATT&CK technique identifiers and relationship objects. Do not confuse the older MITRE/cti STIX 2.0 repository with this release source.
@@ -404,7 +404,7 @@ References: https://falco.org/docs/concepts/rules/basic-elements/ and https://fa
 - **Kubernetes docs:** curated page snapshots and stable URLs/revisions; distinguish security best-practice documents from incident observations.
 - **CTI reports:** permitted HTML/PDF/text extraction, with headers, paragraph boundaries, text spans, publication provenance and content hashes.
 
-### 6.2 Extractor contract
+### 6.2 Extractor contract (**planned; free-text candidate extraction missing**)
 
 ~~~text
 extract(normalized_version, ontology_version, config) -> CandidateSet
@@ -427,7 +427,7 @@ CandidateSet:
 
 **LLM controls [DESIGN]:** Strict JSON-schema outputs, maximal input size, redaction policy, no chain-of-thought retention, no code/tool authority, timeout/retry limits, declared model and generation parameters, token/cost logging. A rejected/missing citation becomes an invalid candidate. The model cannot adjudicate its own scored predictions.
 
-### 6.3 Entity resolution rules
+### 6.3 Entity resolution rules (**planned; historized alias state missing**)
 
 Order:
 1. Exact high-confidence upstream identifiers (STIX, ATT&CK, CVE, documented rule ID).
@@ -439,7 +439,7 @@ Save merge decisions with reviewer/date/supporting sources; **snapshot as-of rec
 
 ## 7. Time-valid snapshot builder: central research control
 
-### 7.1 Inputs and outputs
+### 7.1 Inputs and outputs (**source-level subset implemented; derived as-of state pending**)
 
 Input: **case manifest** containing target ID, research question, event context, **cutoff UTC**, allowed one/two early source-version IDs, forbidden later sources, independence grouping and reference-label set ID.
 
@@ -484,7 +484,7 @@ Both methods output **typed profile facts** with:
 
 The baseline retains source-asserted facts from early reports only. The graph method starts with the identical facts and proposes **additional** testable candidate relations. Score new proposed facts separately from copied observed facts.
 
-### 8.2 Interpretable similarity engine version 1 **[DESIGN]**
+### 8.2 Interpretable similarity engine version 1 **[NOT IMPLEMENTED — M5, Issue #21]**
 
 A case is represented by feature sets extracted from the early profile:
 - **techniques** (ATT&CK IDs) and tactic context;
@@ -523,7 +523,7 @@ candidate_relation_score(t, r) =
 - Conflict handling can reduce score or cause abstention. Explanations name shared features and source paths, not rhetorical model justification.
 - Scores are **ranking heuristics**, not calibrated likelihoods until empirically validated.
 
-### 8.3 Candidate construction and abstention
+### 8.3 Candidate construction and abstention **[M5 DESIGN]**
 
 ~~~text
 for case in frozen_cases:
@@ -544,7 +544,7 @@ for case in frozen_cases:
 
 **Provisional output:** Could say "candidate technique supported by historical analog patterns" with supporting source paths. It must not say "the new threat definitely uses the technique" unless explicit early reports assert it.
 
-### 8.4 GraphRAG synthesis (optional)
+### 8.4 GraphRAG synthesis **[OPTIONAL; NOT IMPLEMENTED]**
 
 GraphRAG is **grounded retrieval + constrained text generation**, not the scientific treatment by definition. The primary testable treatment is graph **structural evidence**. Optional synthesizer:
 1. Retrieve approved neighborhood/evidence paths and plain source snippets within snapshot.
@@ -583,7 +583,7 @@ Each of 4–6 cases includes:
 
 **Annotation protocol [DESIGN]:** Define canonical fact units in advance; label **SUPPORTED**, **CONTRADICTED**, **NOT_ASSESSABLE** and **DUPLICATE/OUT_OF_SCOPE** with exact references. Where feasible, blind the adjudicator to treatment identity. Record disagreements and resolutions. Do not conflate a claim that was unreported later with a false claim.
 
-### 9.2 Paired experiment matrix
+### 9.2 Paired experiment matrix (**planned experimental methods, not run results**)
 
 | Comparison | Early reports | Historical graph | LLM synthesis | Purpose |
 |---|---|---|---|---|
@@ -594,7 +594,7 @@ Each of 4–6 cases includes:
 
 The primary scientific comparison is **G1 versus B0**, preserving all other extraction and scoring conditions. If B0 and G1 use different extractors/prompts, run a controlled variant to separate graph gains from model gains.
 
-### 9.3 Metrics specification
+### 9.3 Metrics specification (**planned; no held-out scorer implemented yet**)
 
 Define canonical evaluated facts rather than comparing free-text similarity.
 
@@ -777,9 +777,9 @@ Metrics: extraction precision/recall, provenance coverage, orphan claims, graph 
 9. Contradicting advisories: both preserved with provenance and scored with uncertainty.
 10. Manually adjudicated gold facts: scorer reads outcome partition only after predictions frozen.
 
-### 13.3 CI pipeline **[DESIGN]**
+### 13.3 CI pipeline — current coverage vs required hardening
 
-On PR: formatting/lint, type-checking, unit and schema tests, secret/dependency checks, offline integration, temporal adversarial fixtures, reproducibility hash check; no AWS credentials or paid API calls. Separate manually invoked, budget-gated cloud integration tests if added.
+**Current CI (`.github/workflows/quality.yml`):** Ubuntu, Python 3.12, pinned `PyYAML`/`pypdf` versions, Python `unittest`, a heuristic import-preflight scan, candidate-manifest validator, local source-artifact audit (zero approved versions), snapshot preview, compilation and CLI help checks. **Still required before formal readiness:** Windows clean-run validation, formatting/lint/type enforcement, dependency vulnerability/SBOM review, proper secret scanner (preflight is not comprehensive), branch protection, exact reproducible dependency lock, self-contained real-source ingest fixtures, derived time-leak adversarial tests, and evaluator outcome-isolation checks. Nothing invokes AWS in normal CI.
 
 ## 14. Requirement-to-design traceability
 
@@ -795,36 +795,33 @@ On PR: formatting/lint, type-checking, unit and schema tests, secret/dependency 
 | NFR-01–04, 10–13, 16, 20 | §§5, 9, 12–13 | Reproducibility, provenance and CI |
 | AC-01–09 | §§9, 13, 15 | Research readiness/release gates |
 
-## 15. Implementation sequence, dependencies and exit gates
+## 15. Greenfield implementation sequence and dependency-gated exit criteria
 
-**Milestone M0 — Greenfield setup and repository baseline (initial setup complete).**
-- Establish the GitHub repository, document architecture, secure defaults, offline development environment and CI.
-- Inventory and continuously audit **code written in this repository** against FR/DR/NFR; there is no pre-existing local prototype to import.
-- Keep the optional import preflight utility for future external code only; it is not a missing-project blocker.
-- Keep ADRs and implementation-status reports tied to evidence from current commits and tests.
+**Detailed authoritative execution checklist:** [BUILD_PLAN](BUILD_PLAN.md), `TRG-PLAN-001 v0.2.0`. Do **not** mistake architectural *design presence* for an accepted implementation, or a passing synthetic test for a genuine historically valid research result.
 
-**M1 — Corpus + rights + format adapters.** Deliver 25–40-source manifest, reproducible source versions, parser fixtures and inclusion decisions. Gate: AC-01, FR-01–08.
+| Milestone | As-built state (2026-10-10) | Work and gate still required |
+|---|---|---|
+| **M0 — Greenfield repo baseline** | Initial repository, docs, Python components and CI are present. A separate local prototype **never existed**. | P0 CI/dependency hardening and an honest FR/DR/NFR code+test matrix; **no import task** |
+| **M1 — Historical corpus** | 14 **unapproved** source URL candidates, empty case registry, source metadata/hash tools. | P1: independently verify rights, exact original bytes and historic availability; first one real development case, then 25–40 approved sources and 4–6 cases / reviewed deviation; AC-01 |
+| **M2 — Extraction/evidence graph** | Synthetic-tested parsers, evidence alignment, SQLite sourced claim ledger and self-declared review gates. | P2: real source → typed candidate extractor/adapters, historized aliases, full coverage/independent annotations and precision/recall; AC-02/03 |
+| **M3 — As-of safety** | Deterministic source-level snapshots, case role allowlist and digest-bound graph views. | P3: independent case cutoff validation; feature/alias/taxonomy/decision-level reconstruction, gold-store isolation, strict adversarial leakage tests; AC-04 |
+| **M4 — B0 baseline** | Deterministic early-source report-assertion profile with abstention; synthetic tests. | P4: run from approved cases using same extracted/reviewed early inputs as G1; freeze output/run provenance |
+| **M5 — G1 similarity** | **Not implemented**, [#21](https://github.com/FardinSamin/ThreatRAGraph/issues/21). | P4: historically eligible neighbor ranker, weighted feature provenance, independence/correlation discount, versioned provisional hypotheses, abstention; no LLM required |
+| **M6 — Evaluator** | **Not implemented**. | P5: frozen paired B0/G1 outputs and independently adjudicated held-out facts, metrics incl. NA, extraction F1, per-case/ablation and leakage report; AC-05/06 |
+| **M7 — Reporting/release** | Research outline/design only. | P6: clean-room offline reproducibility, mentor approval, rights/ethics, negative-result reporting and symposium outputs; AC-07–09 |
 
-**M2 — Ontology + evidence ledger.** Implement schema/versioning, candidate extraction, Falco rule parsing, entity linking, provenance queries and manual review. Gate: AC-02–03, FR-09–18.
+**Immediate build priority:** P0 hardening + P1a one-real-case evidence validation, while the independent M5 ranking algorithm is developed against synthetic fixtures. Do **not** delay all real source verification until after synthetic G1 is coded. It is appropriate to defer *empirical G1 claims*, not to defer the actual dataset indefinitely.
 
-**M3 — Historical snapshot safety.** Build case manifests, time-gated graph projection, alias history and future-source negative fixtures. Gate: AC-04, FR-21, EV-08.
+### Definition of Done / stop-the-line acceptance for each PR
 
-**M4 — Cold-start baseline.** Freeze early reports/extractor/output contracts for all cases. Gate: baseline reproducible, outcome partition blocked.
+1. Declare issue, requirement IDs, exact data/schema boundaries, expected behavior, non-goals and evidence of need.
+2. Add positive, negative, corrupt, time-travel, provenance and deterministic tests appropriate to the component. No future/held-out feature or label may reach B0 or G1.
+3. Verify source bytes, source version, date, permitted use and manual decisions using separate gates; claims and predictions must never share asserted-truth status.
+4. Run CI on **final PR head**, including security/dependency scans when available; document unimplemented scans instead of pretending they passed.
+5. For scientific output, require P1b/P2/P3 signoffs, frozen early inputs, isolated reference labels, denominator-bearing scoring and independently reviewable run hashes.
+6. Update SRS/SDD/build plan/implementation matrix where relevant and leave one clearly scoped next action. No AWS resources or paid APIs without explicit budget authorization.
 
-**M5 — Similarity bootstrapping.** Implement weighted graph features, top-k, evidence path explanations and abstention. Gate: G1 produces versioned provisional candidates with time-safe support. Then optional ablations/GraphRAG.
-
-**M6 — Formal evaluation.** Label later reference facts, compute extraction and profile metrics, per-case paired comparisons, audit contradictions/unassessable predictions, write limitations. Gate: AC-05–06.
-
-**M7 — Reporting and release.** Documentation, cleanup, costs, ethics, faculty review, symposium outputs. Gate: AC-07–09. Optional Neptune/Bedrock only after no-cost reproduction works and budget approval exists.
-
-### Definition of done for a component
-
-- Requirement(s) and data contract referenced.
-- Code tested on valid, malformed, adversarial and (if applicable) time-travel fixtures.
-- Outputs include provenance, versions and failure modes.
-- No credentials/raw restricted documents committed.
-- Performance and cost measured, not assumed.
-- CLI instructions and design decisions updated.
+**Stop immediately on:** post-cutoff source/alias/taxonomy/embedding leakage, unknown chronology called verified, later labels exposed before prediction freeze, forged evidence promoted to fact, incompatible B0/G1 early inputs, unreviewed claims scored, secrets/raw restricted content in Git, or unauthorized cloud expense.
 
 ## 16. Open technical decisions / follow-up ADRs
 
@@ -835,7 +832,7 @@ On PR: formatting/lint, type-checking, unit and schema tests, secret/dependency 
 | TBD-03 historical cases | Mentor-reviewed inclusion criteria and frozen cutoff/held-out manifests |
 | TBD-04 OTX | API mock first; validate quotas and access permission |
 | TBD-05 extractor | Benchmark rule-only and optional model modes; account for model leakage and prices |
-| TBD-06 graph backend | Start local; performance evidence before Neptune |
+| TBD-06 graph backend | Continue SQLite/source-linked graph JSON locally; FTS5/NetworkX/Neptune are optional until justified by tests |
 | TBD-07 similarity | Freeze interpretable weighted-family baseline and development-only tuning |
 | TBD-08 annotation | Written labeling rubric, source references and disagreement log |
 | TBD-09 auth/hosting | Local-only initially; threat-model expansion before external exposure |
@@ -881,3 +878,64 @@ The ranges in §14 are summarized below with every individual SRS identifier spe
 | NFR-14, NFR-15, NFR-16, NFR-17, NFR-18, NFR-19, NFR-20 | §§9, 11–13 — ethics, controls and measured output |
 | EV-01, EV-02, EV-03, EV-04, EV-05, EV-06, EV-07, EV-08, EV-09, EV-10 | §9 — research scoring, validity and ablations |
 | AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09 | §§13, 15 — test and milestone exit gates |
+
+
+## 18. As-built module inventory and architecture delta (2026-10-10)
+
+This section makes **actual implementation** distinguishable from diagrams and example schemas. Paths have been inspected in the repository, and existing synthetic tests have been observed in prior CI runs; no genuine historical dataset has yet validated these components.
+
+| Actual file / interface | Present behavior | Do **not** infer | Follow-up work |
+|---|---|---|---|
+| `datasets/manifests/pilot.json` and `datasets/cases/pilot.json` | 14 candidate URLs; empty case list | Approved archives, documented cutoffs or ground-truth labels | P1 source/date/rights and case review |
+| `scripts/validate_research_manifests.py` | Metadata schema, uniqueness, partition/chronology guard | That any URL was archived at a valid historic version | Curator signoff and real-data tests |
+| `scripts/audit_source_artifacts.py` | Local archived-byte SHA-256 verification | Historical publishing date, license rights or independent publisher corroboration | P1 evidence register and rights policy |
+| `src/threatragraph/normalized_sources.py` | Bounded, versioned visible HTML and Falco YAML parsing | General unstructured CTI relation extraction, full macro execution or observed incidents | P2 adapters and typed candidate extractor |
+| `src/threatragraph/pdf_sources.py` and `evidence_alignment.py` | Versioned evidence locators, exact byte/quote checks for supported content | OCR, visual PDF truth, claim semantics or publisher reliability | P2 normalizer QA and evidence adjudication |
+| `src/threatragraph/evidence_graph.py` | SQLite approved source-version and typed sourced-claim ledger; B0/G1 projection by source ID | STIX full ontology, NetworkX/Neptune graph backend, time-valid aliases or future-free semantic model | P2 identity lineage, P3 as-of rebuilding |
+| `src/threatragraph/semantic_reviews.py` | Self-declared one-review-per-claim binding to claim/source/evidence | Authenticated expert agreement, blinded annotations or independent later reference truth | P2/P5 annotation governance |
+| `scripts/freeze_case_snapshots.py` | Deterministic B0/G1 **source lists** and optional artifact freeze when metadata/bytes pass | Graph feature/alias/taxonomy historical provenance or validity of declaration timestamps | P3 full snapshot / process boundary |
+| `scripts/project_case_graph.py` | Offline reviewed attributed claims → source-scoped graph JSON, strict pilot count rules | Automated extraction or empirical readiness from a synthetic count-matching manifest | P0 readiness semantics, P2 real ingestion |
+| `src/threatragraph/baseline_b0.py` and `scripts/profile_b0.py` | Isolated early-only reviewed-source assertions + abstention; no inference or invented probability | New fact prediction, case-level research benefit or strict-source approval from JSON alone | P4 pair with G1 on frozen real case |
+| M5/M6 | Design/issue only | A functioning similarity engine, reranker, gold-label scorer or measured research outcomes | P4/P5 |
+
+### 18.1 Actual data boundaries versus future target schemas
+
+**M1 source versions:** Manifest metadata contains `source_version_id`, `status` (`candidate`/`approved`), `sha256`, `available_at`, versioned independent dating fields and origin/licensing rationale; original bytes are stored in ignored local content-addressed archive paths. Current pilot contains no approved records. Audit checks source **identity**, not release timing.
+
+**M2 source claim:** `EvidenceGraph.append_source_claim` records a canonical `claim:<64-hex>`, subject/predicate/object, `assertion_kind` (`report_assertion` or `rule_semantics`), polarity, source-version ID, evidence locator/digest and extractor version. The database tracks byte alignment, and `semantic_reviews.py` holds a **separate** reviewer assertion. It is not a single STIX-standard graph object and does not imply publisher truth.
+
+**M3:** `case_views` emits `B0_sparse_report_only` with early sources and `G1_early_plus_historical_background` with the **same** early sources plus eligible background IDs. Both have an explicitly incomplete historical trust boundary until aliases, taxonomies, claim/feature provenance and label-store isolation are implemented.
+
+**M4:** `baseline_b0.py` emits only source-asserted, reviewer-supported target triples in `facts[]` and an intentionally empty `predictions[]`, with abstention and `confidence=null`. Its `research_ready` field is based on supplied structural conditions, **not faculty or historical source approval**, and must be corrected before production study claims.
+
+**M5 [DESIGN ONLY]:** A future `G1Prediction` must be stored separately from ``sourced_claims`; its versioned schema needs candidate triple, uncalibrated ranking score, feature-family contributions, source-verified historical path(s), independence/correlation discount, abstention, cutoff/snapshot and code/config/run hashes. Neither G1 nor an LLM inference workflow exists at this revision.
+
+### 18.2 Contamination and access architecture to implement
+
+~~~mermaid
+flowchart LR
+  M1["Historically archived approved source versions"] --> GATE["Verify source/date/rights"]
+  GATE --> X["Bounded parser + extractor + evidence reviewer"]
+  X --> C["Case-local as-of claim/alias/taxonomy view"]
+  C --> B0["B0: early reviewed source facts"]
+  C --> G1["G1: early facts + eligible background similarity"]
+  B0 --> FREEZE["Immutable early profiles + proposed predictions"]
+  G1 --> FREEZE
+  FUT["Later reference facts and annotation set"] --> EVAL["Separate evaluator process"]
+  FREEZE --> EVAL
+  EVAL --> REPORT["Paired metrics, negative outcomes, audit"]
+~~~
+
+**Trust boundary:**
+- `FUT` must never be readable by `GATE`, `X`, `C`, `B0` or `G1`, **including via file paths, environment, shared embeddings, taxonomy revisions, reviewer caches or permissive database connections**.
+- The arrows involving `X`, full `C` reconstruction, `G1`, `FREEZE` and `EVAL` represent **unfinished** implementation.
+- A process/file-access regression and a zero-future-provenance assertion must pass before the diagram is claimed as built.
+
+## 19. SDD design-change and verification contract
+
+- **Single codebase:** Extend these existing modules in GitHub; the now-closed old issue #1 reflected an incorrect premise that an independent local prototype existed. Do not reopen it as a dependency.
+- **Source hierarchy:** Preserve the original study question, scale, and cyberthreat focus in the SRS; source/version/chronology approvals and restrictions override convenient engineering shortcuts.
+- **No fabricated empirical approval:** `--strict` / `--require-all` / `research_ready=true` are presently structural checks, not proof that the real pilot is eligible. Require documented human signoff plus complete P1–P5 gates before research claims.
+- **Implementation workflow:** PRs include requirement mapping, schema compatibility, positive + adversarial + offline tests, exact SHA and code review, update to [BUILD_PLAN](BUILD_PLAN.md) status, and researcher-facing reproducibility commands.
+- **Architecture controls:** Optional FTS5, NetworkX, FastAPI, embeddings, AWS Bedrock/Neptune and LLM generation remain **design choices**, not prerequisites. The primary experimental comparison is deterministic G1 **structural similarity versus B0**, with no LLM.
+- **Future review:** Track deviations as ADRs, update controlled SRS requirements first and SDD implementation evidence in the same PR. Close a milestone only when its declared **real evidence gate** is met, not when a synthetic scaffold merges.
