@@ -24,3 +24,5 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Intake safety heuristics
         run: python scripts/preflight_import.py .
+      - name: Validate draft research manifests (offline)
+        run: python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
