@@ -54,7 +54,8 @@ def build_b0_profile(view: dict, graph: dict, *, development_only=False) -> dict
 
     Strict mode rejects even one unreviewed/unaligned claim. Development mode
     may count insufficiently reviewed claims but never present them as facts;
-    all output remains research_ready=False pending independent study approval,\n    including runs with strict structural input validation.
+    all output remains research_ready=False pending independent study approval,
+    including runs with strict structural input validation.
     """
     if type(development_only) is not bool:
         raise ValueError("development_only must be a boolean")
