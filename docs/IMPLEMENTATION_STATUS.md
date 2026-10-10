@@ -58,7 +58,7 @@ This is a **code-and-test audit**, not a certification. Status labels:
 
 | Cluster | Current assessment | Gate |
 |---|---|---|
-| RC-01/02 | 17 **candidate URLs**; **0 approved** real versions and **0 selected** cases | P1 complete exact archived sources and independent case chronology |
+| RC-01/02 | 19 **candidate URLs**; **0 approved** real versions and **0 selected** cases | P1 complete exact archived sources and independent case chronology |
 | RC-03/04 | Kubernetes/container/Falco types and source-vs-rule distinction in bounded graph | P2 real extraction, review, source lineage |
 | RC-05/06 | Source-level cutoff + held-out exclusion synthetic tests | P3 full alias/taxonomy/feature/index/label isolation |
 | DR-01/02 | Limited typed ontology, not full vocab | Ontology/version and compatibility tests |
