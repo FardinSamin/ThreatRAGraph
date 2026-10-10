@@ -1,6 +1,7 @@
 """Synthetic, offline, deterministic tests of CTI historical manifest validation."""
 
 import copy
+import hashlib
 import unittest
 
 from scripts.validate_research_manifests import validate
@@ -20,7 +21,7 @@ def source(version, date, group):
         "date_confidence": "verified",
         "date_evidence": "Synthetic fixture timestamp",
         "independence_group": group,
-        "sha256": "a" * 64,
+        "sha256": hashlib.sha256(version.encode("utf-8")).hexdigest(),
         "redistribution": "restricted",
         "selection_rationale": "Artificial unit-test fixture",
     }
@@ -139,6 +140,12 @@ class ResearchManifestTests(unittest.TestCase):
         sources["sources"].append(copy.deepcopy(sources["sources"][0]))
         errors, _, _ = validate(sources, cases)
         self.assertTrue(any("duplicate" in x for x in errors))
+
+    def test_same_content_across_split_is_blocked_even_with_different_groups(self):
+        sources, cases = study()
+        sources["sources"][2]["sha256"] = sources["sources"][0]["sha256"]
+        errors, _, _ = validate(sources, cases)
+        self.assertTrue(any("identical source content digest" in e for e in errors))
 
     def test_unknown_id_is_rejected(self):
         sources, cases = study()

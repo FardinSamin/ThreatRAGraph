@@ -185,6 +185,7 @@ def validate(source_manifest, case_manifest, strict=False):
         partitions = {"early": early, "background": background, "later": later}
         all_seen = set()
         group_partition = {}
+        digest_partition = {}
         for partition, ids in partitions.items():
             for version in ids:
                 if not nonempty(version):
@@ -210,6 +211,19 @@ def validate(source_manifest, case_manifest, strict=False):
                         errors.append(f"{where}.{partition}: '{version}' is post-cutoff leakage")
                     if partition == "later" and available <= cutoff:
                         errors.append(f"{where}.later: '{version}' is not after cutoff")
+
+                # Distinct source IDs with identical archived bytes cannot span
+                # an early/background/reference split, even if the user has
+                # declared different independence groups.
+                digest = record.get("sha256")
+                if isinstance(digest, str) and SHA256.fullmatch(digest):
+                    previous = digest_partition.get(digest)
+                    if previous is not None and previous != partition:
+                        errors.append(
+                            f"{where}: identical source content digest crosses "
+                            f"{previous}/{partition} partition"
+                        )
+                    digest_partition[digest] = partition
 
                 group = record.get("independence_group")
                 if nonempty(group):

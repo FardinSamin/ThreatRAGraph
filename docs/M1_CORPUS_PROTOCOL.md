@@ -125,7 +125,7 @@ For an actual case, document the exact timestamp evidence for each source, justi
 
 1. Researcher lists candidate reports, OTX pulses, ATT&CK/STIX version releases, Falco rules, Kubernetes security documents and selected container-based CVE/advisories.
 2. Record publisher, canonical HTTPS URL, public release/availability evidence, license rights, independence group, and inclusion rationale.
-3. Save a permitted immutable source copy/metadata snapshot **outside Git when restricted**; calculate its real SHA-256 and fill the approved source version record. Do not paste dummy hashes into approved records.
+3. Save a permitted immutable source copy/metadata snapshot **outside Git when restricted**; calculate its real SHA-256 and fill the approved source version record. Do not paste dummy hashes into approved records. Follow the [source byte-integrity procedure](M1_SOURCE_INTEGRITY.md) and verify the actual locally archived bytes. Historical publication time remains a separate, independently evidenced claim.
 4. Select 4–6 evaluable cases with independently verified early cutoff and later material. Record the case splits.
 5. Run non-strict validation after each edit, strict validation before freezing the pilot.
 6. Subject selections, historical timestamps and outcome-label protocol to faculty/research review. Freeze manifest content hashes for experiments, and track revisions rather than silently changing source history.
@@ -142,4 +142,4 @@ For an actual case, document the exact timestamp evidence for each source, justi
 - Re-run case leakage checks in the final graph snapshot system; passing a metadata validator is only an initial safeguard.
 - Complete M0 prototype import and technical audit before integrating manifest schemas with an existing graph database or extraction pipeline.
 
-**Status note:** The JSON registries are intentionally empty. Their existence is not a completed dataset or empirical result.
+**Status note:** The source registry contains 14 unapproved, unfrozen candidates; the case registry is empty. Neither the manifests nor the new byte-integrity tool constitute a completed dataset or empirical result.
