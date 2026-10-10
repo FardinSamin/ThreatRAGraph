@@ -178,6 +178,7 @@ class EvidenceGraphTests(unittest.TestCase):
             {"kind": "text_span", "segment_id": "a", "start": 8, "end": 8},
             {"kind": "yaml_path", "path": "relative/path"},
             {"kind": "python_script", "path": "/evil"},
+            {"kind": ["not-hashable"], "path": "/evil"},
         ):
             with self.subTest(locator=locator):
                 with self.assertRaises(ValueError):
@@ -231,7 +232,7 @@ class EvidenceGraphTests(unittest.TestCase):
         self.assertEqual("negative", edges[0]["polarity"])
         self.assertIn("not independently verified", self.graph.project(self.views["B0"])["caveat"])
 
-    def test_projection_is_deterministic_and_single-source(self):
+    def test_projection_is_deterministic_and_single_source(self):
         self.graph.append_source_claim(claim("historical"))
         self.graph.append_source_claim(claim("early"))
         a = self.graph.project(self.views["G1"])
