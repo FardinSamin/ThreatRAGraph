@@ -28,3 +28,5 @@ jobs:
         run: python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
       - name: Audit available local source artifacts (candidate-only manifest)
         run: python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require-all
+      - name: Preview historical B0 and G1 source snapshots (no write)
+        run: python -m scripts.freeze_case_snapshots datasets/manifests/pilot.json datasets/cases/pilot.json
