@@ -51,7 +51,7 @@ After independent approval, rights review, and byte-accurate archive storage:
 python -m scripts.project_case_graph --case-id VERIFIED_CASE_ID --claims "C:\research\reviewed-claims.jsonl"
 ~~~
 
-The optional `--development-only` flag allows small **synthetic** pilot fixtures, not bypass of archive hashing, cutoff enforcement or exact evidence alignment. The current repository has **17 unapproved source candidates and zero real case studies**, so it cannot yet produce experimental threat profiles.
+The optional `--development-only` flag allows small **synthetic** pilot fixtures, not bypass of archive hashing, cutoff enforcement or exact evidence alignment. The current repository has **19 unapproved source candidates and zero real case studies**, so it cannot yet produce experimental threat profiles.
 
 A fictional example plain-text file contains:
 
