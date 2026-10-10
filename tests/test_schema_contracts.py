@@ -1,5 +1,6 @@
 """Synthetic v1 artifact contracts and fail-closed SQLite migration boundaries."""
 import copy
+from contextlib import closing
 import hashlib
 from pathlib import Path
 import sqlite3
@@ -129,17 +130,17 @@ class SqliteSchemaMigrationSafetyTests(unittest.TestCase):
         self.temp.cleanup()
 
     def test_new_and_reopened_sqlite_v1_is_idempotent(self):
-        with sqlite3.connect(self.dbfile) as conn:
+        with closing(sqlite3.connect(self.dbfile)) as conn, conn:
             EvidenceGraph(conn)
             SemanticReviewLedger(conn)
             self.assertEqual(LEDGER_VERSION, conn.execute("PRAGMA user_version").fetchone()[0])
-        with sqlite3.connect(self.dbfile) as conn:
+        with closing(sqlite3.connect(self.dbfile)) as conn, conn:
             EvidenceGraph(conn)
             SemanticReviewLedger(conn)
             check_schema(conn, ("source_versions", "sourced_claims", "semantic_reviews"))
 
     def test_legacy_missing_evidence_status_is_rejected_without_rewrite(self):
-        with sqlite3.connect(self.dbfile) as conn:
+        with closing(sqlite3.connect(self.dbfile)) as conn, conn:
             EvidenceGraph(conn)
             conn.execute("DROP TABLE sourced_claims")
             conn.execute("""CREATE TABLE sourced_claims (
@@ -157,14 +158,14 @@ class SqliteSchemaMigrationSafetyTests(unittest.TestCase):
             self.assertNotIn("evidence_status", after)
 
     def test_future_sqlite_schema_version_is_rejected(self):
-        with sqlite3.connect(self.dbfile) as conn:
+        with closing(sqlite3.connect(self.dbfile)) as conn, conn:
             EvidenceGraph(conn)
             conn.execute("PRAGMA user_version = 99")
             with self.assertRaisesRegex(ValueError, "Unsupported SQLite schema version"):
                 EvidenceGraph(conn)
 
     def test_partially_constructed_core_is_refused(self):
-        with sqlite3.connect(self.dbfile) as conn:
+        with closing(sqlite3.connect(self.dbfile)) as conn, conn:
             conn.execute("CREATE TABLE source_versions (source_version_id TEXT PRIMARY KEY)")
             original = set(row[0] for row in conn.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"
@@ -177,7 +178,7 @@ class SqliteSchemaMigrationSafetyTests(unittest.TestCase):
             self.assertEqual(original, after)
 
     def test_incompatible_existing_review_table_is_not_silently_migrated(self):
-        with sqlite3.connect(self.dbfile) as conn:
+        with closing(sqlite3.connect(self.dbfile)) as conn, conn:
             EvidenceGraph(conn)
             conn.execute("CREATE TABLE semantic_reviews (review_id TEXT PRIMARY KEY)")
             with self.assertRaisesRegex(ValueError, "Incompatible semantic_reviews"):
