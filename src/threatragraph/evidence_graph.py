@@ -136,8 +136,13 @@ def validate_locator(raw: Any) -> str:
                 start < 0 or end <= start):
             raise ValueError("Invalid text span locator")
     elif kind in {"json_pointer", "yaml_path"}:
-        if set(raw) != {"kind", "path"} or not isinstance(raw["path"], str):
-            raise ValueError("Structured locator requires string path")
+        expected = {"kind", "path"}
+        if kind == "yaml_path":
+            expected.add("normalizer_version")
+            if raw.get("normalizer_version") != "falco-safe-yaml-v1-pyyaml-6.0.3":
+                raise ValueError("Unsupported Falco YAML normalizer version")
+        if set(raw) != expected or not isinstance(raw["path"], str):
+            raise ValueError("Structured locator requires exact keys and string path")
         if not raw["path"].startswith("/") or len(raw["path"]) < 2:
             raise ValueError("Structured locator must be an absolute field path")
     else:
