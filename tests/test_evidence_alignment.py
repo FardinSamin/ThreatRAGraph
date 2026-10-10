@@ -140,13 +140,12 @@ class EvidenceAlignmentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.verifier().verify(record)
 
-    def test_yaml_path_is_not_silently_treated_as_verified(self):
+    def test_yaml_path_verified_against_pinned_falco_safe_parser(self):
         self.add_archive("yaml", "- rule: synthetic\n  condition: evt.type=execve\n",
                          kind="falco_rule")
-        record = claim("yaml", {"kind": "yaml_path", "path": "/rules/0/condition"},
+        record = claim("yaml", {"kind": "yaml_path", "path": "/0/condition"},
                        "evt.type=execve")
-        with self.assertRaisesRegex(ValueError, "YAML path evidence requires"):
-            self.verifier().verify(record)
+        self.assertEqual("aligned", self.verifier().verify(record).status)
 
     def test_archive_mutation_fails_closed(self):
         record = self.add_archive("a", "good report")
