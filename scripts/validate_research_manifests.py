@@ -110,21 +110,25 @@ def validate(source_manifest, case_manifest, strict=False):
             index[version] = record
 
         kind = record.get("source_kind")
-        if kind not in SOURCE_KINDS:
+        if not isinstance(kind, str) or kind not in SOURCE_KINDS:
             errors.append(f"{where}.source_kind: unsupported value")
 
         status = record.get("status")
-        if status not in STATUSES:
+        if not isinstance(status, str) or status not in STATUSES:
             errors.append(f"{where}.status: candidate, approved or excluded required")
-        if record.get("date_confidence") not in DATE_CONFIDENCE:
+        if not isinstance(record.get("date_confidence"), str) or record.get("date_confidence") not in DATE_CONFIDENCE:
             errors.append(f"{where}.date_confidence: invalid value")
-        if record.get("redistribution") not in REDISTRIBUTION:
+        if not isinstance(record.get("redistribution"), str) or record.get("redistribution") not in REDISTRIBUTION:
             errors.append(f"{where}.redistribution: invalid value")
 
         url = record.get("url")
-        if not isinstance(url, str) or not (
-            urlparse(url).scheme == "https" and urlparse(url).netloc
-        ):
+        try:
+            parsed_url = urlparse(url) if isinstance(url, str) else None
+            url_ok = (parsed_url is not None and
+                      parsed_url.scheme == "https" and bool(parsed_url.netloc))
+        except ValueError:
+            url_ok = False
+        if not url_ok:
             errors.append(f"{where}.url: absolute https URL required")
 
         published = timestamp(record.get("published_at"), where + ".published_at",
