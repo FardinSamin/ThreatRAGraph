@@ -89,3 +89,7 @@ Still outstanding: original prototype import and extractor audit (#1), true hist
 ## PDF page-text provenance update
 
 The verifier additionally accepts a `pdf_page_span` locator with a pinned pypdf parser version, source-version-bound page segment ID, one-based page number and Unicode offsets. It re-extracts the page from the **original approved PDF bytes** before hashing the claimed excerpt. See [PDF page provenance](M2_PDF_PAGE_PROVENANCE.md). Scanned/image-only pages, PDF layout and semantic interpretation remain unsupported.
+
+## Semantic review update
+
+Beyond byte-level `evidence_status=aligned`, the strict graph runner now requires a separate claim-bound self-declared reviewer attestation (`semantic_review_status=supported_by_excerpt`). Missing, uncertain or unsupported judgments fail closed; development-only graphs can display unreviewed status but cannot be used as validated research. See [semantic review protocol](M2_SEMANTIC_REVIEW.md). No genuine review decisions are implied by the synthetic tests.
