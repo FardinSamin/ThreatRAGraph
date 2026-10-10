@@ -802,7 +802,7 @@ Metrics: extraction precision/recall, provenance coverage, orphan claims, graph 
 | Milestone | As-built state (2026-10-10) | Work and gate still required |
 |---|---|---|
 | **M0 — Greenfield repo baseline** | Initial repository, docs, Python components and CI are present. A separate local prototype **never existed**. | P0 CI/dependency hardening and an honest FR/DR/NFR code+test matrix; **no import task** |
-| **M1 — Historical corpus** | 14 **unapproved** source URL candidates, empty case registry, source metadata/hash tools. | P1: independently verify rights, exact original bytes and historic availability; first one real development case, then 25–40 approved sources and 4–6 cases / reviewed deviation; AC-01 |
+| **M1 — Historical corpus** | 17 **unapproved** source URL candidates, empty case registry, source metadata/hash tools. | P1: independently verify rights, exact original bytes and historic availability; first one real development case, then 25–40 approved sources and 4–6 cases / reviewed deviation; AC-01 |
 | **M2 — Extraction/evidence graph** | Synthetic-tested parsers, evidence alignment, SQLite sourced claim ledger and self-declared review gates. | P2: real source → typed candidate extractor/adapters, historized aliases, full coverage/independent annotations and precision/recall; AC-02/03 |
 | **M3 — As-of safety** | Deterministic source-level snapshots, case role allowlist and digest-bound graph views. | P3: independent case cutoff validation; feature/alias/taxonomy/decision-level reconstruction, gold-store isolation, strict adversarial leakage tests; AC-04 |
 | **M4 — B0 baseline** | Deterministic early-source report-assertion profile with abstention; synthetic tests. | P4: run from approved cases using same extracted/reviewed early inputs as G1; freeze output/run provenance |
@@ -886,7 +886,7 @@ This section makes **actual implementation** distinguishable from diagrams and e
 
 | Actual file / interface | Present behavior | Do **not** infer | Follow-up work |
 |---|---|---|---|
-| `datasets/manifests/pilot.json` and `datasets/cases/pilot.json` | 14 candidate URLs; empty case list | Approved archives, documented cutoffs or ground-truth labels | P1 source/date/rights and case review |
+| `datasets/manifests/pilot.json` and `datasets/cases/pilot.json` | 17 candidate URLs; empty case list | Approved archives, documented cutoffs or ground-truth labels | P1 source/date/rights and case review |
 | `scripts/validate_research_manifests.py` | Metadata schema, uniqueness, partition/chronology guard | That any URL was archived at a valid historic version | Curator signoff and real-data tests |
 | `scripts/audit_source_artifacts.py` | Local archived-byte SHA-256 verification | Historical publishing date, license rights or independent publisher corroboration | P1 evidence register and rights policy |
 | `src/threatragraph/normalized_sources.py` | Bounded, versioned visible HTML and Falco YAML parsing | General unstructured CTI relation extraction, full macro execution or observed incidents | P2 adapters and typed candidate extractor |
