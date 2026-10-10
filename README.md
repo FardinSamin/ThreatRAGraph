@@ -27,7 +27,7 @@
 
 ## Current engineering priorities
 
-**Next PR:** P0 audit/hardening and research-readiness truthfulness. **In parallel:** P1a verify one real historical case before scaling to the full study, and develop the synthetic M5 G1 ranker without claiming it is already validated. [Details and exit gates](docs/BUILD_PLAN.md).
+**Next PR:** [P0 CI/contract/readiness hardening — Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23). **In parallel:** [P1a verify one real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), and develop the [synthetic M5 G1 ranker — Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) without claiming it is already validated. [Details and exit gates](docs/BUILD_PLAN.md).
 
 No completed real-data GraphRAG comparison exists yet. The 14 source URLs remain *unapproved candidates* and the case manifest remains empty. A passing synthetic test or `research_ready` field is **not** independently reviewed evidence of a historically valid experiment.
 
