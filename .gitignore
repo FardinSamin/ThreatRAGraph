@@ -1,0 +1,50 @@
+# Python build caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Secret material and machine-specific credentials
+.env
+.env.*
+!.env.example
+.aws/
+.ssh/
+secrets/
+credentials.json
+service-account*.json
+*.pem
+*.p12
+*.pfx
+*.key
+id_rsa
+id_ed25519
+
+# Transient and potentially restricted CTI artifacts
+artifacts/
+reports/generated/
+data/raw/
+data/private/
+datasets/raw/
+datasets/private/
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Editor / OS metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+preflight-report.json
