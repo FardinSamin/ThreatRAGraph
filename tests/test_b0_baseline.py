@@ -1,6 +1,5 @@
 """B0 cold-start baseline isolation and abstention tests, synthetic only."""
 
-import copy
 import hashlib
 import io
 import json
