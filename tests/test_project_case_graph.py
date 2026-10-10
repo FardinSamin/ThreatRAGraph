@@ -99,6 +99,53 @@ class CaseGraphRunnerTests(unittest.TestCase):
         self.assertEqual("early", output["B0"]["edges"][0]["source_version_id"])
         self.assertEqual("aligned", output["B0"]["edges"][0]["evidence_status"])
 
+    def test_html_and_falco_sources_flow_through_case_graph(self):
+        html = b"<html><body><p>observed malware behavior</p></body></html>"
+        falco = b"- rule: Synthetic\\n  condition: evt.type=execve\\n".replace(b"\\n", b"\n")
+        for i, payload in ((0, html), (1, falco)):
+            digest = h(payload.decode("utf-8"))
+            self.src["sources"][i]["sha256"] = digest
+            folder = self.archives / digest[:2]
+            folder.mkdir(exist_ok=True, parents=True)
+            (folder / digest).write_bytes(payload)
+        self.src["sources"][1]["source_kind"] = "falco_rule"
+        html_claim = claim("early")
+        html_claim["evidence_locator"] = {
+            "kind": "html_text_span",
+            "normalizer_version": "html-visible-v1",
+            "segment_id": "seg:early:html-visible-v1",
+            "start": 0, "end": 8,
+        }
+        html_claim["evidence_sha256"] = h("observed")
+        falco_claim = claim("background")
+        falco_claim.update({
+            "subject_id": "falco-rule:synthetic",
+            "predicate": "INVOLVES_SYSCALL",
+            "object_id": "system-call:execve",
+            "assertion_kind": "rule_semantics",
+            "evidence_locator": {
+                "kind": "yaml_path", "path": "/0/condition",
+                "normalizer_version": "falco-safe-yaml-v1-pyyaml-6.0.3",
+            },
+            "evidence_sha256": h("evt.type=execve"),
+        })
+        self.claims_file.write_text(
+            json.dumps(html_claim) + "\n" + json.dumps(falco_claim) + "\n",
+            encoding="utf-8"
+        )
+        result = run(self.src, self.cases, "case-test",
+                     self.claims_file, self.archives, development=True)
+        self.assertEqual(1, len(result["B0"]["edges"]))
+        self.assertEqual(2, len(result["G1"]["edges"]))
+        self.assertEqual(
+            {"aligned"},
+            {edge["evidence_status"] for edge in result["G1"]["edges"]}
+        )
+        self.assertEqual(
+            {"rule_semantics", "report_assertion"},
+            {edge["assertion_kind"] for edge in result["G1"]["edges"]}
+        )
+
     def test_future_reference_claim_is_rejected_not_ignored(self):
         with self.claims_file.open("a") as file:
             file.write(json.dumps(claim("heldout")) + "\n")
