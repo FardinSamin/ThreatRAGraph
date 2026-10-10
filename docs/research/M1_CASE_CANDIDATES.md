@@ -43,7 +43,7 @@ The proposed comparison is **B0** (first one or two public sources only) versus 
 
 **Status:** **Promising**, pending trustworthy January snapshot and post-cutoff fact labeling.
 
-**P1a screen update (2026-10-10):** [Leaky Vessels source chronology and evidence checklist](P1A_LEAKY_VESSELS_CASE.md) documents a precise upstream release timestamp, revised modern pages, an independent 2019 background candidate, and an independent publisher's February 2024 later analysis. Three more **unapproved** URLs were added to the manifest (19 candidates total). The executable case registry remains empty; this is not an approved case.
+**P1a screen update (2026-10-10):** [Leaky Vessels source chronology and evidence checklist](P1A_LEAKY_VESSELS_CASE.md) documents a precise upstream release timestamp, revised modern pages, an independent 2019 background candidate, and an independent publisher's February 2024 later analysis. Five additional **unapproved** URLs have now been registered (19 candidate source URLs total), including original 2019 and 2024 oss-security mailing-list disclosures. The executable case registry remains empty; this is not an approved case.
 
 ## Candidate C — NVIDIA Container Toolkit CVE-2024-0132
 
