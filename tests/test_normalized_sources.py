@@ -75,7 +75,8 @@ class NormalizedEvidenceTests(unittest.TestCase):
             "object_id": "system-call:execve",
             "assertion_kind": "rule_semantics",
             "polarity": "positive",
-            "evidence_locator": {"kind": "yaml_path", "path": path},
+            "evidence_locator": {"kind": "yaml_path", "path": path,
+                                 "normalizer_version": "falco-safe-yaml-v1-pyyaml-6.0.3"},
             "evidence_sha256": sha(text),
             "extractor_version": "synthetic/falco/1",
         }
@@ -93,6 +94,10 @@ class NormalizedEvidenceTests(unittest.TestCase):
         start = text.index("shells")
         citation = self.html_claim("html-a", "shells execute", start, start + 14)
         self.assertEqual("aligned", self.verifier().verify(citation).status)
+
+    def test_html_head_meta_link_void_elements_allow_body(self):
+        source = b'<html><head><meta charset="utf-8"><link href="x"></head><body><p>Important report text</p></body></html>'
+        self.assertEqual("Important report text", normalize_html(source))
 
     def test_html_equivalent_byte_snapshot_is_deterministic(self):
         doc = b'<html><body>Alpha <em>Beta</em> and <b>Gamma</b></body></html>'
@@ -152,6 +157,14 @@ class NormalizedEvidenceTests(unittest.TestCase):
         self.assertEqual(3, len(result))
         c = self.yaml_claim("falco", result[2]["condition"], path="/2/condition")
         self.assertEqual("aligned", self.verifier().verify(c).status)
+
+    def test_yaml_locator_rejects_parser_version_mismatch(self):
+        raw = "- rule: Synthetic\\n  condition: evt.type=execve\\n".replace("\\n", "\n")
+        self.source("falco", raw, "falco_rule")
+        c = self.yaml_claim("falco", "evt.type=execve")
+        c["evidence_locator"]["normalizer_version"] = "falco-safe-yaml-v0"
+        with self.assertRaisesRegex(ValueError, "normalizer version"):
+            self.verifier().verify(c)
 
     def test_falco_pinned_parser_version_guard(self):
         import yaml
