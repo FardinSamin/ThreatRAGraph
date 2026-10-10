@@ -234,6 +234,13 @@ class PDFSourceTests(unittest.TestCase):
                 "redistribution": "restricted",
                 "selection_rationale": "Unit fixture, not real CTI",
             })
+        for record in self.sources:
+            if record["source_version_id"] == "heldout":
+                record["published_at"] = "2024-02-01T00:00:00Z"
+                record["available_at"] = "2024-02-01T00:00:00Z"
+            elif record["source_version_id"] == "background":
+                record["published_at"] = "2023-12-01T00:00:00Z"
+                record["available_at"] = "2023-12-01T00:00:00Z"
         sources = {
             "schema_version": "1.0", "dataset_id": "fixture", "dataset_version": "v1",
             "sources": self.sources,
