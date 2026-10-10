@@ -84,7 +84,7 @@ This is a **code-and-test audit**, not a certification. Status labels:
 2. **A matching quotation is not a correct CTI triple.** Semantic review is self-declared and synthetic-tested, not independent scientific validation.
 3. **An extractor interface in the SDD is not an implemented extractor.** `pdf_sources.py`, `normalized_sources.py` and `evidence_alignment.py` mostly parse and verify, not classify all malware relations.
 4. **Source allowlisting is not full historical reconstruction.** Future aliases, ATT&CK/Falco revisions and prior computed graph features are unsolved.
-5. **`research_ready=true` emitted by a structural gate is not external source approval.** Fix in P0; require investigator-reviewed provenance and case signoff.
+5. **P0.1 fix: structural validation now emits `research_ready=false`, even for strict synthetic fixtures.** Its explicit `readiness` disclosure does not authenticate original publication chronology, independent reviewers, or real case approval. A future separate empirical run acceptance protocol is still required.
 6. **B0's `predictions=[]` is intentional.** No new inference is implemented; G1 is outstanding.
 7. **149 synthetic tests do not imply 149 historical research successes.** There are currently zero real case comparisons.
 
