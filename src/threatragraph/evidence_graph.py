@@ -118,7 +118,10 @@ def validate_locator(raw: Any) -> str:
     """Canonical, bounded evidence locator, not a trust assertion about text."""
     if not isinstance(raw, dict):
         raise ValueError("evidence_locator must be an object")
-    if raw.get("kind") == "text_span":
+    kind = raw.get("kind")
+    if not isinstance(kind, str):
+        raise ValueError("Locator kind must be text")
+    if kind == "text_span":
         keys = {"kind", "segment_id", "start", "end"}
         if set(raw) != keys:
             raise ValueError("text_span requires exact locator keys")
@@ -128,7 +131,7 @@ def validate_locator(raw: Any) -> str:
                 type(start) is not int or type(end) is not int or
                 start < 0 or end <= start):
             raise ValueError("Invalid text span locator")
-    elif raw.get("kind") in {"json_pointer", "yaml_path"}:
+    elif kind in {"json_pointer", "yaml_path"}:
         if set(raw) != {"kind", "path"} or not isinstance(raw["path"], str):
             raise ValueError("Structured locator requires string path")
         if not raw["path"].startswith("/") or len(raw["path"]) < 2:
@@ -241,7 +244,7 @@ class EvidenceGraph:
         target = record.get("object_id")
         validate_triple(subject, predicate, target)
         kind = record.get("assertion_kind")
-        if kind not in KINDS if isinstance(kind, str) else True:
+        if not isinstance(kind, str) or kind not in KINDS:
             raise ValueError("Sourced claim must be report_assertion or rule_semantics")
         polarity = record.get("polarity")
         if not isinstance(polarity, str) or polarity not in POLARITIES:
@@ -317,7 +320,7 @@ class EvidenceGraph:
             if not isinstance(record, dict):
                 raise ValueError("View source entry must be object")
             role = record.get("role")
-            if role not in allowed_roles:
+            if not isinstance(role, str) or role not in allowed_roles:
                 raise ValueError("Held-out or unrecognized source role prohibited")
             version = record.get("source_version_id")
             if not isinstance(version, str) or not version.strip() or version in seen:
