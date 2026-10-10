@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "threatragraph-pilot",
+  "dataset_version": "0.0.0-draft",
+  "description": "Draft metadata registry only. No sources have been curated, imported or approved.",
+  "sources": []
+}
