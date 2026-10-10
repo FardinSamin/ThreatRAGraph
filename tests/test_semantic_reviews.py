@@ -119,9 +119,7 @@ class SemanticReviewTests(unittest.TestCase):
     def test_uncertain_and_unsupported_fail_strict_mode(self):
         for decision in ("uncertain", "unsupported_by_excerpt"):
             with self.subTest(decision=decision):
-                with sqlite3.connect(":memory:") as _:
-                    pass
-                # A separate ledger is needed because reviews are immutable.
+                # Reset test-only SQLite state to model a distinct frozen run.
                 self.conn.execute("DELETE FROM semantic_reviews")
                 self.reviews.record(review(self.claim_id, decision=decision))
                 with self.assertRaisesRegex(ValueError, "missing/uncertain/unsupported"):
