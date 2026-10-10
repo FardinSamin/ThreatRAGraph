@@ -73,6 +73,10 @@ The second command relaxes pilot **counts only**. It does not bypass source appr
 
 The strict **pilot count, source rights/timestamps and archived-byte checks remain required**. In the current repository, all 14 public URLs are still unapproved candidates and there are zero selected actual cases, so this functionality has only been exercised against synthetic input.
 
+## P0 readiness truthfulness update
+
+Even a **strict** graph run with valid pilot counts, archived-byte hashes and every claim carrying a syntactically valid semantic review **now reports `research_ready=false`**. Successful structural validation is disclosed separately under `readiness` and does not certify publication dates, reviewer authenticity or experimental approval. See [P0 readiness contract](P0_READINESS_CONTRACT.md). Strict reviewer approval is still mandatory to produce the strict *graph preparation artifact*, but no automated readiness approval is available.
+
 ## Threats to validity and remaining verification
 
 - A reviewer declaration is **not a verified identity or digital signature** and does not establish blind, independent assessment. Independent faculty review, source annotation guidelines, versioned reviewer decisions, adjudication of disagreements and a separate gold/reference partition remain necessary for formal research.

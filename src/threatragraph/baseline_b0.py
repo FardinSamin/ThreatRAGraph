@@ -14,6 +14,7 @@ import re
 from typing import Any
 
 from .evidence_graph import as_utc, fingerprint, require_id, require_sha, validate_triple
+from .readiness import readiness_disclosure
 
 BASELINE_VERSION = "b0-assertions-v1"
 PROFILE_SCHEMA_VERSION = "1.0"
@@ -53,7 +54,8 @@ def build_b0_profile(view: dict, graph: dict, *, development_only=False) -> dict
 
     Strict mode rejects even one unreviewed/unaligned claim. Development mode
     may count insufficiently reviewed claims but never present them as facts;
-    its output explicitly remains research_ready=False.
+    all output remains research_ready=False pending independent study approval,
+    including runs with strict structural input validation.
     """
     if type(development_only) is not bool:
         raise ValueError("development_only must be a boolean")
@@ -215,7 +217,8 @@ def build_b0_profile(view: dict, graph: dict, *, development_only=False) -> dict
             "negative_target_claims": negative_claims,
             "conflicting_target_triples": conflicting,
         },
-        "research_ready": not development_only,
+        "research_ready": False,
+        "readiness": readiness_disclosure(development_only=development_only),
         "limitations": (
             "Only evidence-aligned, review-supported assertions directly mentioning "
             "the target in the first one or two early source reports. No inference, "

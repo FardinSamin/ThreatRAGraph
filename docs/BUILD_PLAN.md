@@ -30,7 +30,7 @@ Research question: can **historically available** graph-structural similarity pr
 
 Prior CI has exercised **149 synthetic tests** at the M4 milestone; passing synthetic tests are **software evidence**, not historical research validation. Re-check the current branch and active test count before publishing a new claim.
 
-**Important honesty fix:** Some code outputs can label a structurally valid, strict synthetic run as `research_ready: true`. This is **not evidence** of approved data, reviewer authenticity, independent dating or successful experiments. Add an explicit signed-off corpus/run approval gate before relying on that label for external reporting.
+**P0.1 corrective implementation:** The graph runner and B0 baseline now return `research_ready: false` even after successful strict structural checks. An explicit `readiness` disclosure reports `validation_mode`, `structural_checks_passed` and `independent_study_approval=not_verified`. This **does not** approve data or complete P0; a separately reviewed, auditable study-approval gate remains pending (see [P0 readiness contract](P0_READINESS_CONTRACT.md)).
 
 ## 3. Immutable safety invariants — never negotiate these away
 
@@ -82,7 +82,7 @@ flowchart TD
 - Add and keep updated `docs/IMPLEMENTATION_STATUS.md` (requirement ID → actual code path → test name → status: implemented / partial / missing / design only). Distinguish *parser*, *extractor*, *graph*, *historical reconstruction*, *baseline* and *experiment*.
 - Run tests/CI in clean Python 3.12 on Linux and representative Windows PowerShell; record commit, OS and exact versions. Maintain `pip` constraints/lock or reproducible wheel versions (version pin alone is not a fully locked environment).
 - Add formatting/lint/type checks, dependency/secret scans, GitHub branch protections requiring passing PR checks, and least-privilege action permissions. Existing preflight is a limited heuristic, **not** a comprehensive secret scanner.
-- Fix misleading `research_ready` semantics: strict code gates verify provenance **structure**, while **human approvals and empirical readiness** are separate. Never infer corpus approval from the current `--require-all` exit code with zero approved versions.
+- **Done in P0.1:** Fix misleading `research_ready` semantics: structural gates now always disclose unverified independent study approval. **Still needed:** authenticated/protocol-reviewed empirical readiness gate once data exists; never infer corpus approval from `--require-all` or synthetic fixtures.
 - Define versioned input/output JSON schemas or strict validators for `SourceVersion`, `Claim`, `Review`, `Snapshot`, `B0Profile`, `G1Prediction` and `RunManifest`. Add negative schema tests, limit resource use and remove confusing dead paths.
 - Add an ADR for source-version identity, deterministic corpus freezing and the eventual label-store access boundary.
 
