@@ -164,6 +164,9 @@ class EvidenceVerifier:
         record = self.versions[version]
         digest = require_sha(record["sha256"], "source.sha256")
         locator = json.loads(validate_locator(claim.get("evidence_locator")))
+        if (locator["kind"] == "yaml_path" and
+                claim.get("assertion_kind") != "rule_semantics"):
+            raise ValueError("Falco rule YAML field is rule semantics, not incident observation")
         expected = require_sha(claim.get("evidence_sha256"), "evidence_sha256")
         folder = self.root / digest[:2]
         path = folder / digest
