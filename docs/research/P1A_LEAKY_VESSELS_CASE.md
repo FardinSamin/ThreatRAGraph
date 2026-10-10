@@ -27,6 +27,10 @@ The **release published_at** and **Jan 23 tagger time** were inspected with GitH
 No source byte SHA-256, first-public-availability timestamp of the frozen content, reviewer approval or redistribution license has been inferred. Every registered manifest entry remains `status=candidate` with `sha256=null`, `published_at=null`, `available_at=null` and `date_confidence=unknown`. A date observation in the screening register is deliberately **not** the executable `available_at` required by the case schema.
 
 
+## P1a signed upstream release-tag verification update (2026-10-10)
+
+The [signed runc v1.1.12 provenance witness](P1A_RUNC_RELEASE_WITNESS.md) now documents the upstream **annotated, PGP-signed tag**, its target commit, GitHub's reported signature verification and the January 31 release time, corroborated by public Openwall/MARC mailing-list indexes. The PGP status is reported by GitHub (not cryptographically reverified here), and GitHub's listed **November 2024 verification time** cannot be treated as January 2024 cutoff evidence. An offline helper checks the official release/ref/tag API JSON linkage, returns **research_ready=false** and deliberately leaves historical source approval and copyright/date reviews open.
+
 ## P1a archival update — original oss-security public messages (2026-10-10)
 
 Two further **candidate-only** sources were identified from the [Openwall oss-security archive](https://www.openwall.com/lists/oss-security/); unlike the updated current Snyk HTML, they are public mailing-list messages indexed to the original disclosure days:
