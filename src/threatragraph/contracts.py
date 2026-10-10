@@ -69,14 +69,14 @@ def validate_source_view(view: Any) -> set[str]:
     for source in sources:
         _exact(source, SOURCE_FIELDS, "Historical source entry")
         if not isinstance(source["role"], str) or source["role"] not in VIEW_METHODS[method]:
-            raise ValueError("Unknown/held-out source role in historical view")
+            raise ValueError("B0 background or held-out source role prohibited by historical method")
         version = _plain_text(source["source_version_id"], "source_version_id")
         if version in seen:
             raise ValueError("Duplicate source version ID")
         seen.add(version)
         require_sha(source["sha256"], "source.sha256")
         if as_utc(source["available_at"]) > cutoff:
-            raise ValueError("Post-cutoff source in historical view")
+            raise ValueError("post-cutoff source in historical view")
         _plain_text(source["independence_group"], "independence_group")
         early += source["role"] == "early"
     if early not in (1, 2):
@@ -97,9 +97,9 @@ def validate_graph_projection(graph: Any, view: dict, *, reviewed: bool = False)
             graph["artifact_kind"] != "historical_sourced_graph"):
         raise ValueError("Unsupported graph artifact schema/version")
     if graph["case_id"] != view["case_id"] or graph["method"] != view["method"] or graph["cutoff_at"] != view["cutoff_at"]:
-        raise ValueError("Graph does not match historical source view identity")
+        raise ValueError("B0 graph case_id/method/cutoff identity mismatch")
     if require_sha(graph["source_view_sha256"], "source_view_sha256") != fingerprint(view):
-        raise ValueError("Graph source-view fingerprint mismatch")
+        raise ValueError("Graph not bound to exact B0 source-view fingerprint")
     _plain_text(graph["caveat"], "graph caveat", 3000)
     edges = graph["edges"]
     if not isinstance(edges, list) or len(edges) > MAX_GRAPH_EDGES:
@@ -114,10 +114,10 @@ def validate_graph_projection(graph: Any, view: dict, *, reviewed: bool = False)
         _exact(edge, required, "Sourced graph edge")
         cid = edge["claim_id"]
         if not isinstance(cid, str) or not CLAIM.fullmatch(cid) or cid in seen:
-            raise ValueError("Invalid or duplicate graph claim ID")
+            raise ValueError("Invalid or duplicate B0/graph claim ID")
         seen.add(cid)
         if _plain_text(edge["source_version_id"], "edge source") not in allowed:
-            raise ValueError("Graph claim from non-eligible or future source")
+            raise ValueError("Graph claim from non-early or future source")
         validate_triple(edge["subject_id"], edge["predicate"], edge["object_id"])
         endpoints.update((edge["subject_id"], edge["object_id"]))
         if (not isinstance(edge["assertion_kind"], str) or
