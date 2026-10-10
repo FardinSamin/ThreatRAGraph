@@ -1,3 +1,5 @@
 # Pinned reviewed parser for Falco YAML source-field evidence verification.
 # CI installs this before unit tests. No cloud or ML runtime dependency.
 PyYAML==6.0.3
+# PDF page text parser; 6.20.0 includes per-stream work limiting security improvements.
+pypdf==6.20.0

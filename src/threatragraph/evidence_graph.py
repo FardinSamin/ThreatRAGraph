@@ -121,7 +121,19 @@ def validate_locator(raw: Any) -> str:
     kind = raw.get("kind")
     if not isinstance(kind, str):
         raise ValueError("Locator kind must be text")
-    if kind in {"text_span", "html_text_span"}:
+    if kind == "pdf_page_span":
+        if set(raw) != {"kind", "normalizer_version", "page_number",
+                        "segment_id", "start", "end"}:
+            raise ValueError("PDF locator must have exact page-span keys")
+        if raw.get("normalizer_version") != "pdf-text-v1-pypdf-6.20.0":
+            raise ValueError("Unsupported PDF text normalizer version")
+        if (type(raw.get("page_number")) is not int or raw["page_number"] < 1
+                or not isinstance(raw.get("segment_id"), str)
+                or type(raw.get("start")) is not int
+                or type(raw.get("end")) is not int
+                or raw["start"] < 0 or raw["end"] <= raw["start"]):
+            raise ValueError("Invalid PDF page number or text offsets")
+    elif kind in {"text_span", "html_text_span"}:
         keys = {"kind", "segment_id", "start", "end"}
         if kind == "html_text_span":
             keys.add("normalizer_version")

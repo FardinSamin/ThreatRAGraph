@@ -7,11 +7,13 @@ Supported v1 evidence:
 * json_pointer: RFC 6901 path to scalar in raw JSON.
 * html_text_span: versioned derived visible-text span recomputed from original
   approved HTML source bytes on every check.
+* pdf_page_span: 1-based page-scoped normalized text, extracted from the
+  original approved PDF archive with pinned pypdf.
 * yaml_path: scalar field in a Falco rules YAML source, using the pinned
   strict SafeLoader. Conditions are rule semantics, never incident telemetry.
 
-PDF/OCR and external normalized text segments still FAIL CLOSED until their
-source-byte lineage and extractor versions can be checked.
+Scanned/image-only PDFs, OCR and external normalized text segments FAIL CLOSED.
+PDF page text alignment is not visual/layout validation or semantic truth.
 
 This proves exact-byte alignment, NOT whether prose semantically supports a
 relationship, whether the publisher is correct, or when it became public.
@@ -30,6 +32,7 @@ from .normalized_sources import (
     HTML_NORMALIZER_VERSION, normalize_html,
     normalize_falco_yaml, yaml_scalar_from_path,
 )
+from .pdf_sources import pdf_page_evidence
 
 MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
 MAX_EVIDENCE_BYTES = 128 * 1024
@@ -75,6 +78,10 @@ def _json_pointer_value(obj: Any, pointer: str) -> Any:
 def _evidence_bytes(raw: bytes, locator: dict[str, Any],
                     source_version_id: str, source_kind: str = "") -> bytes:
     kind = locator["kind"]
+    if kind == "pdf_page_span":
+        if source_kind not in {"cti_report", "cve_advisory", "kubernetes_doc", "other"}:
+            raise ValueError("PDF locator not permitted for this source kind")
+        return pdf_page_evidence(raw, source_version_id, locator)
     if kind == "yaml_path":
         if source_kind != "falco_rule":
             raise ValueError("YAML locators require falco_rule source type")
@@ -164,6 +171,9 @@ class EvidenceVerifier:
         record = self.versions[version]
         digest = require_sha(record["sha256"], "source.sha256")
         locator = json.loads(validate_locator(claim.get("evidence_locator")))
+        if (locator["kind"] == "pdf_page_span" and
+                claim.get("assertion_kind") != "report_assertion"):
+            raise ValueError("PDF source citation must be a report assertion")
         if (locator["kind"] == "yaml_path" and
                 claim.get("assertion_kind") != "rule_semantics"):
             raise ValueError("Falco rule YAML field is rule semantics, not incident observation")

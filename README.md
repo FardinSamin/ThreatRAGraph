@@ -17,6 +17,7 @@
 - [M2 sourced evidence graph](docs/M2_EVIDENCE_GRAPH.md) — reference SQLite claim ledger, typed provenance edges and snapshot-scoped B0/G1 graph queries.
 - [M2 evidence alignment](docs/M2_EVIDENCE_ALIGNMENT.md) — source-byte-backed text and JSON citation validation before graph insertion.
 - [M2 HTML/Falco normalization](docs/M2_HTML_FALCO_NORMALIZATION.md) — deterministic source-linked HTML visible text and safe pinned Falco YAML citation parsing.
+- [M2 PDF page evidence](docs/M2_PDF_PAGE_PROVENANCE.md) — pinned page-by-page PDF text extraction from approved archived bytes with verifiable page/offset citations.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
@@ -39,10 +40,11 @@ The script prints finding **categories and relative paths**, not token values. A
 Validate the preflight itself using the built-in test suite:
 
 ~~~powershell
+python -m pip install -r requirements-normalization.txt
 python -m unittest discover -s tests -v
 ~~~
 
-No application dependencies, API tokens, AWS account or paid cloud services are needed for this preparatory script.
+The import-preflight script itself needs only Python's standard library. The full test suite now requires the pinned normalization dependencies in `requirements-normalization.txt`; no API tokens, AWS account, or paid cloud services are needed.
 
 ## Research manifests (draft only)
 
@@ -79,7 +81,7 @@ The repository now includes a **standalone, testable sourced-claim graph** in `s
 python -m scripts.project_case_graph --help
 ~~~
 
-For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**, and the CLI now verifies source citation spans against archived UTF-8 text/JSON bytes. It does **not** yet predict novel behavior or implement a full extraction pipeline. HTML visible-text and pinned Falco YAML citation parsing are now supported; PDF/OCR and semantic claim review remain pending. Real corpus, cases, and original local prototype integration are still pending.
+For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**, and the CLI now verifies source citation spans against archived UTF-8 text/JSON bytes. It does **not** yet predict novel behavior or implement a full extraction pipeline. HTML visible-text, pinned Falco YAML, and **extractable PDF page-text citation verification** are now supported; OCR, PDF visual layout interpretation, and semantic claim review remain pending. Real corpus, cases, and original local prototype integration are still pending.
 
 ## Cloud services and licensing
 

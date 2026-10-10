@@ -18,7 +18,7 @@ These checks guarantee byte alignment **only**. They do not prove that the extra
 | `json_pointer` | Original UTF-8 JSON bytes | RFC 6901-style absolute path including escaped `~0` and `~1` and array indices, selecting a scalar. Strings hash as UTF-8 text; other scalars hash as deterministic JSON. |
 | `yaml_path` | Archived Falco rule YAML | **Now supported through the pinned strict parser** with required `normalizer_version=`falco-safe-yaml-v1-pyyaml-6.0.3``; only for `rule_semantics` fields. See [normalization contract](M2_HTML_FALCO_NORMALIZATION.md). |
 
-Binary PDFs, OCR, UTF-16 reports, and *external derived normalized text segments* are **not** supported in this version. **Archived UTF-8 HTML** now supports a deterministic, versioned `html_text_span` derived view, explained in [M2 normalization](M2_HTML_FALCO_NORMALIZATION.md). They require a separately versioned, reproducible normalizer that retains a checked lineage to the archived original. **Do not simply label a derived PDF paragraph as a raw-text segment.**
+**Extractable archived PDFs now support** versioned `pdf_page_span` page-text citations verified from original approved source bytes, as described in [PDF provenance](M2_PDF_PAGE_PROVENANCE.md). OCR/image-only PDF pages, page-image/visual layouts, UTF-16 reports, and *external derived normalized text segments* remain unsupported. **Archived UTF-8 HTML** now supports a deterministic, versioned `html_text_span` derived view, explained in [M2 normalization](M2_HTML_FALCO_NORMALIZATION.md). They require a separately versioned, reproducible normalizer that retains a checked lineage to the archived original. **Do not simply label a derived PDF paragraph as a raw-text segment.**
 
 ## Integrity and historical boundaries
 
@@ -84,4 +84,8 @@ python -m compileall -q src scripts
 
 Synthetic tests cover correct Unicode offsets, JSON pointer paths and escaping, spoofed quotes/hashes, wrong source segments, malformed/binary text, missing or mutated archived versions, unapproved sources, unsupported YAML paths, prompt injection as plain data, direct-ledger `unverified` vs. checked `aligned` statuses, and the full graph runner refusing fabricated citations.
 
-Still outstanding: original prototype import and extractor audit (#1), true historical source/case corpus (#3), deterministic PDF/OCR and advanced normalization, semantic claim correctness review, time-valid aliases and embeddings, and actual GraphRAG similarity/evaluation. HTML visible-text and Falco YAML normalization are now implemented with explicit versioning. A source match alone does not establish a correct extracted CTI relationship.
+Still outstanding: original prototype import and extractor audit (#1), true historical source/case corpus (#3), OCR and page-image/layout interpretation, semantic claim correctness review, time-valid aliases and embeddings, and actual GraphRAG similarity/evaluation. Pinned PDF text extraction is a citation check, not visual/OCR or semantic verification. HTML visible-text and Falco YAML normalization are now implemented with explicit versioning. A source match alone does not establish a correct extracted CTI relationship.
+
+## PDF page-text provenance update
+
+The verifier additionally accepts a `pdf_page_span` locator with a pinned pypdf parser version, source-version-bound page segment ID, one-based page number and Unicode offsets. It re-extracts the page from the **original approved PDF bytes** before hashing the claimed excerpt. See [PDF page provenance](M2_PDF_PAGE_PROVENANCE.md). Scanned/image-only pages, PDF layout and semantic interpretation remain unsupported.

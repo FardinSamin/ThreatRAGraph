@@ -99,7 +99,7 @@ The end-to-end research case CLI automatically uses `EvidenceVerifier`; no extra
 - **Byte alignment is not semantic correctness.** The cited words or Falco condition may be interpreted incorrectly. Independent review and extraction quality scoring are still required.
 - **The source hash does not prove publication timing.** Historical version/date confirmation remains a separate curator task.
 - **No JavaScript, unsafe YAML tags, alias execution, Falco event processing or cloud services** run during normalization.
-- PDF/OCR, extracted source text from dynamic sites, text layout preservation, and external normalized segments are **not** implemented. Build a versioned PDF normalizer with deterministic page provenance only after reviewing the original Python prototype and tests.
+- PDF page-text extraction is now available with a pinned parser and exact page citation checks (see [PDF provenance](M2_PDF_PAGE_PROVENANCE.md)). **OCR for scanned pages**, dynamic-site browser rendering, visual layout preservation and external normalized segments are **not** implemented. Build a versioned PDF normalizer with deterministic page provenance only after reviewing the original Python prototype and tests.
 - Schema evolution, annotation metadata, source licensing, true 25–40-source corpus, 4–6 cases, and full historical GraphRAG evaluation remain open.
 
 **References:** [SRS](SRS.md), [SDD](SDD.md), [Falco rule syntax](https://falco.org/docs/concepts/rules/basic-elements/), [PyYAML 6.0.3](https://pypi.org/project/PyYAML/).
