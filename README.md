@@ -14,6 +14,7 @@
 - [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
 - [M1 source byte-integrity audit](docs/M1_SOURCE_INTEGRITY.md) — locally verify SHA-256 of frozen CTI source versions while keeping archives out of Git.
 - [M3 historical snapshot contract](docs/M3_HISTORICAL_SNAPSHOTS.md) — deterministic B0/G1 source inputs that exclude held-out later references.
+- [M2 sourced evidence graph](docs/M2_EVIDENCE_GRAPH.md) — reference SQLite claim ledger, typed provenance edges and snapshot-scoped B0/G1 graph queries.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
@@ -67,6 +68,16 @@ python -m scripts.freeze_case_snapshots datasets/manifests/pilot.json datasets/c
 ~~~
 
 Current result is **no_cases_yet**, not a genuine research experiment. The strict `--write` mode requires a complete approved 25–40-source corpus, 4–6 historical cases, and byte-verified local archives before persisting content-addressed snapshots. This does **not** yet time-filter extracted graph claims, aliases, semantic embeddings or model pretraining.
+
+## Provenance graph reference component
+
+The repository now includes a **standalone, testable sourced-claim graph** in `src/threatragraph/evidence_graph.py` and a guarded offline CLI:
+
+~~~powershell
+python -m scripts.project_case_graph --help
+~~~
+
+For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**, and the CLI does not currently extract CTI text or predict novel behavior. Real corpus, cases, and original local prototype integration are still pending.
 
 ## Cloud services and licensing
 

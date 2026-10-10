@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+"""Run a *source-asserted* B0/G1 graph projection from curated claim JSONL.
+
+This is NOT GraphRAG similarity/prediction. Source evidence must be independently
+checked against the archived report; this runner enforces source-byte integrity,
+historical source partitions and restrictions on which claims may be loaded.
+No cloud/network/model calls. Only outputs graph metadata, never raw source text.
+"""
+import argparse
+import json
+from pathlib import Path
+import sqlite3
+import sys
+
+from scripts.audit_source_artifacts import audit_sources
+from scripts.freeze_case_snapshots import case_views
+from scripts.validate_research_manifests import load_json, validate
+from src.threatragraph.evidence_graph import EvidenceGraph
+
+MAX_CLAIMS_BYTES = 5 * 1024 * 1024
+MAX_CLAIMS = 10000
+
+
+def load_claims(path, allowed_versions):
+    """Fail rather than silently skip out-of-cutoff source claim records."""
+    path = Path(path)
+    if path.stat().st_size > MAX_CLAIMS_BYTES:
+        raise ValueError("Claim file exceeds input limit")
+    claims = []
+    with path.open("r", encoding="utf-8") as stream:
+        for line_number, line in enumerate(stream, 1):
+            if not line.strip():
+                continue
+            if len(claims) >= MAX_CLAIMS:
+                raise ValueError("Claim count exceeds allowed limit")
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"Malformed JSON at claim line {line_number}") from exc
+            if not isinstance(obj, dict):
+                raise ValueError(f"Claim line {line_number} is not an object")
+            if obj.get("source_version_id") not in allowed_versions:
+                # Do NOT print the prohibited source ID: it may be held-out.
+                raise ValueError(f"Disallowed historical source in claim line {line_number}")
+            claims.append(obj)
+    return claims
+
+
+def run(sources, cases, case_id, raw_claims_path, archives, development=False):
+    errors, warnings, counts = validate(sources, cases, strict=not development)
+    if errors:
+        raise ValueError("Source/case manifest validation failed: " + "; ".join(errors))
+    views = case_views(sources, cases, case_id)
+    integrity, integrity_errors, _ = audit_sources(sources, archives, require_all=True)
+    if (integrity_errors or integrity["approved"] == 0 or
+            integrity["verified_bytes"] != counts["approved_sources"]):
+        raise ValueError("Source bytes not all verified against the frozen manifest")
+
+    permitted = {
+        item["source_version_id"]
+        for view in views.values() for item in view["sources"]
+    }
+    claims = load_claims(raw_claims_path, permitted)
+    with sqlite3.connect(":memory:") as conn:
+        ledger = EvidenceGraph(conn)
+        ledger.register_source_versions(sources)
+        for record in claims:
+            ledger.append_source_claim(record)
+        b0, g1 = ledger.project(views["B0"]), ledger.project(views["G1"])
+    b0_ids = {edge["claim_id"] for edge in b0["edges"]}
+    g1_ids = {edge["claim_id"] for edge in g1["edges"]}
+    if not b0_ids.issubset(g1_ids):
+        raise ValueError("B0 evidence is not a subset of G1 evidence")
+
+    return {
+        "status": "development_only" if development else "sourced_graph_projection",
+        "research_ready": not development,
+        "case_id": case_id,
+        "warnings": warnings,
+        "scope": (
+            "Source-asserted graph only; does not validate extraction against "
+            "evidence text or control language model historical knowledge."
+        ),
+        "B0": b0,
+        "G1": g1,
+    }
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--sources", default="datasets/manifests/pilot.json")
+    parser.add_argument("--cases", default="datasets/cases/pilot.json")
+    parser.add_argument("--case-id", required=True)
+    parser.add_argument("--claims", required=True, help="JSONL of pre-reviewed claims from permitted sources only")
+    parser.add_argument("--archive-root", default="artifacts/source_versions/sha256")
+    parser.add_argument(
+        "--development-only", action="store_true",
+        help="Allow fewer than pilot source/case counts for synthetic fixtures; never mark research ready",
+    )
+    args = parser.parse_args(argv)
+    try:
+        result = run(
+            load_json(args.sources), load_json(args.cases),
+            args.case_id, args.claims, args.archive_root,
+            development=args.development_only,
+        )
+    except (OSError, ValueError, TypeError, sqlite3.Error) as exc:
+        print(json.dumps({
+            "status": "refused", "reason": type(exc).__name__,
+            "message": str(exc)[:1200],
+        }, indent=2))
+        return 2
+    print(json.dumps(result, sort_keys=True, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
