@@ -37,7 +37,7 @@ ThreatRAGraph is a **research platform first**, a prototype second. Its defining
 | ADR-007 | Interpretable weighted graph-feature ranking before embeddings or LLM synthesis | Falsifiable similarity treatment and meaningful ablations | Proposed |
 | ADR-008 | Offline scoring pipeline and human-reviewed reference facts | Research integrity and reproducibility | Proposed |
 | ADR-009 | Frozen manifests + content hashes + exact release revisions | Prevent silent dataset changes | Proposed |
-| ADR-010 | One-user local prototype first; hosted dashboard deferred | Matches focused pilot size and scope | Proposed |
+| ADR-010 | One-user local-first greenfield implementation; hosted dashboard deferred | Matches focused pilot size and scope | Proposed |
 
 *These decisions should be revisited against the actual repository implementation and faculty methodological feedback. An ADR describes a selected reference design, not proof of implementation.*
 
