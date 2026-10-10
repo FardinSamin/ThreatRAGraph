@@ -14,7 +14,7 @@ The repository itself is the first and only ThreatRAGraph codebase of record. It
 
 - **Initial greenfield setup:** repository and draft architecture established; security-conscious Git workflow and automated tests in place.
 - **Ongoing engineering audit:** compare code actually committed to this repository with SRS/SDD functional requirements, maintain CI, and flag unimplemented features honestly.
-- **M1 corpus:** approve historical source versions, verify availability/rights, independently review 4–6 case selection and reference facts. Current 17 URLs are candidate-only.
+- **M1 corpus:** approve historical source versions, verify availability/rights, independently review 4–6 case selection and reference facts. Current 19 URLs are candidate-only.
 - **M5:** implement G1 explainable graph similarity separately from the merged B0 baseline (see [Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21)).
 - **M6:** run paired evaluations only after authentic source/case evidence and appropriate annotation are available.
 

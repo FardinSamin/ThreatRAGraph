@@ -26,6 +26,16 @@ Paths are constructed solely from a validated lowercase SHA-256 digest, never an
 
 **Do not commit source archives to GitHub by default.** Publicly visible reports are not necessarily licensed for redistribution. Maintain private archives and appropriate permitted backups.
 
+### Candidate-only private capture (new P1a tooling)
+
+Before any original source version has passed historical availability and rights review, **do not put it in the approved case manifest**. The offline helper `scripts/capture_candidate_snapshot.py` can preserve the exact bytes of a *manually downloaded* local candidate, without claiming that they are the historical document revision:
+
+~~~powershell
+python -m scripts.capture_candidate_snapshot --source-version-id "candidate:runc-2024-openwall-disclosure:unfrozen" --input-file ".\data\private\runc-2024-openwall.html"
+~~~
+
+The content goes into the ignored `artifacts/source_versions/sha256/` store, and a separate ignored candidate receipt records the digest, size, local import time and `historical_available_at=null`. Existing content-addressed files and receipts cannot be silently overwritten. This operation **does not download the original page, verify the document's true publication date, authenticate its source URL, grant reuse rights, change the approved source registry or create a study-ready case**. See [P1a original-disclosure evidence screen](research/P1A_LEAKY_VESSELS_CASE.md). The exact original bytes and rights review are still outstanding.
+
 ### Archive an exact version (PowerShell)
 
 After verifying rights and locating a genuinely historical version:
@@ -56,7 +66,7 @@ Require exact stored bytes for all approved records:
 python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require-all
 ~~~
 
-On the current **17-candidate, zero-approved** corpus, these commands cannot establish any real source validity. In particular, an exit code 0 with zero approved sources is **not** a research-readiness result. The strict data-readiness check must also pass:
+On the current **19-candidate, zero-approved** corpus, these commands cannot establish any real source validity. In particular, an exit code 0 with zero approved sources is **not** a research-readiness result. The strict data-readiness check must also pass:
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json --strict

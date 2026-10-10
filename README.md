@@ -26,6 +26,7 @@
 - [M2 semantic claim review](docs/M2_SEMANTIC_REVIEW.md) — explicit reviewer attestations bound to exact claim IDs, archive evidence, and strict graph readiness gates.
 - [M4 B0 cold-start baseline](docs/M4_B0_BASELINE.md) — deterministic target facts from early reviewed source assertions only, no background retrieval, prediction or invented confidence.
 - [P1a first real-source screening](docs/research/P1A_LEAKY_VESSELS_CASE.md) — real dated Leaky Vessels source chronology and explicit remaining archive/review blockers; **not an approved case**.
+- [Private candidate byte capture](docs/research/P1A_LEAKY_VESSELS_CASE.md#safe-manual-source-byte-preservation-private-not-approval) — bounded offline original-byte archiving and unapproved receipts; not proof of historical content or rights.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M5 similarity engine tracking](https://github.com/FardinSamin/ThreatRAGraph/issues/21).
 
@@ -33,7 +34,7 @@
 
 **Next PR:** [P0 CI/contract/readiness hardening — Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23). **In parallel:** [P1a verify one real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), and develop the [synthetic M5 G1 ranker — Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) without claiming it is already validated. [Details and exit gates](docs/BUILD_PLAN.md).
 
-No completed real-data GraphRAG comparison exists yet. The 17 source URLs remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
+No completed real-data GraphRAG comparison exists yet. The 19 source URLs remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
 
 ## Research plan
 
@@ -56,7 +57,7 @@ The historical `scripts/preflight_import.py` utility is optional for future exte
 
 ## Research manifests (draft only)
 
-The M1 **source registry now contains 17 preliminary public URL candidates**, but **zero approved/frozen source versions and zero selected evaluation cases**. These links require historical version, timestamp, rights and hash review before scientific use. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
+The M1 **source registry now contains 19 preliminary public URL candidates**, but **zero approved/frozen source versions and zero selected evaluation cases**. These links require historical version, timestamp, rights and hash review before scientific use. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json

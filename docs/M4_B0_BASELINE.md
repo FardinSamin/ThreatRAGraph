@@ -117,7 +117,7 @@ The synthetic tests cover one/two early reports, claims with multi-source suppor
 - B0 doesn't identify unreported behavior; it describes **only early supported source assertions**. Comparability with G1 must use a preregistered fact/ontology and scoring protocol rather than give G1 credit for outputting more speculation.
 - Any pre-extracted claim using future-informed language-model weights/aliases can contaminate B0 **before** this algorithm sees it. Those must be controlled at original extractor/case reconstruction.
 - **Strict structural validation is not scientific research readiness.** The B0 profiler now always reports \`research_ready=false\` plus a separate structural \`readiness\` disclosure; it cannot itself verify archived-source chronology, reviewer identity or empirical study approval. See [P0 contract](P0_READINESS_CONTRACT.md).
-- The current repository has **17 unapproved candidate URLs and no validated cases**; no true B0 baseline experiment has been run.
+- The current repository has **19 unapproved candidate URLs and no validated cases**; no true B0 baseline experiment has been run.
 - Validation of the repository's actual extraction implementation, exact source chronology (#3), reviewed real claims and paired B0/G1 results remain pending.
 
 **M5** is the next proposed implementation: a separate, time-valid graph-structural similarity candidate engine with attributable feature contributions, inferred-edge isolation and abstention. Do not merge G1 features into this B0 code.
