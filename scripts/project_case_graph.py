@@ -4,7 +4,9 @@
 This is NOT GraphRAG similarity/prediction. Source evidence locators and digests are checked against exact archive bytes
 for supported UTF-8/JSON types; this runner also enforces source-byte integrity,
 historical source partitions and restrictions on which claims may be loaded.
-No cloud/network/model calls. Only outputs graph metadata, never raw source text.
+Strict research runs require explicit manual semantic review of every claim;
+development-only runs may emit visibly unreviewed/uncertain claims, but cannot
+be labeled research ready. No cloud/network/model calls or raw report output.
 """
 import argparse
 import json
@@ -17,6 +19,7 @@ from scripts.freeze_case_snapshots import case_views
 from scripts.validate_research_manifests import load_json, validate
 from src.threatragraph.evidence_graph import EvidenceGraph
 from src.threatragraph.evidence_alignment import EvidenceVerifier
+from src.threatragraph.semantic_reviews import SemanticReviewLedger, read_review_jsonl
 
 MAX_CLAIMS_BYTES = 5 * 1024 * 1024
 MAX_CLAIMS = 10000
@@ -47,7 +50,8 @@ def load_claims(path, allowed_versions):
     return claims
 
 
-def run(sources, cases, case_id, raw_claims_path, archives, development=False):
+def run(sources, cases, case_id, raw_claims_path, archives, development=False,
+        reviews_path=None):
     errors, warnings, counts = validate(sources, cases, strict=not development)
     if errors:
         raise ValueError("Source/case manifest validation failed: " + "; ".join(errors))
@@ -66,9 +70,20 @@ def run(sources, cases, case_id, raw_claims_path, archives, development=False):
         verifier = EvidenceVerifier(sources, archives)
         ledger = EvidenceGraph(conn, evidence_verifier=verifier)
         ledger.register_source_versions(sources)
+        claim_ids = set()
         for record in claims:
-            ledger.append_source_claim(record)
+            claim_ids.add(ledger.append_source_claim(record))
+        reviews = SemanticReviewLedger(conn)
+        if reviews_path is not None:
+            for review in read_review_jsonl(reviews_path):
+                reviews.record(review)
+        decisions = reviews.status(claim_ids, require_supported=not development)
         b0, g1 = ledger.project(views["B0"]), ledger.project(views["G1"])
+        for projection in (b0, g1):
+            for edge in projection["edges"]:
+                edge["semantic_review_status"] = decisions.get(
+                    edge["claim_id"], "unreviewed"
+                )
     if any(edge["evidence_status"] != "aligned"
            for graph in (b0, g1) for edge in graph["edges"]):
         raise ValueError("Refusing graph projection with unverified evidence")
@@ -84,9 +99,9 @@ def run(sources, cases, case_id, raw_claims_path, archives, development=False):
         "case_id": case_id,
         "warnings": warnings,
         "scope": (
-            "Source evidence spans are byte-aligned for supported UTF-8 and JSON "
-            "sources; this does not prove semantic correctness, attack truth, "
-            "YAML/PDF extraction, or model historical ignorance."
+            "Archive-backed citation bytes can be aligned for approved source formats. "
+            "Semantic approval is self-declared reviewer judgment, not independently "
+            "authenticated truth, attack occurrence or model historical ignorance."
         ),
         "B0": b0,
         "G1": g1,
@@ -100,6 +115,7 @@ def main(argv=None):
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--claims", required=True, help="JSONL of claims with archive-verifiable text or JSON evidence")
     parser.add_argument("--archive-root", default="artifacts/source_versions/sha256")
+    parser.add_argument("--reviews", help="JSONL human semantic evidence reviews; required for strict research runs")
     parser.add_argument(
         "--development-only", action="store_true",
         help="Allow fewer than pilot source/case counts for synthetic fixtures; never mark research ready",
@@ -109,7 +125,7 @@ def main(argv=None):
         result = run(
             load_json(args.sources), load_json(args.cases),
             args.case_id, args.claims, args.archive_root,
-            development=args.development_only,
+            development=args.development_only, reviews_path=args.reviews,
         )
     except (OSError, ValueError, TypeError, sqlite3.Error) as exc:
         print(json.dumps({
