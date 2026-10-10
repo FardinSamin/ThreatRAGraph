@@ -78,8 +78,12 @@ def check_schema(conn: sqlite3.Connection, tables: tuple[str, ...]) -> None:
     # A half-built persistent database is not safely equivalent to a fresh DB.
     if len(tables) > 1 and set(states.values()) == {"absent", "existing"}:
         raise ValueError("Partial ledger schema; explicit repair required")
-    if version == LEDGER_VERSION and any(v == "absent" for v in states.values()):
-        raise ValueError("Missing table from versioned ledger")
+    # The semantic-review extension may legitimately be added to a valid
+    # core v1 ledger on first use; its absence is not a core table migration.
+    if (version == LEDGER_VERSION and
+            tables != ("semantic_reviews",) and
+            any(v == "absent" for v in states.values())):
+        raise ValueError("Missing core table from versioned ledger")
 
 
 def stamp_schema(conn: sqlite3.Connection) -> None:
