@@ -20,7 +20,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Unit tests (standard library only)
+      - name: Install pinned Falco YAML parser
+        run: python -m pip install --disable-pip-version-check -r requirements-normalization.txt
+      - name: Python unit and integration tests
         run: python -m unittest discover -s tests -v
       - name: Intake safety heuristics
         run: python scripts/preflight_import.py .
