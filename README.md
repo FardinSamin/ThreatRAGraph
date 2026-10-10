@@ -13,6 +13,7 @@
 - [M0 prototype intake](docs/M0_PROTOTYPE_INTAKE.md) — safe procedure for bringing the existing prototype into the repository and auditing it.
 - [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
 - [M1 source byte-integrity audit](docs/M1_SOURCE_INTEGRITY.md) — locally verify SHA-256 of frozen CTI source versions while keeping archives out of Git.
+- [M3 historical snapshot contract](docs/M3_HISTORICAL_SNAPSHOTS.md) — deterministic B0/G1 source inputs that exclude held-out later references.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
@@ -56,6 +57,16 @@ python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require
 ~~~
 
 With **zero approved sources**, a no-error audit is not proof of a valid research corpus. The first manifest command validates candidate metadata but must not be interpreted as approval. The strict readiness check is **expected to fail** until 25–40 verified source versions and 4–6 cases are populated and reviewed. This is an intentional quality gate, not a completed research dataset.
+
+## Historical input snapshots (source-level foundation)
+
+A no-write preview for deterministic cold-start (B0) versus graph-assisted (G1) **source lists** is available:
+
+~~~powershell
+python -m scripts.freeze_case_snapshots datasets/manifests/pilot.json datasets/cases/pilot.json
+~~~
+
+Current result is **no_cases_yet**, not a genuine research experiment. The strict `--write` mode requires a complete approved 25–40-source corpus, 4–6 historical cases, and byte-verified local archives before persisting content-addressed snapshots. This does **not** yet time-filter extracted graph claims, aliases, semantic embeddings or model pretraining.
 
 ## Cloud services and licensing
 
