@@ -12,7 +12,7 @@ The supplied URFS proposal targets around **25–40 public sources** and **4–6
 
 ## 2. How to validate
 
-The case registry is still **empty**, while the source registry now holds **14 unapproved candidate URLs** recorded in [the case shortlist](research/M1_CASE_CANDIDATES.md). All these source versions remain unfrozen with unknown exact historical timestamps and no verified SHA-256. Draft structural validation can run without inventing approved evidence.
+The case registry is still **empty**, while the source registry now holds **17 unapproved candidate URLs** recorded in [the case shortlist](research/M1_CASE_CANDIDATES.md). All these source versions remain unfrozen with unknown exact historical timestamps and no verified SHA-256. Draft structural validation can run without inventing approved evidence.
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
@@ -142,4 +142,4 @@ For an actual case, document the exact timestamp evidence for each source, justi
 - Re-run case leakage checks in the final graph snapshot system; passing a metadata validator is only an initial safeguard.
 - Audit and extend the actual repository extraction/graph implementation against M1 schema requirements; no pre-existing prototype import is needed.
 
-**Status note:** The source registry contains 14 unapproved, unfrozen candidates; the case registry is empty. Neither the manifests nor the new byte-integrity tool constitute a completed dataset or empirical result.
+**Status note:** The source registry contains 17 unapproved, unfrozen candidates; the case registry is empty. Neither the manifests nor the new byte-integrity tool constitute a completed dataset or empirical result.

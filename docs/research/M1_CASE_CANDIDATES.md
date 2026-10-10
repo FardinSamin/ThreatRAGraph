@@ -10,7 +10,7 @@
 
 Screen real container/Kubernetes security disclosures for the eventual 4–6-case sparse-report experiment. The list below **does not choose final time cutoffs**, label any ground truth, or assert that a current webpage is historically faithful to its stated publication date.
 
-All 14 source links in the draft JSON registry are marked **candidate**, with null available_at, null SHA-256 and unverified historical versions. A publication date shown on a webpage is *not* a verified, exact availability timestamp. Source copies/archives and independent chronology must be reviewed before approval.
+All 17 source links in the draft JSON registry are marked **candidate**, with null available_at, null SHA-256 and unverified historical versions. A publication date shown on a webpage is *not* a verified, exact availability timestamp. Source copies/archives and independent chronology must be reviewed before approval.
 
 The proposed comparison is **B0** (first one or two public sources only) versus **G1** (B0 plus independently historical background graph), evaluated against later factual descriptions without exposing those descriptions during inference.
 
@@ -42,6 +42,8 @@ The proposed comparison is **B0** (first one or two public sources only) versus 
 **Research caution:** The *current* Snyk original page says it was later updated; its 2024-01-31 text cannot be reconstructed by merely downloading it today. The Snyk deep dive is from the same research source and may not be independent evidence; use the Palo Alto article as a more independent later candidate, subject to confirmation.
 
 **Status:** **Promising**, pending trustworthy January snapshot and post-cutoff fact labeling.
+
+**P1a screen update (2026-10-10):** [Leaky Vessels source chronology and evidence checklist](P1A_LEAKY_VESSELS_CASE.md) documents a precise upstream release timestamp, revised modern pages, an independent 2019 background candidate, and an independent publisher's February 2024 later analysis. Three more **unapproved** URLs were added to the manifest (17 candidates total). The executable case registry remains empty; this is not an approved case.
 
 ## Candidate C — NVIDIA Container Toolkit CVE-2024-0132
 
@@ -106,7 +108,7 @@ The proposed comparison is **B0** (first one or two public sources only) versus 
 - Record **verified** exact UTC available_at evidence; do not invent time-of-day based on a printed calendar date.
 - Review dates of specific later reports independently, then approve only eligible source versions.
 - Add selected cases to datasets/cases/pilot.json **after** each reference and cutoff pass the validator.
-- Expand the corpus with versioned ATT&CK/STIX, Falco rules, Kubernetes documentation and other diverse historical CTI; 14 candidate links are **not** the planned 25–40 approved source corpus.
+- Expand the corpus with versioned ATT&CK/STIX, Falco rules, Kubernetes documentation and other diverse historical CTI; 17 candidate links are **not** the planned 25–40 approved source corpus.
 - Run strict validation and faculty methodological review before an actual experiment.
 
 **No experiments, predictions, extraction quality scores or model comparisons have been run.**

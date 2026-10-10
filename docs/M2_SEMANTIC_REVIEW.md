@@ -71,7 +71,7 @@ The second command relaxes pilot **counts only**. It does not bypass source appr
 | \`semantic_review_status=unreviewed\` | No semantic attestation; **not research-ready** |
 | \`semantic_review_status=uncertain\` / \`unsupported_by_excerpt\` | A known concern; refused in strict research mode |
 
-The strict **pilot count, source rights/timestamps and archived-byte checks remain required**. In the current repository, all 14 public URLs are still unapproved candidates and there are zero selected actual cases, so this functionality has only been exercised against synthetic input.
+The strict **pilot count, source rights/timestamps and archived-byte checks remain required**. In the current repository, all 17 public URLs are still unapproved candidates and there are zero selected actual cases, so this functionality has only been exercised against synthetic input.
 
 ## P0 readiness truthfulness update
 
