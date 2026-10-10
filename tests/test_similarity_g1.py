@@ -69,12 +69,12 @@ def fixtures():
     background2 = src("back-two", "background", "independent-history-B",
                       "2022-04-01T00:00:00Z")
     b0 = view("B0_sparse_report_only", [early])
-    g1 = view("G1_early_plus_historical_background", [early, background1, background2])
+    g1 = view("G1_early_plus_historical_background", [copy.deepcopy(early), background1, background2])
     target = edge(1, "early", "malware:new", "USES", "attack-technique:T1059")
     overlap = edge(2, "back-one", "malware:older", "USES", "attack-technique:T1059")
     candidate = edge(3, "back-two", "malware:older", "HAS_BEHAVIOR",
                      "attack-behavior:exec-sequence")
-    return b0, graph(b0, [target]), g1, graph(g1, [target, overlap, candidate])
+    return b0, graph(b0, [target]), g1, graph(g1, [copy.deepcopy(target), overlap, candidate])
 
 
 def profile(params=None, **kw):
