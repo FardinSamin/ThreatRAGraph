@@ -131,3 +131,7 @@ The evidence verifier now recomputes a versioned HTML visible-text view or safel
 ## PDF page-scoped evidence update
 
 The source-assertion graph CLI now validates pinned `pdf_page_span` citations against the **exact approved archived PDF source version**, extracting text per page, normalizing whitespace, checking cited offsets and recomputing the evidence SHA-256. See [PDF provenance](M2_PDF_PAGE_PROVENANCE.md). No OCR, visual verification or automatic factual/semantic correctness is implied.
+
+## Human semantic review gate (subsequent M2 update)
+
+The strict historical graph runner now additionally requires a versioned **human-declared semantic review** of each source-asserted claim. The reviewer attestation binds the deterministic claim ID, source version, evidence SHA-256, decision, timestamp and rationale in a separate SQLite table. Unreviewed/uncertain/unsupported claims cause strict-run refusal; development-only outputs remain visibly unreviewed and not research-ready. See [semantic evidence review](M2_SEMANTIC_REVIEW.md). Exact byte citation alignment and human semantic signoff are **distinct**, and neither certifies external real-world truth or reviewer identity.
