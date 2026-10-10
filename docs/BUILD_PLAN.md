@@ -203,13 +203,13 @@ flowchart TD
 
 ## 7. Backlog order and explicit next three PRs
 
-**PR-A — Repo hardening / readiness truthfulness (P0, first):**
+**[PR-A / Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23) — Repo hardening / readiness truthfulness (P0, first):**
 - requirement matrix; clear distinction between syntactic “strict” and researcher-approved experiment readiness;
 - reproducible dependency environment, Windows + Linux smoke, CI secret/dependency/lint checks;
 - tests proving empty/fictional approved data cannot be described as a completed empirical study;
 - contract audit for current modules; branch protection and review policy (document if GitHub settings cannot be changed through available tools).
 
-**PR-B — One historical development case (P1a):**
+**[PR-B / Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24) — One historical development case (P1a):**
 - select one candidate with verifiable original and follow-up reporting dates **before reviewing prediction outcome**;
 - collect permitted exact archived versions outside Git, source rights and hash/date evidence;
 - freeze initial 1–2 report split and background/later reference separation; manually review in GitHub using metadata only;
