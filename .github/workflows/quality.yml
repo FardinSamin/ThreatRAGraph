@@ -26,3 +26,5 @@ jobs:
         run: python scripts/preflight_import.py .
       - name: Validate draft research manifests (offline)
         run: python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
+      - name: Audit available local source artifacts (candidate-only manifest)
+        run: python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require-all
