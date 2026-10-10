@@ -133,6 +133,8 @@ class SignedReleaseWitnessTests(unittest.TestCase):
             release, _, _ = records()
             path.write_text(json.dumps(release), encoding="utf-8")
             self.assertEqual(release, read_api_json(path))
+            path.write_text(json.dumps(release), encoding="utf-8-sig")
+            self.assertEqual(release, read_api_json(path))
             path.write_bytes(b" " * (1024 * 1024 + 1))
             with self.assertRaisesRegex(ValueError, "bounded"):
                 read_api_json(path)
