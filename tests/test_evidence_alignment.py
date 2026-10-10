@@ -146,6 +146,7 @@ class EvidenceAlignmentTests(unittest.TestCase):
         record = claim("yaml", {"kind": "yaml_path", "path": "/0/condition",
                                   "normalizer_version": "falco-safe-yaml-v1-pyyaml-6.0.3"},
                        "evt.type=execve")
+        record["assertion_kind"] = "rule_semantics"
         self.assertEqual("aligned", self.verifier().verify(record).status)
 
     def test_archive_mutation_fails_closed(self):
