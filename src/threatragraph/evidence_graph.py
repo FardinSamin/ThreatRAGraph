@@ -4,8 +4,8 @@ Reference implementation: Python stdlib + SQLite, no external services.
 Only SOURCE-ASSERTED facts/rule semantics belong here. Predicted relations
 must be stored elsewhere and never silently treated as sourced observations.
 
-This module does not parse reports or prove exact evidence-span correctness.
-Use verified source-version manifests and the source-integrity gate upstream.
+An optional evidence verifier aligns locators against approved source archive bytes.
+Unverified direct API inserts remain clearly marked and are not research-ready.
 """
 from __future__ import annotations
 
@@ -147,8 +147,9 @@ def validate_locator(raw: Any) -> str:
 class EvidenceGraph:
     """Append-only sourced claims stored in SQLite; snapshot-scoped views."""
 
-    def __init__(self, connection: sqlite3.Connection):
+    def __init__(self, connection: sqlite3.Connection, evidence_verifier=None):
         self.conn = connection
+        self.evidence_verifier = evidence_verifier
         self.conn.execute("PRAGMA foreign_keys=ON")
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript("""
@@ -172,6 +173,8 @@ class EvidenceGraph:
                 evidence_locator TEXT NOT NULL,
                 evidence_sha256 TEXT NOT NULL,
                 extractor_version TEXT NOT NULL,
+                evidence_status TEXT NOT NULL DEFAULT 'unverified'
+                    CHECK (evidence_status IN ('unverified', 'aligned')),
                 FOREIGN KEY (source_version_id)
                     REFERENCES source_versions(source_version_id)
             );
@@ -256,6 +259,20 @@ class EvidenceGraph:
             raise ValueError("Extractor version too long")
         locator = validate_locator(record.get("evidence_locator"))
         evidence_sha = require_sha(record.get("evidence_sha256"), "evidence_sha256")
+        verification_state = "unverified"
+        if self.evidence_verifier is not None:
+            alignment = self.evidence_verifier.verify(record)
+            if (alignment.status != "aligned" or
+                    alignment.source_version_id != version or
+                    alignment.evidence_sha256 != evidence_sha):
+                raise ValueError("Evidence alignment does not match claim")
+            registered = self.conn.execute(
+                "SELECT sha256 FROM source_versions WHERE source_version_id=?",
+                (version,),
+            ).fetchone()
+            if registered is None or registered["sha256"] != alignment.source_sha256:
+                raise ValueError("Aligned evidence source differs from registered source")
+            verification_state = "aligned"
 
         canonical = {
             "schema_version": SCHEMA_VERSION,
@@ -272,7 +289,7 @@ class EvidenceGraph:
         claim_id = "claim:" + fingerprint(canonical)
         row = (
             claim_id, version, subject, predicate, target,
-            kind, polarity, locator, evidence_sha, extractor,
+            kind, polarity, locator, evidence_sha, extractor, verification_state,
         )
         with self.conn:
             existing = self.conn.execute(
@@ -287,8 +304,8 @@ class EvidenceGraph:
                     """INSERT INTO sourced_claims
                     (claim_id, source_version_id, subject_id, predicate, object_id,
                      assertion_kind, polarity, evidence_locator,
-                     evidence_sha256, extractor_version)
-                    VALUES (?,?,?,?,?,?,?,?,?,?)""", row,
+                     evidence_sha256, extractor_version, evidence_status)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?)""", row,
                 )
             except sqlite3.IntegrityError as exc:
                 raise ValueError("Claim source must be registered and approved") from exc
@@ -347,7 +364,7 @@ class EvidenceGraph:
         rows = self.conn.execute(
             f"""SELECT claim_id, source_version_id, subject_id, predicate,
                        object_id, assertion_kind, polarity, evidence_locator,
-                       evidence_sha256, extractor_version
+                       evidence_sha256, extractor_version, evidence_status
                   FROM sourced_claims
                  WHERE source_version_id IN ({placeholders})
               ORDER BY subject_id, predicate, object_id, claim_id""",
@@ -359,7 +376,7 @@ class EvidenceGraph:
                 **{name: row[name] for name in (
                     "claim_id", "source_version_id", "subject_id", "predicate",
                     "object_id", "assertion_kind", "polarity",
-                    "evidence_sha256", "extractor_version",
+                    "evidence_sha256", "extractor_version", "evidence_status",
                 )},
                 "evidence_locator": json.loads(row["evidence_locator"]),
             }
@@ -379,9 +396,10 @@ class EvidenceGraph:
             "nodes": vertices,
             "edges": edges,
             "caveat": (
-                "Only source-asserted relationships; not independently verified "
-                "attack events. Source-level cutoff cannot rule out extractor/model "
-                "memorization or entity aliases learned later."
+                "Only source-asserted relationships, not independently verified "
+                "attack events. Aligned citation bytes do NOT prove semantic correctness "
+                "or factual truth. Unverified direct-ledger claims are labeled; memorization "
+                "and future-learned aliases remain separate risks."
             ),
         }
 

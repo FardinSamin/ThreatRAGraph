@@ -57,7 +57,7 @@ def claim(version):
             "kind": "text_span", "segment_id": "seg:" + version,
             "start": 0, "end": 5
         },
-        "evidence_sha256": h("quote" + version),
+        "evidence_sha256": h(version[:5]),
         "extractor_version": "synthetic-parser-v1",
     }
 
@@ -97,6 +97,7 @@ class CaseGraphRunnerTests(unittest.TestCase):
         self.assertEqual(2, len(output["G1"]["edges"]))
         self.assertNotIn("heldout", str(output))
         self.assertEqual("early", output["B0"]["edges"][0]["source_version_id"])
+        self.assertEqual("aligned", output["B0"]["edges"][0]["evidence_status"])
 
     def test_future_reference_claim_is_rejected_not_ignored(self):
         with self.claims_file.open("a") as file:
@@ -121,6 +122,14 @@ class CaseGraphRunnerTests(unittest.TestCase):
         with self.claims_file.open("a") as file:
             file.write(json.dumps(claim("unknown-source")) + "\n")
         with self.assertRaises(ValueError):
+            run(self.src, self.cases, "case-test",
+                self.claims_file, self.archives, development=True)
+
+    def test_fabricated_citation_refused_by_full_graph_cli(self):
+        forged = claim("early")
+        forged["evidence_sha256"] = h("invented source quotation")
+        self.claims_file.write_text(json.dumps(forged) + "\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "Evidence hash does not match"):
             run(self.src, self.cases, "case-test",
                 self.claims_file, self.archives, development=True)
 
