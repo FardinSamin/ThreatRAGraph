@@ -17,7 +17,6 @@ import sys
 MAX_BYTES = 2 * 1024 * 1024
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 UTC = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
-GIT_PREFIX = re.compile(r"^[0-9a-f]{12}$")
 ROLES = {"early", "background", "later", "excluded"}
 REQUIRED_RECORD = {
     "source_version_id", "source_id", "url", "publisher",
@@ -89,10 +88,9 @@ def validate_screening(screen, sources, cases=None) -> dict:
     ref = screen.get("git_provenance_anchor")
     if not isinstance(ref, dict):
         raise ValueError("Git provenance anchor missing")
-    for field in ("git_annotated_tag_oid_prefix", "tagged_commit_oid_prefix"):
-        oid = ref.get(field)
-        if not isinstance(oid, str) or not GIT_PREFIX.fullmatch(oid):
-            raise ValueError("Git object prefix must be 12 hexadecimal characters; not an archive hash")
+    tag_ref = ref.get("official_tag_ref_api_url")
+    if tag_ref != "https://api.github.com/repos/opencontainers/runc/git/ref/tags/v1.1.12":
+        raise ValueError("Official upstream tag reference must match the reviewed source")
     release_date = _date(ref.get("github_release_published_at_observed"), utc=True)
     if release_date > cutoff:
         raise ValueError("Observed GitHub public release follows proposed cutoff")
