@@ -72,6 +72,6 @@ Tests cover correct page number/text attribution, Unicode span boundaries in the
 - OCR for scanned reports; graphics/figures, tables with ambiguous extraction order, and page-layout coordinate mapping are **not supported**. A page with no selectable text must not silently produce a claim.
 - pypdf does not prove how the page looks to a human; **visual review remains necessary** for ambiguous tables, overprinted text, redactions or badly embedded fonts.
 - Independently verifying exact public availability, source rights, published revisions and subsequent extracted relationship semantics is mandatory before real research evaluation.
-- True case counts and approved corpus versions, original local prototype integration, model contamination studies and GraphRAG scoring remain pending under [#1](https://github.com/FardinSamin/ThreatRAGraph/issues/1), [#3](https://github.com/FardinSamin/ThreatRAGraph/issues/3) and [#11](https://github.com/FardinSamin/ThreatRAGraph/issues/11).
+- True case counts and approved corpus versions, end-to-end validation of repository extraction modules, model contamination studies and GraphRAG scoring remain pending under [#3](https://github.com/FardinSamin/ThreatRAGraph/issues/3), [#11](https://github.com/FardinSamin/ThreatRAGraph/issues/11), and [#21](https://github.com/FardinSamin/ThreatRAGraph/issues/21).
 
 **This feature is page-scoped citation integrity infrastructure, not an OCR service, PDF attack detector, complete CTI extraction pipeline, or empirical GraphRAG result.**
