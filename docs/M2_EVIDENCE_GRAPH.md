@@ -1,6 +1,6 @@
 # M2 — Evidence-Backed Claims and Historical Graph Projection
 
-**Status:** Implemented as a testable, independent reference component. **Not integrated with the investigator's original local prototype. No real extraction or GraphRAG predictions have been performed.**
+**Status:** Implemented as a testable, independent reference component. This is part of the repository's greenfield implementation. No end-to-end real CTI extraction benchmark or GraphRAG prediction experiment has been performed.
 
 **Tracking:** [Issue #9](https://github.com/FardinSamin/ThreatRAGraph/issues/9)  
 **Requirements:** SRS FR-09–16, FR-19–21, DR-01–10, NFR-02–03; SDD ``5–9.
@@ -111,7 +111,7 @@ Synthetic tests cover stable source claims, independent multi-edge provenance, F
 
 ## 6. Next integration work
 
-1. Import and audit original local prototype under [M0 #1](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
+1. Audit and extend the graph and extraction modules already implemented in this repository; no earlier local prototype exists.
 2. Implement **evidence-span verification** against frozen normalized source records and measure precision/recall.
 3. Curate actual versions/case cutoffs under [M1 #3](https://github.com/FardinSamin/ThreatRAGraph/issues/3).
 4. Integrate historical per-cutoff alias decisions and graph construction using M3 views.
