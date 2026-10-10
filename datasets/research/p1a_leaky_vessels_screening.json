@@ -26,9 +26,8 @@
     "release_url": "https://github.com/opencontainers/runc/releases/tag/v1.1.12",
     "github_release_published_at_observed": "2024-01-31T20:06:08Z",
     "annotated_tag_tagger_at": "2024-01-23T13:13:42Z",
-    "warning": "Abbreviated Git SHA-1 prefixes are discovery clues, NOT uniquely verified immutable archive IDs or study-required SHA-256. Resolve and independently audit complete upstream tag/commit identities before approving any source. Tagger/commit timestamps before embargo do not establish public availability; release timestamp does not prove today's HTML existed at release.",
-    "git_annotated_tag_oid_prefix": "20381324e21b",
-    "tagged_commit_oid_prefix": "51d5e94601ce"
+    "warning": "The official tag-reference API URL is a discovery pointer, not a frozen Git object or SHA-256 of archived report bytes. Resolve original tag and commit identities separately and independently audit the actual approved bytes. Tagger timestamps before embargo do not establish public availability.",
+    "official_tag_ref_api_url": "https://api.github.com/repos/opencontainers/runc/git/ref/tags/v1.1.12"
   },
   "sources": [
     {
@@ -57,7 +56,7 @@
       "proposed_role": "early",
       "observed_publication_date": "2024-01-31",
       "published_timestamp_observation": "2024-01-31T20:06:08Z",
-      "date_observation_basis": "Official GitHub Releases API published_at is 2024-01-31T20:06:08Z; the annotated tag and its target commit can be resolved using the upstream tag-ref API. The pre-publication Git tagger date of 2024-01-23 does NOT establish public availability. Only abbreviated discovery IDs appear in this screening record; no archived SHA-256 has been verified.",
+      "date_observation_basis": "GitHub Releases API published_at=2024-01-31T20:06:08Z. Follow the official upstream v1.1.12 tag-ref API to verify the annotated tag and commit. Earlier 2024-01-23 tagger time is not public availability. Original release-note content SHA-256 is still unknown.",
       "revision_risk": "Pinned git tag object is a promising immutable text reference, but release page content, source rights and a SHA-256 of the exact archived bytes are not yet verified.",
       "triage_decision": "pin_git_object_then_audit_release_bytes",
       "approved": false,
