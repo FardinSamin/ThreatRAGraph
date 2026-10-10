@@ -858,3 +858,26 @@ On PR: formatting/lint, type-checking, unit and schema tests, secret/dependency 
 - STIX/Python optional library: https://stix2.readthedocs.io/
 
 **Change control:** Any architecture change that affects a requirement should carry a change to docs/SRS.md, this document, related ADR (when material), appropriate schema examples and tests. Keep **proposal intent**, **chosen design**, and **verified implementation** clearly separated. Quantitative findings belong in immutable evaluation runs, not speculative README statements.
+
+## Appendix A. Explicit SRS identifier coverage
+
+The ranges in §14 are summarized below with every individual SRS identifier spelled out for searchable, machine-auditable traceability. A design location does **not** mean the corresponding requirement has been implemented or tested.
+
+| SRS requirements (all IDs) | Design location |
+|---|---|
+| RC-01, RC-02, RC-03, RC-04 | §§4, 6 — corpus, sourcing, provenance |
+| RC-05, RC-06 | §§7, 9 — time gating and outcome isolation |
+| RC-07 | §9 — research-claim limitations |
+| FR-01, FR-02, FR-03, FR-04, FR-05, FR-06, FR-07, FR-08 | §§4, 6 — collection and normalization |
+| FR-09, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18 | §§5–6 — extraction and graph |
+| FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26 | §§7–8 — profiles, similarity and GraphRAG |
+| FR-27, FR-28, FR-29, FR-30, FR-31 | §9 — evaluation and reproducibility |
+| FR-32, FR-33, FR-34 | §10 — CLI, API and optional dashboard |
+| FR-35, FR-36 | §§11–12 — cloud limits and safe input |
+| DR-01, DR-02, DR-03, DR-04, DR-05, DR-06, DR-07, DR-08, DR-09, DR-10, DR-11 | §5 — ontology and evidence records |
+| NFR-01, NFR-02, NFR-03, NFR-04 | §§5, 7, 13 — reproducibility, provenance, temporal integrity |
+| NFR-05, NFR-06, NFR-07, NFR-08, NFR-09 | §§11–13 — security, local execution and recovery |
+| NFR-10, NFR-11, NFR-12, NFR-13 | §§8, 10, 12–13 — latency targets and uncertainty |
+| NFR-14, NFR-15, NFR-16, NFR-17, NFR-18, NFR-19, NFR-20 | §§9, 11–13 — ethics, controls and measured output |
+| EV-01, EV-02, EV-03, EV-04, EV-05, EV-06, EV-07, EV-08, EV-09, EV-10 | §9 — research scoring, validity and ablations |
+| AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09 | §§13, 15 — test and milestone exit gates |
