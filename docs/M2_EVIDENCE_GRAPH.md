@@ -127,3 +127,7 @@ The end-to-end CLI now attaches the [M2 citation verifier](M2_EVIDENCE_ALIGNMENT
 ## 8. HTML and Falco normalization update
 
 The evidence verifier now recomputes a versioned HTML visible-text view or safely parses a pinned Falco YAML rules file from the **original, hash-verified archive bytes** at insertion time. Those derived locators carry explicit normalizer versions. Falco YAML citations must remain `rule_semantics`, not observations of an incident. See [M2 normalization](M2_HTML_FALCO_NORMALIZATION.md). Raw PDF/OCR and semantic extraction verification are still not covered.
+
+## PDF page-scoped evidence update
+
+The source-assertion graph CLI now validates pinned `pdf_page_span` citations against the **exact approved archived PDF source version**, extracting text per page, normalizing whitespace, checking cited offsets and recomputing the evidence SHA-256. See [PDF provenance](M2_PDF_PAGE_PROVENANCE.md). No OCR, visual verification or automatic factual/semantic correctness is implied.
