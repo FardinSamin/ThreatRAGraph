@@ -220,6 +220,14 @@ class NormalizedEvidenceTests(unittest.TestCase):
                       db.execute("SELECT evidence_status FROM sourced_claims").fetchall()]
             self.assertEqual(["aligned", "aligned"], sorted(states))
 
+    def test_falco_yaml_cannot_be_classified_as_incident_observation(self):
+        raw = "- rule: Shell\n  condition: evt.type=execve\n"
+        self.source("falco", raw, "falco_rule")
+        c = self.yaml_claim("falco", "evt.type=execve")
+        c["assertion_kind"] = "report_assertion"
+        with self.assertRaisesRegex(ValueError, "rule semantics"):
+            self.verifier().verify(c)
+
     def test_falco_document_cannot_prove_actual_event_occurrence(self):
         raw = "- rule: Shell\n  condition: evt.type=execve\n"
         self.source("falco", raw, "falco_rule")
