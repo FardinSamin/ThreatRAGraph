@@ -121,10 +121,14 @@ def validate_locator(raw: Any) -> str:
     kind = raw.get("kind")
     if not isinstance(kind, str):
         raise ValueError("Locator kind must be text")
-    if kind == "text_span":
+    if kind in {"text_span", "html_text_span"}:
         keys = {"kind", "segment_id", "start", "end"}
+        if kind == "html_text_span":
+            keys.add("normalizer_version")
+            if raw.get("normalizer_version") != "html-visible-v1":
+                raise ValueError("Unsupported HTML normalizer version")
         if set(raw) != keys:
-            raise ValueError("text_span requires exact locator keys")
+            raise ValueError("Text span requires exact locator keys")
         segment = raw["segment_id"]
         start, end = raw["start"], raw["end"]
         if (not isinstance(segment, str) or not segment.strip() or
