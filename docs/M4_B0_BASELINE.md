@@ -62,7 +62,7 @@ The versioned JSON record carries:
 | \`predictions[]\` | **Always empty for this v1 baseline**; no extrapolation |
 | \`abstention\` | Explicit boolean and reason when no valid positive target assertion remains |
 | \`diagnostics\` | Counts of unreviewed/uncertain/non-target/negative/conflicted claims |
-| \`research_ready\` | False for synthetic \`--development-only\` runs; strict mode still depends on upstream corpus validation |
+| \`research_ready\` | **Always false at P0.1** pending independent historical corpus/case approval, even when strict structural checks pass. See additional \`readiness\` disclosure |
 
 **\`score=null\` is deliberate.** Two agreeing reports and five copy-pasted claims do not automatically translate to a probability or calibrated confidence. G1's later similarity scores must also disclose that they are uncalibrated until benchmark evidence supports calibration.
 
@@ -116,7 +116,7 @@ The synthetic tests cover one/two early reports, claims with multi-source suppor
 **Research limitations that remain:**
 - B0 doesn't identify unreported behavior; it describes **only early supported source assertions**. Comparability with G1 must use a preregistered fact/ontology and scoring protocol rather than give G1 credit for outputting more speculation.
 - Any pre-extracted claim using future-informed language-model weights/aliases can contaminate B0 **before** this algorithm sees it. Those must be controlled at original extractor/case reconstruction.
-- Strict \`research_ready\` means the supplied B0 contract and review requirements passed; this lightweight profiler cannot reverify original immutable source archives or publisher chronology. Upstream M1/M2 checks and human review are mandatory.
+- **Strict structural validation is not scientific research readiness.** The B0 profiler now always reports \`research_ready=false\` plus a separate structural \`readiness\` disclosure; it cannot itself verify archived-source chronology, reviewer identity or empirical study approval. See [P0 contract](P0_READINESS_CONTRACT.md).
 - The current repository has **14 unapproved candidate URLs and no validated cases**; no true B0 baseline experiment has been run.
 - Validation of the repository's actual extraction implementation, exact source chronology (#3), reviewed real claims and paired B0/G1 results remain pending.
 
