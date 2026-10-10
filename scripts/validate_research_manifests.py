@@ -223,6 +223,8 @@ def validate(source_manifest, case_manifest, strict=False):
 
     if not records:
         warnings.append("Draft corpus is empty; no real CTI sources have been curated")
+    elif counts["approved_sources"] == 0:
+        warnings.append("No source versions approved; candidate URLs are not validated historical evidence")
     if not cases:
         warnings.append("Draft case registry is empty; no experiment cases selected")
     if strict:

@@ -2,7 +2,7 @@ name: Research repo checks
 
 on:
   push:
-    branches: [main, "chore/**", "docs/**", "feature/**", "import/**"]
+    branches: [main, "chore/**", "docs/**", "feature/**", "research/**", "import/**"]
   pull_request:
 
 permissions:

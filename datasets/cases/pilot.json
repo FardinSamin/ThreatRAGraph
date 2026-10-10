@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
-  "dataset_version": "0.0.0-draft",
-  "description": "Draft historical evaluation case registry. No cases have been selected or reviewed.",
+  "dataset_version": "0.1.0-candidate",
+  "description": "No case has been approved or added; see docs/research/M1_CASE_CANDIDATES.md for the separately reviewed shortlist.",
   "cases": []
 }
