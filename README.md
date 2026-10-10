@@ -29,24 +29,18 @@ The pilot targets approximately **25–40 permitted public CTI, Kubernetes, CVE,
 
 Milestones: **M0** greenfield repository setup (initial setup complete; legacy import inapplicable) → **M1** verified source corpus → **M2** extraction/graph foundation → **M3** historical snapshots → **M4** B0 baseline → **M5** G1 similarity inference → **M6** evaluation → **M7** research report/presentation. **M1 remains unfinished, and the real end-to-end CTI extraction/case evaluation have not been demonstrated.**
 
-## Getting ready for M0
+## Local setup and tests
 
-The local prototype must be reviewed before any source code import. The read-only intake preflight can inspect a folder for suspicious filenames, selected secret patterns, symlinks and scan limitations without uploading file contents:
-
-~~~powershell
-python scripts/preflight_import.py "C:\full\path\to\your\existing\ThreatRAGraph"
-~~~
-
-The script prints finding **categories and relative paths**, not token values. A clean result does **not** certify the source or Git history as safe. Read the [complete intake procedure](docs/M0_PROTOTYPE_INTAKE.md) before pushing.
-
-Validate the preflight itself using the built-in test suite:
+This is a **greenfield project**. Clone the existing GitHub repository to work on the implementation already committed here. There is no prior local Python prototype to import.
 
 ~~~powershell
+git clone https://github.com/FardinSamin/ThreatRAGraph.git
+cd ThreatRAGraph
 python -m pip install -r requirements-normalization.txt
 python -m unittest discover -s tests -v
 ~~~
 
-The import-preflight script itself needs only Python's standard library. The full test suite now requires the pinned normalization dependencies in `requirements-normalization.txt`; no API tokens, AWS account, or paid cloud services are needed.
+The historical `scripts/preflight_import.py` utility is optional for future external code imports; it is **not** a project blocker or required setup step. The full test suite uses pinned normalization dependencies; no AWS account or paid cloud service is required.
 
 ## Research manifests (draft only)
 
