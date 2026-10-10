@@ -12,13 +12,13 @@ The supplied URFS proposal targets around **25–40 public sources** and **4–6
 
 ## 2. How to validate
 
-The first two files are **empty draft registries**. They pass structural validation so the project can be established without inventing research evidence.
+The case registry is still **empty**, while the source registry now holds **14 unapproved candidate URLs** recorded in [the case shortlist](research/M1_CASE_CANDIDATES.md). All these source versions remain unfrozen with unknown exact historical timestamps and no verified SHA-256. Draft structural validation can run without inventing approved evidence.
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
 ~~~
 
-Expected status: "draft_valid", with warnings that no sources/cases exist.
+Expected status: "draft_valid", with warnings that no evaluation cases have been selected (and no approved source versions).
 
 The readiness gate must fail until the corpus is actually curated:
 
