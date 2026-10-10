@@ -12,6 +12,7 @@
 - [SDD](docs/SDD.md) — proposed architecture, claim/evidence graph schema, time-safe snapshots, similarity engine, baseline, evaluation, deployment options.
 - [**Controlled build plan**](docs/BUILD_PLAN.md) — execution order, exact dependencies, per-stage acceptance, adversarial tests, stop/go rules and first three PRs.
 - [**Implementation coverage ledger**](docs/IMPLEMENTATION_STATUS.md) — FR-01–36 and research gate statuses backed by actual code/test paths, with missing and partial work disclosed.
+- [P0 research-readiness contract](docs/P0_READINESS_CONTRACT.md) — strict structural checks never automatically certify real-world research approval.
 - [M0 historical intake note](docs/M0_PROTOTYPE_INTAKE.md) — superseded planning document; there is no pre-existing prototype to import. The preflight script remains optional for any future external contributions.
 - [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
 - [M1 source byte-integrity audit](docs/M1_SOURCE_INTEGRITY.md) — locally verify SHA-256 of frozen CTI source versions while keeping archives out of Git.
@@ -29,7 +30,7 @@
 
 **Next PR:** [P0 CI/contract/readiness hardening — Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23). **In parallel:** [P1a verify one real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), and develop the [synthetic M5 G1 ranker — Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) without claiming it is already validated. [Details and exit gates](docs/BUILD_PLAN.md).
 
-No completed real-data GraphRAG comparison exists yet. The 14 source URLs remain *unapproved candidates* and the case manifest remains empty. A passing synthetic test or `research_ready` field is **not** independently reviewed evidence of a historically valid experiment.
+No completed real-data GraphRAG comparison exists yet. The 14 source URLs remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
 
 ## Research plan
 
