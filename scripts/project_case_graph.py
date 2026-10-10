@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Run a *source-asserted* B0/G1 graph projection from curated claim JSONL.
 
-This is NOT GraphRAG similarity/prediction. Source evidence must be independently
-checked against the archived report; this runner enforces source-byte integrity,
+This is NOT GraphRAG similarity/prediction. Source evidence locators and digests are checked against exact archive bytes
+for supported UTF-8/JSON types; this runner also enforces source-byte integrity,
 historical source partitions and restrictions on which claims may be loaded.
 No cloud/network/model calls. Only outputs graph metadata, never raw source text.
 """
@@ -16,6 +16,7 @@ from scripts.audit_source_artifacts import audit_sources
 from scripts.freeze_case_snapshots import case_views
 from scripts.validate_research_manifests import load_json, validate
 from src.threatragraph.evidence_graph import EvidenceGraph
+from src.threatragraph.evidence_alignment import EvidenceVerifier
 
 MAX_CLAIMS_BYTES = 5 * 1024 * 1024
 MAX_CLAIMS = 10000
@@ -62,7 +63,8 @@ def run(sources, cases, case_id, raw_claims_path, archives, development=False):
     }
     claims = load_claims(raw_claims_path, permitted)
     with sqlite3.connect(":memory:") as conn:
-        ledger = EvidenceGraph(conn)
+        verifier = EvidenceVerifier(sources, archives)
+        ledger = EvidenceGraph(conn, evidence_verifier=verifier)
         ledger.register_source_versions(sources)
         for record in claims:
             ledger.append_source_claim(record)
@@ -78,8 +80,9 @@ def run(sources, cases, case_id, raw_claims_path, archives, development=False):
         "case_id": case_id,
         "warnings": warnings,
         "scope": (
-            "Source-asserted graph only; does not validate extraction against "
-            "evidence text or control language model historical knowledge."
+            "Source evidence spans are byte-aligned for supported UTF-8 and JSON "
+            "sources; this does not prove semantic correctness, attack truth, "
+            "YAML/PDF extraction, or model historical ignorance."
         ),
         "B0": b0,
         "G1": g1,
@@ -91,7 +94,7 @@ def main(argv=None):
     parser.add_argument("--sources", default="datasets/manifests/pilot.json")
     parser.add_argument("--cases", default="datasets/cases/pilot.json")
     parser.add_argument("--case-id", required=True)
-    parser.add_argument("--claims", required=True, help="JSONL of pre-reviewed claims from permitted sources only")
+    parser.add_argument("--claims", required=True, help="JSONL of claims with archive-verifiable text or JSON evidence")
     parser.add_argument("--archive-root", default="artifacts/source_versions/sha256")
     parser.add_argument(
         "--development-only", action="store_true",
