@@ -22,6 +22,7 @@ from src.threatragraph.evidence_graph import EvidenceGraph
 from src.threatragraph.evidence_alignment import EvidenceVerifier
 from src.threatragraph.semantic_reviews import SemanticReviewLedger, read_review_jsonl
 from src.threatragraph.readiness import readiness_disclosure
+from src.threatragraph.contracts import validate_graph_projection
 
 MAX_CLAIMS_BYTES = 5 * 1024 * 1024
 MAX_CLAIMS = 10000
@@ -86,6 +87,8 @@ def run(sources, cases, case_id, raw_claims_path, archives, development=False,
                 edge["semantic_review_status"] = decisions.get(
                     edge["claim_id"], "unreviewed"
                 )
+    validate_graph_projection(b0, views["B0"], reviewed=True)
+    validate_graph_projection(g1, views["G1"], reviewed=True)
     if any(edge["evidence_status"] != "aligned"
            for graph in (b0, g1) for edge in graph["edges"]):
         raise ValueError("Refusing graph projection with unverified evidence")

@@ -66,7 +66,7 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | DR-06 | No canonical full STIX/ATT&CK/CVE/Falco revision registry | Source-version and alias adapters |
 | DR-09 | **No G1 Prediction store** | P4 candidate schema and separate hypotheses |
 | DR-10 | **No independent evaluator outcome plane implemented** | P3/P5 process isolation and frozen labels |
-| DR-11 | Some versioned JSON records; no complete migration suite | P0 schema validation and backward compatibility |
+| DR-11 | P0.3 exact B0/G1 source-view/graph input schema checks, SQLite v1 column/primary-key/nullability compatibility and refusal of legacy evidence-status omission | Full artifact schema registry, complete constraint/index checks, explicit controlled version upgrades and signed output chain still pending |
 | EV-01–10 | Scoring/evidence policy designed; no independent real evaluation | P2 extraction labels and P5 paired evaluator |
 | NFR-01/04 | Synthetic hashes and local integrity code | Clean-room real-corpus reproducibility |
 | NFR-02/03 | Synthetic attribution and source-level cutoff protections | P3 full derived-leak audit, scored 100% provenance |

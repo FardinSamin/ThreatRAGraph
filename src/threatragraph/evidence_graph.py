@@ -16,6 +16,8 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
+from .sqlite_schema import check_schema, stamp_schema
+
 SCHEMA_VERSION = "1.0"
 SHA = re.compile(r"^[0-9a-f]{64}$")
 ID = re.compile(r"^[a-z][a-z0-9-]*:[^\s:][^\s]*$")
@@ -173,6 +175,7 @@ class EvidenceGraph:
         self.evidence_verifier = evidence_verifier
         self.conn.execute("PRAGMA foreign_keys=ON")
         self.conn.row_factory = sqlite3.Row
+        check_schema(self.conn, ("source_versions", "sourced_claims"))
         self.conn.executescript("""
             CREATE TABLE IF NOT EXISTS source_versions (
                 source_version_id TEXT PRIMARY KEY,
@@ -204,6 +207,7 @@ class EvidenceGraph:
             CREATE INDEX IF NOT EXISTS idx_claim_subject
                 ON sourced_claims(subject_id, predicate);
         """)
+        stamp_schema(self.conn)
 
     def register_source_versions(self, manifest: dict[str, Any]) -> int:
         """Register approved version metadata immutably. Does NOT hash files.
@@ -338,6 +342,8 @@ class EvidenceGraph:
         Use a validated case_views() result from the M3 manifest builder, not
         an arbitrary analyst-supplied view, for real research.
         """
+        from .contracts import validate_source_view
+        validate_source_view(view)
         if not isinstance(view, dict) or view.get("artifact_kind") != "historical_source_input":
             raise ValueError("Historical source input view required")
         if view.get("schema_version") != SCHEMA_VERSION:

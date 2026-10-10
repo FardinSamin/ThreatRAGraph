@@ -15,6 +15,7 @@ from typing import Any
 
 from .evidence_graph import as_utc, fingerprint, require_id, require_sha, validate_triple
 from .readiness import readiness_disclosure
+from .contracts import validate_graph_projection
 
 BASELINE_VERSION = "b0-assertions-v1"
 PROFILE_SCHEMA_VERSION = "1.0"
@@ -59,6 +60,7 @@ def build_b0_profile(view: dict, graph: dict, *, development_only=False) -> dict
     """
     if type(development_only) is not bool:
         raise ValueError("development_only must be a boolean")
+    validate_graph_projection(graph, view, reviewed=True)
     view = _object(view, _ALLOWED_VIEW, "B0 source view")
     graph = _object(graph, _ALLOWED_GRAPH, "B0 sourced graph")
     if (view["schema_version"] != PROFILE_SCHEMA_VERSION or
