@@ -91,8 +91,8 @@ class CaseScreeningTests(unittest.TestCase):
             if x["source_version_id"] == "candidate:runc-maintainer-release:unfrozen"
         )["verified_available_at"])
         s = copy.deepcopy(self.screen)
-        s["git_provenance_anchor"]["git_annotated_tag_oid_prefix"] = "0" * 64
-        with self.assertRaisesRegex(ValueError, "12 hexadecimal"):
+        s["git_provenance_anchor"]["official_tag_ref_api_url"] = "https://example.org/not-a-release"
+        with self.assertRaisesRegex(ValueError, "Official upstream tag reference"):
             self.valid(screen=s)
 
     def test_future_reference_cannot_be_earlier_than_cutoff(self):
