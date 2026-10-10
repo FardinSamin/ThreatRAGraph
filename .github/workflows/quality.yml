@@ -36,3 +36,4 @@ jobs:
         run: |
           python -m compileall -q src scripts
           python -m scripts.project_case_graph --help
+          python -m scripts.profile_b0 --help

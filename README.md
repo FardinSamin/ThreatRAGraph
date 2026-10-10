@@ -4,7 +4,7 @@
 
 ## Status
 
-**Architecture approved for planning; implementation unverified.** The investigator's URFS proposal describes an existing local Python extraction and graph-building prototype, but that original code has **not been imported or audited here**. At present, this repository contains architecture documents and preparation tools, not a demonstrated end-to-end research system.
+**Research infrastructure under development, not yet empirically evaluated.** This repository now contains testable, offline source-integrity, evidence-alignment, semantic-review, historical graph, and B0 baseline reference components. The investigator's **original local Python extraction/graph prototype remains unimported and unaudited**, and **no approved real CTI source versions, historical cases or B0/G1 study outcomes exist yet**. SRS/SDD are draft research designs, not proof of final faculty approval.
 
 ## Documents
 
@@ -19,6 +19,7 @@
 - [M2 HTML/Falco normalization](docs/M2_HTML_FALCO_NORMALIZATION.md) — deterministic source-linked HTML visible text and safe pinned Falco YAML citation parsing.
 - [M2 PDF page evidence](docs/M2_PDF_PAGE_PROVENANCE.md) — pinned page-by-page PDF text extraction from approved archived bytes with verifiable page/offset citations.
 - [M2 semantic claim review](docs/M2_SEMANTIC_REVIEW.md) — explicit reviewer attestations bound to exact claim IDs, archive evidence, and strict graph readiness gates.
+- [M4 B0 cold-start baseline](docs/M4_B0_BASELINE.md) — deterministic target facts from early reviewed source assertions only, no background retrieval, prediction or invented confidence.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
@@ -83,6 +84,17 @@ python -m scripts.project_case_graph --help
 ~~~
 
 For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**. The CLI verifies archived source citations (UTF-8 text, JSON, HTML, Falco YAML, and extractable PDF text) and now requires **claim-bound human semantic reviews** for strict research runs. It does **not** yet predict novel behavior or implement a full extraction pipeline. HTML visible-text, pinned Falco YAML, and **extractable PDF page-text citation verification** are now supported; OCR, PDF visual layout interpretation, independent reviewer authentication, and real semantic review annotations remain pending. Real corpus, cases, and original local prototype integration are still pending.
+
+## M4 cold-start B0 baseline
+
+The new **B0-only** CLI consumes a pair of isolated M3 source-view/M2 sourced-graph JSON inputs for a case. It refuses G1/background/later-source inputs, requires aligned citations and semantic review in strict mode, directly reports supported *early source assertions* about the target with source/claim/evidence provenance, and abstains on insufficient or contradictory evidence.
+
+~~~powershell
+python -m scripts.profile_b0 --help
+python -m scripts.profile_b0 --b0-view "C:\research\b0-view.json" --b0-graph "C:\research\b0-graph.json"
+~~~
+
+The baseline itself requires only Python's standard library; preparing trusted source/evidence artifacts uses the broader pinned toolchain and historical validation pipeline. B0 deliberately emits **no inferred predictions** or statistical confidence. See [the full B0 contract](docs/M4_B0_BASELINE.md). A real baseline evaluation cannot proceed until the historical corpus and local prototype are reviewed.
 
 ## Cloud services and licensing
 
