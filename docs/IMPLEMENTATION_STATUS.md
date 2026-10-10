@@ -36,12 +36,12 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | FR-17 | Partial | `semantic_reviews.py` decisions, adverse tests | Review queue, independent adjudication and conflict resolution protocol |
 | FR-18 | **Missing** | JSON outputs exist | Versioned interoperable JSON/CSV export-import (STIX only valid types) |
 | FR-19 | Present/tested synthetic (only) | `freeze_case_snapshots.py` + `baseline_b0.py` | Real historical case and extract/review parity |
-| FR-20 | **Missing** | [M5 Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) | G1 typed structural similarity and feature contributions |
+| FR-20 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `tests/test_similarity_g1.py` | Equal-weight typed Jaccard overlap and evidence contributions exist; general structural families, validated as-of feature lineage and real historical corpus missing |
 | FR-21 | Partial | M1/M3 source-level cutoffs and provenance exclusions | Historized alias/taxonomy/feature/index exclusion + future controls |
-| FR-22 | **Missing** | G1 prediction target schema designed in SDD | G1 provisional, attributable, scored, abstaining predictions |
-| FR-23 | Partial | B0 abstention `baseline_b0.py`; synthetic tests | G1 score/support/uncertainty abstention |
+| FR-22 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `scripts/profile_g1.py` | Separate provisional inferred triples, uncalibrated rank, historical claim paths and abstention; no externally authenticated source provenance, research-approved evaluation or calibration |
+| FR-23 | Partial / synthetic-tested | B0 abstention `baseline_b0.py`, G1 independent-source abstention `similarity_g1.py` | Empirical calibration/ablation and uncertainty metrics missing |
 | FR-24 | Present/tested synthetic (only) | `scripts/profile_b0.py`, `tests/test_b0_baseline.py` | Real paired-run common extraction/output comparison |
-| FR-25 | Partial | `EvidenceGraph.neighborhood` and source-attributed edges | Historical evidence-chain explanations for G1 |
+| FR-25 | Partial / synthetic-tested | G1 matching feature + early/historical claim evidence paths `similarity_g1.py` | Verified original-byte provenance of real paths and indirect multi-hop historical graph routes absent |
 | FR-26 | Optional/deferred | Architecture only | Opt-in, budget-gated, citation-validated synthesis with contamination disclosure |
 | FR-27 | Partial | Draft source/case registries and validators | 4–6 frozen real historical cases and independent label partitions |
 | FR-28 | **Missing** | B0/G1 source view scaffold exists | Machine-verified paired early-input equivalence and runner |
