@@ -29,11 +29,11 @@
 - [P1a signed upstream release provenance](docs/research/P1A_RUNC_RELEASE_WITNESS.md) — replayable offline audit of runc GitHub release, annotated tag, reported PGP signature and hard historical-approval boundaries.
 - [Private candidate byte capture](docs/research/P1A_LEAKY_VESSELS_CASE.md#safe-manual-source-byte-preservation-private-not-approval) — bounded offline original-byte archiving and unapproved receipts; not proof of historical content or rights.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
-- [M5 similarity engine tracking](https://github.com/FardinSamin/ThreatRAGraph/issues/21).
+- [**M5 G1 explainable similarity v1**](docs/M5_G1_SIMILARITY.md) — synthetic-tested paired early-source parity, typed graph neighbors, independent provenance paths and provisional hypotheses; **no real empirical claim**. [Remaining M5 work](https://github.com/FardinSamin/ThreatRAGraph/issues/21).
 
 ## Current engineering priorities
 
-**Next PR:** [P0 CI/contract/readiness hardening — Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23). **In parallel:** [P1a verify one real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), and develop the [synthetic M5 G1 ranker — Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) without claiming it is already validated. [Details and exit gates](docs/BUILD_PLAN.md).
+**Next PR:** [P0 CI/contract/readiness hardening — Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23). **In parallel:** [P1a verify one real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), and extend the [synthetic-tested M5 G1 v1 similarity ranker](docs/M5_G1_SIMILARITY.md) without claiming historically approved or empirical effectiveness. [Details and exit gates](docs/BUILD_PLAN.md).
 
 No completed real-data GraphRAG comparison exists yet. The 19 source URLs remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
 
