@@ -1,0 +1,44 @@
+# ThreatRAGraph
+
+**ThreatRAGraph** is a GraphRAG-based cyber threat intelligence research project investigating whether graph-structural similarity to historically documented threats can improve provisional profiles for newly emerging threats when only one or two early public reports exist.
+
+## Status
+
+**Architecture approved for planning; implementation unverified.** The investigator's URFS proposal describes an existing local Python extraction and graph-building prototype, but that original code has **not been imported or audited here**. At present, this repository contains architecture documents and preparation tools, not a demonstrated end-to-end research system.
+
+## Documents
+
+- [SRS](docs/SRS.md) — software requirements, research hypotheses, functional and nonfunctional criteria, acceptance gates.
+- [SDD](docs/SDD.md) — proposed architecture, claim/evidence graph schema, time-safe snapshots, similarity engine, baseline, evaluation, deployment options.
+- [M0 prototype intake](docs/M0_PROTOTYPE_INTAKE.md) — safe procedure for bringing the existing prototype into the repository and auditing it.
+- [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
+
+## Research plan
+
+The pilot targets approximately **25–40 permitted public CTI, Kubernetes, CVE, ATT&CK and Falco sources** and **4–6 historical cases**. The central paired experiment compares (B0) a sparse-report-only baseline with (G1) similarity-based graph bootstrapping. The graph must only use historically eligible evidence at each case's cutoff. Source-backed observations and provisional inferred relationships must remain distinct.
+
+Milestones: **M0** import/audit → **M1** source corpus → **M2** extraction/graph → **M3** historical snapshots → **M4** baseline → **M5** similarity inference → **M6** evaluation → **M7** research report/presentation.
+
+## Getting ready for M0
+
+The local prototype must be reviewed before any source code import. The read-only intake preflight can inspect a folder for suspicious filenames, selected secret patterns, symlinks and scan limitations without uploading file contents:
+
+~~~powershell
+python scripts/preflight_import.py "C:\full\path\to\your\existing\ThreatRAGraph"
+~~~
+
+The script prints finding **categories and relative paths**, not token values. A clean result does **not** certify the source or Git history as safe. Read the [complete intake procedure](docs/M0_PROTOTYPE_INTAKE.md) before pushing.
+
+Validate the preflight itself using the built-in test suite:
+
+~~~powershell
+python -m unittest discover -s tests -v
+~~~
+
+No application dependencies, API tokens, AWS account or paid cloud services are needed for this preparatory script.
+
+## Cloud services and licensing
+
+The SDD proposes a **local-first** baseline. Neptune, Bedrock and S3 are optional and should not be activated until justified, budgeted and approved. No repository license has yet been selected; review source ownership and public-report redistribution terms before publication.
+
+**Primary research source:** *URFS_Proposal_Fardin_Samin.pdf* supplied to the project investigator (not committed here). Requirements/design do not constitute evaluated research findings.

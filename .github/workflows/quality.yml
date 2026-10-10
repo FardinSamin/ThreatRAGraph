@@ -1,0 +1,26 @@
+name: Research repo checks
+
+on:
+  push:
+    branches: [main, "chore/**", "docs/**", "feature/**", "import/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight-and-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests (standard library only)
+        run: python -m unittest discover -s tests -v
+      - name: Intake safety heuristics
+        run: python scripts/preflight_import.py .
