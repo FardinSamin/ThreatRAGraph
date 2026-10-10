@@ -14,6 +14,7 @@
 - [**Implementation coverage ledger**](docs/IMPLEMENTATION_STATUS.md) — FR-01–36 and research gate statuses backed by actual code/test paths, with missing and partial work disclosed.
 - [P0 research-readiness contract](docs/P0_READINESS_CONTRACT.md) — strict structural checks never automatically certify real-world research approval.
 - [P0 security and dependency gates](docs/P0_SECURITY_GATES.md) — new Python lint, tracked-content secret detection, public runtime advisory auditing and exact parser pin checks.
+- [P0 artifact and SQLite v1 contracts](docs/P0_SCHEMA_CONTRACTS.md) — validate exact historical source/graph boundaries and reject incompatible legacy SQLite ledgers without silent migration.
 - [M0 historical intake note](docs/M0_PROTOTYPE_INTAKE.md) — superseded planning document; there is no pre-existing prototype to import. The preflight script remains optional for any future external contributions.
 - [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
 - [M1 source byte-integrity audit](docs/M1_SOURCE_INTEGRITY.md) — locally verify SHA-256 of frozen CTI source versions while keeping archives out of Git.
