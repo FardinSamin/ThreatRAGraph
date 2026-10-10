@@ -396,10 +396,10 @@ class EvidenceGraph:
             "nodes": vertices,
             "edges": edges,
             "caveat": (
-                "Only source-asserted relationships. Aligned citation bytes do NOT "
-                "establish claim semantic correctness or factual truth. Unverified "
-                "direct-ledger claims are visibly labeled; model memorization and "
-                "future-learned aliases remain separate risks."
+                "Only source-asserted relationships, not independently verified "
+                "attack events. Aligned citation bytes do NOT prove semantic correctness "
+                "or factual truth. Unverified direct-ledger claims are labeled; memorization "
+                "and future-learned aliases remain separate risks."
             ),
         }
 
