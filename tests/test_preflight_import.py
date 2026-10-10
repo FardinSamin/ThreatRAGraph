@@ -16,7 +16,7 @@ class PreflightTests(unittest.TestCase):
     def test_categorizes_token_without_revealing_it(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            fake_token = "AKIAABCDEFGHIJKLMNOP"
+            fake_token = "AKIA" + "ABCDEFGHIJKLMNOP"
             (root / "config.py").write_text("TOKEN = " + fake_token, encoding="utf-8")
             (root / ".env").write_text(
                 "OPENAI_API_KEY=not-a-real-example-secret", encoding="utf-8"
@@ -35,7 +35,7 @@ class PreflightTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             (root / ".venv").mkdir()
-            (root / ".venv" / "skipped.txt").write_text("AKIAABCDEFGHIJKLMNOP")
+            (root / ".venv" / "skipped.txt").write_text("AKIA" + "ABCDEFGHIJKLMNOP")
             (root / "secrets").mkdir()
             (root / "secrets" / "secret.txt").write_text("not-scanned")
             (root / "main.py").write_text("print('safe')", encoding="utf-8")
