@@ -7,7 +7,7 @@
 **Owner:** Primary student investigator, ThreatRAGraph  
 **Companion:** docs/SDD.md (design derived from this specification)
 
-> **Implementation disclosure.** On 2026-10-10, the linked GitHub repository was empty. The URFS proposal states that a local Python extraction/graph prototype exists, but its code and tests were not accessible for audit. All implementation states below are **unverified** until that prototype is imported. Proposed requirements, design choices, targets, and test cases must not be reported as completed work.
+> **Implementation disclosure.** On 2026-10-10, the linked GitHub repository was empty. The investigator has clarified that **there was no pre-existing local Python prototype; ThreatRAGraph is being developed from scratch in this GitHub repository**. The initial design predates much of the subsequently committed and tested reference infrastructure; verify implementation coverage against actual code and CI, not assumed previous work. Proposed requirements, design choices, targets, and test cases must not be reported as completed work.
 
 ## 1. Purpose and research foundation
 
@@ -181,7 +181,7 @@ Each important persisted record shall carry **schema_version**, stable **id**, c
 
 ## 6. Nonfunctional requirements and provisional targets
 
-*These are proposed engineering thresholds for the pilot, not previously measured results or funding-program mandates. Calibrate targets after profiling the local prototype.*
+*These are proposed engineering thresholds for the pilot, not previously measured results or funding-program mandates. Calibrate targets after profiling the newly implemented, repository-based pipeline with real data.*
 
 | ID | Pri. | Constraint or target | Acceptance method |
 |---|---|---|---|
@@ -284,7 +284,7 @@ Each important persisted record shall carry **schema_version**, stable **id**, c
 | Unsupported LLM claims/prompt injection | Hallucinated or unsafe output | Constrained JSON, evidence validation, abstention, never execute source text |
 | Neptune/Bedrock billing | Unplanned financial cost | Local-first mocks, explicit enablement, spending guardrails, shutdown checklist |
 | Disclosure/license risk | Unpublishable corpus | Usage-rights manifest and links/hashes when redistribution disallowed |
-| Prototype–design mismatch | Rework | Import and audit local code before claiming architecture matches reality |
+| Reference implementation–design mismatch | Rework | Audit this repository's implemented modules/tests against the SRS and SDD; integrate missing components incrementally |
 
 ## 11. Traceability baseline
 
@@ -303,7 +303,7 @@ Each important persisted record shall carry **schema_version**, stable **id**, c
 
 | ID | Decision pending | Default until decided |
 |---|---|---|
-| TBD-01 | Where is original prototype, what branch/history/licenses exist? | Treat implementation as unverified; preserve before changes |
+| TBD-01 | **Resolved:** Greenfield repository; no prior local prototype exists | Audit existing repository modules and their tests as the sole implementation of record |
 | TBD-02 | Exact 25–40 documents and allowed redistribution? | Curate per-source manifest; do not copy restricted full texts into public releases |
 | TBD-03 | Selection, dates and independent later reference facts for 4–6 cases? | No experimental claim until documented |
 | TBD-04 | Exact source of OTX access and API quota? | Optional adapter; no credentials committed |

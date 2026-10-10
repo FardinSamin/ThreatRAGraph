@@ -7,7 +7,7 @@
 **Design authority:** docs/SRS.md, version 0.1.0  
 **Project:** ThreatRAGraph — A GraphRAG-Based Cyber Threat Intelligence Knowledge Graph System
 
-> **Status and source of truth:** The repository was empty when docs/SRS.md was first committed. The provided URFS proposal describes an existing *local* Python extraction/graph-building prototype, but that implementation has not been inspected. Everything below is a **proposed, testable reference architecture**, not an assertion that a component or service exists. Import and audit the original code before adapting or replacing it.
+> **Status and source of truth:** The repository was empty when docs/SRS.md was first committed. The investigator confirmed **there is no pre-existing local Python prototype**. ThreatRAGraph is being implemented from scratch **in this repository**. This original SDD describes the proposed target architecture; evaluate progress against actual committed modules and CI (now including M1–M4 reference components), and do not assume unimplemented features exist.
 
 ## 1. Design objectives and decisions
 
@@ -28,7 +28,7 @@ ThreatRAGraph is a **research platform first**, a prototype second. Its defining
 
 | ADR | Choice | Rationale | State |
 |---|---|---|---|
-| ADR-001 | Python 3.12+ reference implementation **[DESIGN]** | Fits proposal's Python prototype; must verify against local code | Proposed |
+| ADR-001 | Python 3.12+ reference implementation **[DESIGN]** | Supports the greenfield Python implementation in this repository; verify interpreter and dependencies in CI | Proposed |
 | ADR-002 | Batch/CLI orchestrator first, optional FastAPI read API | Research reproducibility without hosting dependency | Proposed |
 | ADR-003 | SQLite with FTS5 + immutable filesystem artifacts as local system of record; NetworkX MultiDiGraph as in-memory analytical projection | Small corpus, straightforward provenance, no cloud bill | Proposed |
 | ADR-004 | Optional Amazon Neptune **property graph** backend using an adapter; openCypher/Gremlin compatibility reviewed before use | Proposal mentions Neptune; backend-independent evidence logic | Conditional |
@@ -37,9 +37,9 @@ ThreatRAGraph is a **research platform first**, a prototype second. Its defining
 | ADR-007 | Interpretable weighted graph-feature ranking before embeddings or LLM synthesis | Falsifiable similarity treatment and meaningful ablations | Proposed |
 | ADR-008 | Offline scoring pipeline and human-reviewed reference facts | Research integrity and reproducibility | Proposed |
 | ADR-009 | Frozen manifests + content hashes + exact release revisions | Prevent silent dataset changes | Proposed |
-| ADR-010 | One-user local prototype first; hosted dashboard deferred | Matches focused pilot size and scope | Proposed |
+| ADR-010 | One-user local-first greenfield implementation; hosted dashboard deferred | Matches focused pilot size and scope | Proposed |
 
-*These decisions should be revisited after inspecting the local prototype and obtaining faculty methodological feedback. An ADR describes a selected reference design, not proof of implementation.*
+*These decisions should be revisited against the actual repository implementation and faculty methodological feedback. An ADR describes a selected reference design, not proof of implementation.*
 
 ## 2. Context and high-level architecture
 
@@ -122,7 +122,7 @@ flowchart TB
 
 ## 3. Suggested repository structure
 
-**Not yet present; adapt to the uploaded prototype rather than overwrite existing work.**
+**Illustrative target layout only; some paths now exist in the greenfield repository. Verify against the actual current tree before adding or moving files.**
 
 ~~~text
 ThreatRAGraph/
@@ -648,7 +648,7 @@ trg experiment report --run-id <run-id>
 trg ops estimate-cost --run-config config/similarity_v1.yaml
 ~~~
 
-Commands are conceptual; final flags may change after imported prototype review. Prefer typed configuration validation, clear exit codes, --dry-run on imports and cloud operations, and output of artifact paths/hashes.
+Commands are conceptual; use actual implemented CLI flags from the greenfield repository and update this design when they change. Prefer typed configuration validation, clear exit codes, --dry-run on imports and cloud operations, and output of artifact paths/hashes.
 
 ### 10.2 Optional REST read API **[DESIGN]**
 
@@ -797,11 +797,11 @@ On PR: formatting/lint, type-checking, unit and schema tests, secret/dependency 
 
 ## 15. Implementation sequence, dependencies and exit gates
 
-**Milestone M0 — Prototype intake/audit (first practical coding step).**
-- Import local prototype preserving Git history when possible.
-- Inventory Python modules, scripts, datasets, extraction output, graph implementation, environment, tests, APIs and AWS use.
-- Run local tests, credential scan, document existing behavior; map to FR/DR/NFR IDs.
-- Update ADRs and implementation-status table to reflect what is real.
+**Milestone M0 — Greenfield setup and repository baseline (initial setup complete).**
+- Establish the GitHub repository, document architecture, secure defaults, offline development environment and CI.
+- Inventory and continuously audit **code written in this repository** against FR/DR/NFR; there is no pre-existing local prototype to import.
+- Keep the optional import preflight utility for future external code only; it is not a missing-project blocker.
+- Keep ADRs and implementation-status reports tied to evidence from current commits and tests.
 
 **M1 — Corpus + rights + format adapters.** Deliver 25–40-source manifest, reproducible source versions, parser fixtures and inclusion decisions. Gate: AC-01, FR-01–08.
 
@@ -830,7 +830,7 @@ On PR: formatting/lint, type-checking, unit and schema tests, secret/dependency 
 
 | TBD (from SRS) | Resolution process / default |
 |---|---|
-| TBD-01 prototype | Import + run audit before naming existing classes or claiming implementation |
+| TBD-01 project origin (resolved) | Greenfield repository; audit only code actually committed here, not a nonexistent pre-existing prototype |
 | TBD-02 corpus rights | Review source-by-source terms; avoid restricted raw payloads in Git |
 | TBD-03 historical cases | Mentor-reviewed inclusion criteria and frozen cutoff/held-out manifests |
 | TBD-04 OTX | API mock first; validate quotas and access permission |

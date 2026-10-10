@@ -4,13 +4,13 @@
 
 ## Status
 
-**Research infrastructure under development, not yet empirically evaluated.** This repository now contains testable, offline source-integrity, evidence-alignment, semantic-review, historical graph, and B0 baseline reference components. The investigator's **original local Python extraction/graph prototype remains unimported and unaudited**, and **no approved real CTI source versions, historical cases or B0/G1 study outcomes exist yet**. SRS/SDD are draft research designs, not proof of final faculty approval.
+**Research infrastructure under development, not yet empirically evaluated.** This repository now contains testable, offline source-integrity, evidence-alignment, semantic-review, historical graph, and B0 baseline reference components. **This project is being developed from scratch in this repository; there is no pre-existing local Python prototype to import.** No approved real CTI source versions, historical cases or B0/G1 study outcomes exist yet. SRS/SDD are draft research designs, not proof of final faculty approval.
 
 ## Documents
 
 - [SRS](docs/SRS.md) — software requirements, research hypotheses, functional and nonfunctional criteria, acceptance gates.
 - [SDD](docs/SDD.md) — proposed architecture, claim/evidence graph schema, time-safe snapshots, similarity engine, baseline, evaluation, deployment options.
-- [M0 prototype intake](docs/M0_PROTOTYPE_INTAKE.md) — safe procedure for bringing the existing prototype into the repository and auditing it.
+- [M0 historical intake note](docs/M0_PROTOTYPE_INTAKE.md) — superseded planning document; there is no pre-existing prototype to import. The preflight script remains optional for any future external contributions.
 - [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
 - [M1 source byte-integrity audit](docs/M1_SOURCE_INTEGRITY.md) — locally verify SHA-256 of frozen CTI source versions while keeping archives out of Git.
 - [M3 historical snapshot contract](docs/M3_HISTORICAL_SNAPSHOTS.md) — deterministic B0/G1 source inputs that exclude held-out later references.
@@ -21,32 +21,26 @@
 - [M2 semantic claim review](docs/M2_SEMANTIC_REVIEW.md) — explicit reviewer attestations bound to exact claim IDs, archive evidence, and strict graph readiness gates.
 - [M4 B0 cold-start baseline](docs/M4_B0_BASELINE.md) — deterministic target facts from early reviewed source assertions only, no background retrieval, prediction or invented confidence.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
-- [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
+- [M5 similarity engine tracking](https://github.com/FardinSamin/ThreatRAGraph/issues/21).
 
 ## Research plan
 
 The pilot targets approximately **25–40 permitted public CTI, Kubernetes, CVE, ATT&CK and Falco sources** and **4–6 historical cases**. The central paired experiment compares (B0) a sparse-report-only baseline with (G1) similarity-based graph bootstrapping. The graph must only use historically eligible evidence at each case's cutoff. Source-backed observations and provisional inferred relationships must remain distinct.
 
-Milestones: **M0** import/audit → **M1** source corpus → **M2** extraction/graph → **M3** historical snapshots → **M4** baseline → **M5** similarity inference → **M6** evaluation → **M7** research report/presentation.
+Milestones: **M0** greenfield repository setup (initial setup complete; legacy import inapplicable) → **M1** verified source corpus → **M2** extraction/graph foundation → **M3** historical snapshots → **M4** B0 baseline → **M5** G1 similarity inference → **M6** evaluation → **M7** research report/presentation. **M1 remains unfinished, and the real end-to-end CTI extraction/case evaluation have not been demonstrated.**
 
-## Getting ready for M0
+## Local setup and tests
 
-The local prototype must be reviewed before any source code import. The read-only intake preflight can inspect a folder for suspicious filenames, selected secret patterns, symlinks and scan limitations without uploading file contents:
-
-~~~powershell
-python scripts/preflight_import.py "C:\full\path\to\your\existing\ThreatRAGraph"
-~~~
-
-The script prints finding **categories and relative paths**, not token values. A clean result does **not** certify the source or Git history as safe. Read the [complete intake procedure](docs/M0_PROTOTYPE_INTAKE.md) before pushing.
-
-Validate the preflight itself using the built-in test suite:
+This is a **greenfield project**. Clone the existing GitHub repository to work on the implementation already committed here. There is no prior local Python prototype to import.
 
 ~~~powershell
+git clone https://github.com/FardinSamin/ThreatRAGraph.git
+cd ThreatRAGraph
 python -m pip install -r requirements-normalization.txt
 python -m unittest discover -s tests -v
 ~~~
 
-The import-preflight script itself needs only Python's standard library. The full test suite now requires the pinned normalization dependencies in `requirements-normalization.txt`; no API tokens, AWS account, or paid cloud services are needed.
+The historical `scripts/preflight_import.py` utility is optional for future external code imports; it is **not** a project blocker or required setup step. The full test suite uses pinned normalization dependencies; no AWS account or paid cloud service is required.
 
 ## Research manifests (draft only)
 
@@ -83,7 +77,7 @@ The repository now includes a **standalone, testable sourced-claim graph** in `s
 python -m scripts.project_case_graph --help
 ~~~
 
-For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**. The CLI verifies archived source citations (UTF-8 text, JSON, HTML, Falco YAML, and extractable PDF text) and now requires **claim-bound human semantic reviews** for strict research runs. It does **not** yet predict novel behavior or implement a full extraction pipeline. HTML visible-text, pinned Falco YAML, and **extractable PDF page-text citation verification** are now supported; OCR, PDF visual layout interpretation, independent reviewer authentication, and real semantic review annotations remain pending. Real corpus, cases, and original local prototype integration are still pending.
+For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**. The CLI verifies archived source citations (UTF-8 text, JSON, HTML, Falco YAML, and extractable PDF text) and now requires **claim-bound human semantic reviews** for strict research runs. It does **not** yet predict novel behavior or implement a full extraction pipeline. HTML visible-text, pinned Falco YAML, and **extractable PDF page-text citation verification** are now supported; OCR, PDF visual layout interpretation, independent reviewer authentication, and real semantic review annotations remain pending. Real corpus curation, end-to-end extraction validation and real-case experiments are still pending.
 
 ## M4 cold-start B0 baseline
 
@@ -94,7 +88,7 @@ python -m scripts.profile_b0 --help
 python -m scripts.profile_b0 --b0-view "C:\research\b0-view.json" --b0-graph "C:\research\b0-graph.json"
 ~~~
 
-The baseline itself requires only Python's standard library; preparing trusted source/evidence artifacts uses the broader pinned toolchain and historical validation pipeline. B0 deliberately emits **no inferred predictions** or statistical confidence. See [the full B0 contract](docs/M4_B0_BASELINE.md). A real baseline evaluation cannot proceed until the historical corpus and local prototype are reviewed.
+The baseline itself requires only Python's standard library; preparing trusted source/evidence artifacts uses the broader pinned toolchain and historical validation pipeline. B0 deliberately emits **no inferred predictions** or statistical confidence. See [the full B0 contract](docs/M4_B0_BASELINE.md). A real baseline evaluation cannot proceed until the historical corpus, actual extractor behavior and independent case-review protocol are validated.
 
 ## Cloud services and licensing
 

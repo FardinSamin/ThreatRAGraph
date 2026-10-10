@@ -84,7 +84,7 @@ python -m compileall -q src scripts
 
 Synthetic tests cover correct Unicode offsets, JSON pointer paths and escaping, spoofed quotes/hashes, wrong source segments, malformed/binary text, missing or mutated archived versions, unapproved sources, unsupported YAML paths, prompt injection as plain data, direct-ledger `unverified` vs. checked `aligned` statuses, and the full graph runner refusing fabricated citations.
 
-Still outstanding: original prototype import and extractor audit (#1), true historical source/case corpus (#3), OCR and page-image/layout interpretation, semantic claim correctness review, time-valid aliases and embeddings, and actual GraphRAG similarity/evaluation. Pinned PDF text extraction is a citation check, not visual/OCR or semantic verification. HTML visible-text and Falco YAML normalization are now implemented with explicit versioning. A source match alone does not establish a correct extracted CTI relationship.
+Still outstanding: integration and empirical verification of the repository's extraction pipeline, true historical source/case corpus (#3), OCR and page-image/layout interpretation, semantic claim correctness review, time-valid aliases and embeddings, and actual GraphRAG similarity/evaluation. Pinned PDF text extraction is a citation check, not visual/OCR or semantic verification. HTML visible-text and Falco YAML normalization are now implemented with explicit versioning. A source match alone does not establish a correct extracted CTI relationship.
 
 ## PDF page-text provenance update
 
