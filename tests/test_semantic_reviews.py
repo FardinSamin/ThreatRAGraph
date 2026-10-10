@@ -242,7 +242,11 @@ class StrictReviewRunnerTests(unittest.TestCase):
         self.review_file.write_text(json.dumps(review(self.claim_id)) + "\n")
         output = run(self.manifest, self.cases, "case-0",
                      self.claims, self.archives, reviews_path=self.review_file)
-        self.assertTrue(output["research_ready"])
+        self.assertFalse(output["research_ready"])
+        self.assertEqual("strict_structural", output["readiness"]["validation_mode"])
+        self.assertTrue(output["readiness"]["structural_checks_passed"])
+        self.assertEqual("not_verified", output["readiness"]["independent_study_approval"])
+        self.assertEqual("not_performed", output["readiness"]["empirical_evaluation"])
         self.assertEqual("supported_by_excerpt",
                          output["B0"]["edges"][0]["semantic_review_status"])
         self.assertEqual("aligned", output["B0"]["edges"][0]["evidence_status"])
@@ -259,6 +263,7 @@ class StrictReviewRunnerTests(unittest.TestCase):
         output = run(self.manifest, self.cases, "case-0",
                      self.claims, self.archives, development=True)
         self.assertFalse(output["research_ready"])
+        self.assertEqual("development_only", output["readiness"]["validation_mode"])
         self.assertEqual("unreviewed",
                          output["B0"]["edges"][0]["semantic_review_status"])
 
