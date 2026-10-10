@@ -98,7 +98,7 @@ Each line of the claim input is one evidence-backed JSON object. **Claims from s
 
 The explicit `--development-only` option relaxes only the corpus/count requirements for **synthetic fixture experiments**, keeping source approval, archive byte integrity and cutoff checks in place; outputs are labeled `research_ready: false`.
 
-Current repository manifests contain **14 candidate URLs, zero approved sources and zero selected cases**, so no real profile can be generated yet.
+Current repository manifests contain **17 candidate URLs, zero approved sources and zero selected cases**, so no real profile can be generated yet.
 
 ## 5. Tests and verification
 
