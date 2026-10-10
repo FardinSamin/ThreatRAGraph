@@ -26,6 +26,7 @@
 - [M2 semantic claim review](docs/M2_SEMANTIC_REVIEW.md) — explicit reviewer attestations bound to exact claim IDs, archive evidence, and strict graph readiness gates.
 - [M4 B0 cold-start baseline](docs/M4_B0_BASELINE.md) — deterministic target facts from early reviewed source assertions only, no background retrieval, prediction or invented confidence.
 - [P1a first real-source screening](docs/research/P1A_LEAKY_VESSELS_CASE.md) — real dated Leaky Vessels source chronology and explicit remaining archive/review blockers; **not an approved case**.
+- [P1a signed upstream release provenance](docs/research/P1A_RUNC_RELEASE_WITNESS.md) — replayable offline audit of runc GitHub release, annotated tag, reported PGP signature and hard historical-approval boundaries.
 - [Private candidate byte capture](docs/research/P1A_LEAKY_VESSELS_CASE.md#safe-manual-source-byte-preservation-private-not-approval) — bounded offline original-byte archiving and unapproved receipts; not proof of historical content or rights.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M5 similarity engine tracking](https://github.com/FardinSamin/ThreatRAGraph/issues/21).

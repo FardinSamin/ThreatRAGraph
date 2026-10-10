@@ -210,6 +210,7 @@ flowchart TD
 - contract audit for current modules; branch protection and review policy (document if GitHub settings cannot be changed through available tools).
 
 **[PR-B / Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24) — One historical development case (P1a):**
+- **Signed-release provenance subtask:** an offline [runc release/ref/tag witness verifier](research/P1A_RUNC_RELEASE_WITNESS.md) can cross-check GitHub's PGP verification claim, annotated-tag target and public release timestamp; this does **not** independently certify 2024 original web bytes, permissions or a research-ready source.
 - select one candidate with verifiable original and follow-up reporting dates **before reviewing prediction outcome**;
 - collect permitted exact archived versions outside Git, source rights and hash/date evidence;
 - freeze initial 1–2 report split and background/later reference separation; manually review in GitHub using metadata only;

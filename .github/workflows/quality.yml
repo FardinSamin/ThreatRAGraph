@@ -60,6 +60,8 @@ jobs:
           python -m pip freeze
       - name: Validate real P1a candidate chronology without granting source approval
         run: python -m scripts.validate_case_screening
+      - name: Signed release provenance CLI smoke (offline only)
+        run: python -m scripts.verify_runc_release_witness --help
       - name: Candidate byte capture CLI interface smoke (no downloads or writes)
         run: python -m scripts.capture_candidate_snapshot --help
       - name: Python unit and integration tests
