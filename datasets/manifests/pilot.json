@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
   "dataset_version": "0.1.0-candidate",
-  "description": "Candidate public URLs only; 17 candidate versions as of 2026-10-10. The Leaky Vessels P1a source screen adds maintainer/research background but has NOT approved any version, UTC availability, source rights or case.",
+  "description": "Candidate public URLs only (19 records); two public dated oss-security maintainer disclosures added to the Leaky Vessels source screen. No archived source byte version or actual research case is approved; no listed observed date is a verified available_at timestamp.",
   "sources": [
     {
       "source_id": "src:crio-crowdstrike",
@@ -292,6 +292,40 @@
       "sha256": null,
       "redistribution": "unknown",
       "selection_rationale": "Alternative original maintainer advisory; must not be counted as independent of upstream runc release or treated as historically unchanged"
+    },
+    {
+      "source_id": "src:runc-2024-openwall-disclosure",
+      "source_version_id": "candidate:runc-2024-openwall-disclosure:unfrozen",
+      "source_kind": "cve_advisory",
+      "title": "runc CVE-2024-21626 original public oss-security mailing-list disclosure",
+      "publisher": "Aleksa Sarai / runc maintainers via oss-security (Openwall)",
+      "url": "https://www.openwall.com/lists/oss-security/2024/01/31/6",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "The public archived oss-security email is indexed 2024-01-31; its Message Date header reads 2024-02-01 07:33:01 +1100, equivalent to 2024-01-31T20:33:01Z. Message header is author-supplied, not independent delivery proof; archived page retrieved today is not yet a frozen original source revision.",
+      "independence_group": "runc-maintainer-releases",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "Publicly indexed near-release original maintainer advisory and alternative early-source chronology anchor; treat as dependent on official runc release and retain original exact bytes only after rights review"
+    },
+    {
+      "source_id": "src:runc-2019-openwall-disclosure",
+      "source_version_id": "candidate:runc-2019-openwall-disclosure:unfrozen",
+      "source_kind": "cve_advisory",
+      "title": "CVE-2019-5736 original public oss-security mailing-list disclosure",
+      "publisher": "Aleksa Sarai / runc maintainers via oss-security (Openwall)",
+      "url": "https://www.openwall.com/lists/oss-security/2019/02/11/2",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "Public oss-security archive indexed 2019-02-11; email Date header reads 2019-02-12 00:05:20 +1100, equivalent to 2019-02-11T13:05:20Z. Mail Date is not independently verified list delivery time; present HTML has not been byte-historically attested.",
+      "independence_group": "runc-maintainer-releases",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "Alternative pre-cutoff original historical advisory about a distinct runc vulnerability; same maintainer provenance as 2024 runc release prevents counting as independent background without redesigned grouping"
     }
   ]
 }
