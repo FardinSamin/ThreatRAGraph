@@ -12,6 +12,7 @@
 - [SDD](docs/SDD.md) — proposed architecture, claim/evidence graph schema, time-safe snapshots, similarity engine, baseline, evaluation, deployment options.
 - [M0 prototype intake](docs/M0_PROTOTYPE_INTAKE.md) — safe procedure for bringing the existing prototype into the repository and auditing it.
 - [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
+- [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
 ## Research plan
@@ -40,14 +41,14 @@ No application dependencies, API tokens, AWS account or paid cloud services are 
 
 ## Research manifests (draft only)
 
-The M1 registries are intentionally **empty**; no real corpus or case study has been curated yet. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
+The M1 **source registry now contains 14 preliminary public URL candidates**, but **zero approved/frozen source versions and zero selected evaluation cases**. These links require historical version, timestamp, rights and hash review before scientific use. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json --strict
 ~~~
 
-The first command should validate the draft with warnings. The strict readiness check is **expected to fail** until 25–40 verified sources and 4–6 cases are populated and reviewed. This is an intentional quality gate, not a completed research dataset.
+The first command validates the candidate metadata but must not be interpreted as approval. The strict readiness check is **expected to fail** until 25–40 verified source versions and 4–6 cases are populated and reviewed. This is an intentional quality gate, not a completed research dataset.
 
 ## Cloud services and licensing
 
