@@ -69,6 +69,10 @@ def run(sources, cases, case_id, raw_claims_path, archives, development=False):
         for record in claims:
             ledger.append_source_claim(record)
         b0, g1 = ledger.project(views["B0"]), ledger.project(views["G1"])
+    if any(edge["evidence_status"] != "aligned"
+           for graph in (b0, g1) for edge in graph["edges"]):
+        raise ValueError("Refusing graph projection with unverified evidence")
+
     b0_ids = {edge["claim_id"] for edge in b0["edges"]}
     g1_ids = {edge["claim_id"] for edge in g1["edges"]}
     if not b0_ids.issubset(g1_ids):
