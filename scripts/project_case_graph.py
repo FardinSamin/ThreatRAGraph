@@ -6,7 +6,8 @@ for supported UTF-8/JSON types; this runner also enforces source-byte integrity,
 historical source partitions and restrictions on which claims may be loaded.
 Strict structural runs require explicit manual semantic review of every claim;
 development-only runs may emit visibly unreviewed/uncertain claims, but cannot
-be labeled empirically research ready; even strict structural runs need\nindependent scientific approval outside this CLI. No network/model calls or raw report output.
+be labeled empirically research ready; even strict structural runs need
+independent scientific approval outside this CLI. No network/model calls or raw report output.
 """
 import argparse
 import json
