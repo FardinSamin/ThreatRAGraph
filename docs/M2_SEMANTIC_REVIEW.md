@@ -78,7 +78,7 @@ The strict **pilot count, source rights/timestamps and archived-byte checks rema
 - A reviewer declaration is **not a verified identity or digital signature** and does not establish blind, independent assessment. Independent faculty review, source annotation guidelines, versioned reviewer decisions, adjudication of disagreements and a separate gold/reference partition remain necessary for formal research.
 - A supported quotation does not mean the statement is true, the claimed actor actually exists, or a detection rule ever fired. Preserve the difference between **publisher assertions**, **rule semantics**, **provisional graph predictions** and **independent later ground truth**.
 - For proper historical experiments, reviewers should assess **only eligible early text** while hidden from later reference material when feasible; human temporal leakage remains a methodology risk.
-- Real source permissions, exact historical availability, source normalization, extraction benchmark labeling, original local prototype import (#1), and quality metrics remain unfinished.
+- Real source permissions, exact historical availability, source normalization, extraction benchmark labeling, validation of the greenfield source extraction workflow, and quality metrics remain unfinished.
 - This workflow does not use an LLM to evaluate its own model outputs.
 
 Test offline:
