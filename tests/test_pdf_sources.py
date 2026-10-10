@@ -5,6 +5,7 @@ OCR, network access, LLM extraction, or historical CTI source claims.
 """
 from io import BytesIO
 import hashlib
+import json
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -19,6 +20,7 @@ from src.threatragraph.pdf_sources import (
 )
 from src.threatragraph.evidence_alignment import EvidenceVerifier
 from src.threatragraph.evidence_graph import EvidenceGraph
+from scripts.project_case_graph import run
 
 
 def sha(data):
@@ -215,6 +217,61 @@ class PDFSourceTests(unittest.TestCase):
             self.assertEqual("aligned", conn.execute(
                 "SELECT evidence_status FROM sourced_claims"
             ).fetchone()[0])
+
+    def test_pdf_page_citation_in_historical_b0_g1_cli(self):
+        """The actual CLI must verify a PDF claim and exclude later sources."""
+        early_bytes = synthetic_pdf(["Sparse initial report", "Malware uses execve"])
+        self.archive("early-pdf", early_bytes)
+        self.archive("background", b"background malware uses execve")
+        self.archive("heldout", b"later reference is never exposed")
+        for record in self.sources:
+            record.update({
+                "title": "Synthetic " + record["source_version_id"],
+                "publisher": "Fixture only",
+                "url": "https://example.org/" + record["source_version_id"],
+                "published_at": record["available_at"],
+                "independence_group": "group:" + record["source_version_id"],
+                "redistribution": "restricted",
+                "selection_rationale": "Unit fixture, not real CTI",
+            })
+        sources = {
+            "schema_version": "1.0", "dataset_id": "fixture", "dataset_version": "v1",
+            "sources": self.sources,
+        }
+        cases = {
+            "schema_version": "1.0", "dataset_id": "fixture", "dataset_version": "v1",
+            "cases": [{
+                "case_id": "case-fixture",
+                "target_entity_id": "malware:synthetic",
+                "selection_rationale": "Synthetic end-to-end PDF provenance",
+                "cutoff_at": "2024-01-15T00:00:00Z",
+                "early_source_version_ids": ["early-pdf"],
+                "background_source_version_ids": ["background"],
+                "later_reference_source_version_ids": ["heldout"],
+            }],
+        }
+        first = self.claim("early-pdf", 2, "Malware uses execve")
+        second = {
+            "source_version_id": "background", "subject_id": "malware:history",
+            "predicate": "USES", "object_id": "attack-technique:T1059",
+            "assertion_kind": "report_assertion", "polarity": "positive",
+            "evidence_locator": {
+                "kind": "text_span", "segment_id": "seg:background",
+                "start": 0, "end": 10,
+            },
+            "evidence_sha256": sha("background"),
+            "extractor_version": "synthetic/1",
+        }
+        claims = self.root / "claims.jsonl"
+        claims.write_text(json.dumps(first) + "\n" + json.dumps(second) + "\n")
+        output = run(sources, cases, "case-fixture", claims, self.root,
+                     development=True)
+        self.assertEqual(1, len(output["B0"]["edges"]))
+        self.assertEqual(2, len(output["G1"]["edges"]))
+        self.assertEqual("aligned", output["B0"]["edges"][0]["evidence_status"])
+        self.assertEqual("pdf_page_span",
+                         output["B0"]["edges"][0]["evidence_locator"]["kind"])
+        self.assertNotIn("heldout", json.dumps(output))
 
     def test_pdf_whitespace_normalization_is_documented(self):
         raw = synthetic_pdf(["Malware  uses   execve"])
