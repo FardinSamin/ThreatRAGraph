@@ -4,12 +4,14 @@ Supported v1 evidence:
 * text_span: one UTF-8 plain-text source, segment_id == "seg:" + source version ID.
   start/end are zero-based Python Unicode code-point positions in original text;
   no implicit OCR, whitespace changes, newline folding, or normalization.
-* json_pointer: RFC 6901 path to a scalar string/JSON value in raw JSON bytes.
-  Hash UTF-8 string content, or canonical JSON for number/boolean/null scalars.
+* json_pointer: RFC 6901 path to scalar in raw JSON.
+* html_text_span: versioned derived visible-text span recomputed from original
+  approved HTML source bytes on every check.
+* yaml_path: scalar field in a Falco rules YAML source, using the pinned
+  strict SafeLoader. Conditions are rule semantics, never incident telemetry.
 
-Raw PDF, HTML extraction, YAML and derived normalized segments require pinned,
-reviewed normalization code with independently checked source linkage; unsupported
-formats FAIL CLOSED, rather than laundering invented evidence into the graph.
+PDF/OCR and external normalized text segments still FAIL CLOSED until their
+source-byte lineage and extractor versions can be checked.
 
 This proves exact-byte alignment, NOT whether prose semantically supports a
 relationship, whether the publisher is correct, or when it became public.
@@ -20,9 +22,14 @@ from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 from .evidence_graph import require_sha, validate_locator
+from .normalized_sources import (
+    HTML_NORMALIZER_VERSION, normalize_html,
+    normalize_falco_yaml, yaml_scalar_from_path,
+)
 
 MAX_ARCHIVE_BYTES = 50 * 1024 * 1024
 MAX_EVIDENCE_BYTES = 128 * 1024
@@ -66,11 +73,33 @@ def _json_pointer_value(obj: Any, pointer: str) -> Any:
 
 
 def _evidence_bytes(raw: bytes, locator: dict[str, Any],
-                    source_version_id: str) -> bytes:
+                    source_version_id: str, source_kind: str = "") -> bytes:
     kind = locator["kind"]
     if kind == "yaml_path":
-        raise ValueError("YAML path evidence requires a reviewed, pinned safe YAML parser")
+        if source_kind != "falco_rule":
+            raise ValueError("YAML locators require falco_rule source type")
+        return yaml_scalar_from_path(normalize_falco_yaml(raw), locator["path"])
+    if kind == "html_text_span":
+        if source_kind not in {"cti_report", "kubernetes_doc", "cve_advisory", "other"}:
+            raise ValueError("HTML locator not permitted for this source type")
+        if locator["normalizer_version"] != HTML_NORMALIZER_VERSION:
+            raise ValueError("HTML normalizer version mismatch")
+        if locator["segment_id"] != "seg:" + source_version_id + ":" + HTML_NORMALIZER_VERSION:
+            raise ValueError("HTML segment ID does not match source/version")
+        normalized = normalize_html(raw)
+        a, b = locator["start"], locator["end"]
+        if a < 0 or b > len(normalized) or b <= a:
+            raise ValueError("HTML text span out of bounds")
+        selected = normalized[a:b]
+        if not selected.strip():
+            raise ValueError("HTML text evidence must be nonblank")
+        return selected.encode("utf-8")
     if kind == "text_span":
+        if raw.startswith(b"%PDF-") or re.match(
+            rb"\s*<(?:!doctype\s+html|html|body|article|div|p)\b",
+            raw[:256], flags=re.I
+        ):
+            raise ValueError("Binary/HTML source requires a versioned normalizer")
         if locator["segment_id"] != "seg:" + source_version_id:
             raise ValueError("Text segment ID does not match source version")
         try:
@@ -135,6 +164,9 @@ class EvidenceVerifier:
         record = self.versions[version]
         digest = require_sha(record["sha256"], "source.sha256")
         locator = json.loads(validate_locator(claim.get("evidence_locator")))
+        if (locator["kind"] == "yaml_path" and
+                claim.get("assertion_kind") != "rule_semantics"):
+            raise ValueError("Falco rule YAML field is rule semantics, not incident observation")
         expected = require_sha(claim.get("evidence_sha256"), "evidence_sha256")
         folder = self.root / digest[:2]
         path = folder / digest
@@ -151,7 +183,9 @@ class EvidenceVerifier:
         if hashlib.sha256(raw).hexdigest() != digest:
             raise ValueError("Source archive differs from approved version digest")
 
-        evidence = _evidence_bytes(raw, locator, version)
+        evidence = _evidence_bytes(
+            raw, locator, version, source_kind=record.get("source_kind", "")
+        )
         if len(evidence) > MAX_EVIDENCE_BYTES:
             raise ValueError("Evidence span exceeds size limit")
         actual = hashlib.sha256(evidence).hexdigest()

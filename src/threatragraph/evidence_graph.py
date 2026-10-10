@@ -121,10 +121,14 @@ def validate_locator(raw: Any) -> str:
     kind = raw.get("kind")
     if not isinstance(kind, str):
         raise ValueError("Locator kind must be text")
-    if kind == "text_span":
+    if kind in {"text_span", "html_text_span"}:
         keys = {"kind", "segment_id", "start", "end"}
+        if kind == "html_text_span":
+            keys.add("normalizer_version")
+            if raw.get("normalizer_version") != "html-visible-v1":
+                raise ValueError("Unsupported HTML normalizer version")
         if set(raw) != keys:
-            raise ValueError("text_span requires exact locator keys")
+            raise ValueError("Text span requires exact locator keys")
         segment = raw["segment_id"]
         start, end = raw["start"], raw["end"]
         if (not isinstance(segment, str) or not segment.strip() or
@@ -132,8 +136,13 @@ def validate_locator(raw: Any) -> str:
                 start < 0 or end <= start):
             raise ValueError("Invalid text span locator")
     elif kind in {"json_pointer", "yaml_path"}:
-        if set(raw) != {"kind", "path"} or not isinstance(raw["path"], str):
-            raise ValueError("Structured locator requires string path")
+        expected = {"kind", "path"}
+        if kind == "yaml_path":
+            expected.add("normalizer_version")
+            if raw.get("normalizer_version") != "falco-safe-yaml-v1-pyyaml-6.0.3":
+                raise ValueError("Unsupported Falco YAML normalizer version")
+        if set(raw) != expected or not isinstance(raw["path"], str):
+            raise ValueError("Structured locator requires exact keys and string path")
         if not raw["path"].startswith("/") or len(raw["path"]) < 2:
             raise ValueError("Structured locator must be an absolute field path")
     else:

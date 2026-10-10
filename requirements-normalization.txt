@@ -1,0 +1,3 @@
+# Pinned reviewed parser for Falco YAML source-field evidence verification.
+# CI installs this before unit tests. No cloud or ML runtime dependency.
+PyYAML==6.0.3

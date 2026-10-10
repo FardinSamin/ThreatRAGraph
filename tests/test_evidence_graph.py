@@ -166,7 +166,8 @@ class EvidenceGraphTests(unittest.TestCase):
             claim("historical", subject="falco-rule:exec-shell",
                   predicate="INVOLVES_SYSCALL", target="system-call:execve",
                   assertion_kind="rule_semantics",
-                  evidence_locator={"kind": "yaml_path", "path": "/rules/0/condition"})
+                  evidence_locator={"kind": "yaml_path", "path": "/rules/0/condition",
+                                    "normalizer_version": "falco-safe-yaml-v1-pyyaml-6.0.3"})
         )
         g1 = self.graph.project(self.views["G1"])
         self.assertEqual("rule_semantics", g1["edges"][0]["assertion_kind"])
