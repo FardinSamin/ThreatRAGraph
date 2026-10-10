@@ -23,7 +23,7 @@ From the repository root:
 python -m scripts.freeze_case_snapshots datasets/manifests/pilot.json datasets/cases/pilot.json
 ~~~
 
-The current **14-candidate, zero-approved, zero-case** registries will yield **no_cases_yet**, not an experimental result. The command reports preview counts and future snapshot content digests for valid synthetic or later approved cases; it does not write source data, use cloud services, download reports or require API keys.
+The current **17-candidate, zero-approved, zero-case** registries will yield **no_cases_yet**, not an experimental result. The command reports preview counts and future snapshot content digests for valid synthetic or later approved cases; it does not write source data, use cloud services, download reports or require API keys.
 
 ## 3. Research-ready artifact generation
 
