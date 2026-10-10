@@ -12,6 +12,7 @@
 - [SDD](docs/SDD.md) — proposed architecture, claim/evidence graph schema, time-safe snapshots, similarity engine, baseline, evaluation, deployment options.
 - [M0 prototype intake](docs/M0_PROTOTYPE_INTAKE.md) — safe procedure for bringing the existing prototype into the repository and auditing it.
 - [M1 corpus protocol](docs/M1_CORPUS_PROTOCOL.md) — source-version metadata, historical case partitions and cutoff validation.
+- [M1 source byte-integrity audit](docs/M1_SOURCE_INTEGRITY.md) — locally verify SHA-256 of frozen CTI source versions while keeping archives out of Git.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
@@ -48,7 +49,13 @@ python scripts/validate_research_manifests.py datasets/manifests/pilot.json data
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json --strict
 ~~~
 
-The first command validates the candidate metadata but must not be interpreted as approval. The strict readiness check is **expected to fail** until 25–40 verified source versions and 4–6 cases are populated and reviewed. This is an intentional quality gate, not a completed research dataset.
+The additional offline byte-audit checks a local content-addressed archive against approved hashes, without downloading or printing report content:
+
+~~~powershell
+python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require-all
+~~~
+
+With **zero approved sources**, a no-error audit is not proof of a valid research corpus. The first manifest command validates candidate metadata but must not be interpreted as approval. The strict readiness check is **expected to fail** until 25–40 verified source versions and 4–6 cases are populated and reviewed. This is an intentional quality gate, not a completed research dataset.
 
 ## Cloud services and licensing
 
