@@ -29,6 +29,25 @@ def summarize_findings(report: str) -> tuple[int, int]:
     return total_files, total_findings
 
 
+def finding_locations(report: str) -> list[tuple[str, str]]:
+    """Return only tracked path and detector category; never secret material."""
+    payload = json.loads(report)
+    if not isinstance(payload, dict) or not isinstance(payload.get("results"), dict):
+        raise ValueError("Invalid secret scanner report")
+    locations: list[tuple[str, str]] = []
+    for path, findings in payload["results"].items():
+        if not isinstance(path, str) or not isinstance(findings, list):
+            raise ValueError("Invalid scanner findings")
+        for item in findings:
+            if not isinstance(item, dict):
+                raise ValueError("Invalid scanner finding")
+            detector = item.get("type", "unspecified")
+            if not isinstance(detector, str):
+                raise ValueError("Invalid scanner detector")
+            locations.append((path, detector))
+    return locations
+
+
 def main() -> int:
     try:
         process = subprocess.run(
@@ -49,6 +68,8 @@ def main() -> int:
     if findings:
         # No secret excerpts printed. Look at local audit output for investigation.
         print(f"Secret scan flagged {findings} potential secret(s) in {files} file(s)", file=sys.stderr)
+        for path, detector in finding_locations(process.stdout):
+            print(f"Review tracked file: {path} (detector: {detector})", file=sys.stderr)
         return 1
     print("Tracked-content secret scan: no findings")
     return 0
