@@ -58,6 +58,8 @@ jobs:
         run: |
           python --version
           python -m pip freeze
+      - name: Validate real P1a candidate chronology without granting source approval
+        run: python -m scripts.validate_case_screening
       - name: Python unit and integration tests
         run: python -m unittest discover -s tests -v
       - name: Intake safety heuristics
