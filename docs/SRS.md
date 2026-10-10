@@ -1,13 +1,13 @@
 # ThreatRAGraph — Software Requirements Specification (SRS)
 
 **Document ID:** TRG-SRS-001  
-**Version:** 0.1.0 (research architecture baseline)  
+**Version:** 0.2.0 (greenfield requirements + implementation-audit gates)  
 **Date:** 2026-10-10  
-**Status:** Draft for investigator/faculty review; not a statement of implemented functionality  
+**Status:** Controlled draft for investigator/faculty review; implementation coverage is evidenced by GitHub code/CI, not by this requirements document alone  
 **Owner:** Primary student investigator, ThreatRAGraph  
-**Companion:** docs/SDD.md (design derived from this specification)
+**Companions:** docs/SDD.md (design and as-built gap map); docs/BUILD_PLAN.md (sequencing, dependencies and stop/go gates)
 
-> **Implementation disclosure.** On 2026-10-10, the linked GitHub repository was empty. The investigator has clarified that **there was no pre-existing local Python prototype; ThreatRAGraph is being developed from scratch in this GitHub repository**. The initial design predates much of the subsequently committed and tested reference infrastructure; verify implementation coverage against actual code and CI, not assumed previous work. Proposed requirements, design choices, targets, and test cases must not be reported as completed work.
+> **Greenfield source-of-truth correction (2026-10-10):** There has **never been a separate local Python prototype to import**. This GitHub repository is the project codebase. The initial SRS/SDD were created before the source/evidence/graph/historical/B0 reference components; those components now exist and have synthetic CI tests, but **0 real source versions and 0 historical cases have been approved and no B0/G1 empirical comparison has been performed**. Design descriptions and green synthetic CI must never be confused with real-world functionality, historical provenance, faculty approval or research results. See [BUILD_PLAN](BUILD_PLAN.md) for required exit gates.
 
 ## 1. Purpose and research foundation
 
@@ -28,7 +28,7 @@ This is a falsifiable research system, **not** a live operational threat-detecti
 1. **Research authority:** The provided six-page *URFS Proposal — ThreatRAGraph: A GraphRAG-Based Cyber Threat Intelligence Knowledge Graph System* (sections 1–10, especially 1–2, 5–7). Its intended pilot contains approximately **25–40 sources**, **4–6 sparse-threat evaluation cases**, Python-based ingestion/extraction/graph-building, a Kubernetes/container/Falco focus, and an evaluation against later evidence.
 2. **Standards authority:** OASIS STIX 2.1, published MITRE ATT&CK STIX releases, published Falco rule syntax/fields, and upstream vendor documentation. External formats must be versioned and not silently assumed stable.
 3. **Engineering proposals:** Requirements identified as **[DESIGN]** or **[TARGET]** are recommendations made here to operationalize the proposal, not commitments explicitly made by the URFS.
-4. **Implementation evidence:** Versioned source files, manifests, tests, CI and recorded experiment runs. Until local code is imported, implementation status is unknown.
+4. **Implementation evidence:** Code actually committed in this greenfield repository, synthetic and real-data tests, CI, case/source approval records and frozen experiment artifacts. An existing Python module does **not** imply the associated research requirement is fully met.
 
 ### 1.3 Goals and non-goals
 
@@ -85,7 +85,7 @@ This is a falsifiable research system, **not** a live operational threat-detecti
 - **EV-nn:** research-evaluation safeguard / outcome requirement.
 - **AC-nn:** release acceptance criterion.
 - Priority **M** = pilot must-have, **S** = should-have, **L** = later.
-- All requirements default to **proposed/unimplemented or unverified** until traced to repository code and tests.
+- Requirements are **normative targets**. A matching file or synthetic unit test is not necessarily end-to-end completion; assign each requirement an implementation evidence/status in the build-plan matrix. A future source/version/label leak is a release blocker.
 
 ## 4. Functional requirements
 
@@ -106,7 +106,7 @@ This is a falsifiable research system, **not** a live operational threat-detecti
 
 | ID | Pri. | Requirement | Verification |
 |---|---|---|---|
-| FR-09 | M | Extract candidate entities/relationships from normalized text with deterministic parsing where feasible and model-assisted methods where explicitly configured. | Manually labeled fixture |
+| FR-09 | M | Generate typed candidate entities/relationships from normalized source content, with transparent deterministic extraction first and model assistance only when separately enabled. Parsers that *only verify citations* do not satisfy this requirement. | Manually labeled documents + a real source-to-claim test |
 | FR-10 | M | Extract Falco rule names, descriptions, conditions, referenced fields, recognizable syscall/event types and container predicates; distinguish static rule patterns from observed incidents. | Falco YAML fixtures |
 | FR-11 | M | Preserve evidence spans/field paths, document ID and extraction/model version for every candidate assertion. | Traceability assertions |
 | FR-12 | M | Validate types, relation domain/range, identifiers and temporal fields; reject or quarantine incompatible objects. | Schema-negative tests |
@@ -123,7 +123,7 @@ This is a falsifiable research system, **not** a live operational threat-detecti
 |---|---|---|---|
 | FR-19 | M | Construct a sparse input profile solely from each case's permitted first one or two reports. | Cutoff fixture |
 | FR-20 | M | Retrieve eligible historical neighbors using typed graph features (e.g., techniques, components, behaviors, syscall/rule predicates); log feature contributions. | Deterministic top-k test |
-| FR-21 | M | Exclude the target's later evidence, aliases learned later, duplicated target reports and outcome-label artifacts from historical similarity candidates. | Leakage regression tests |
+| FR-21 | M | Exclude the target's later evidence, aliases learned later, later taxonomy/rule revisions, duplicated/syndicated target reports, full-corpus precomputed features, outcome labels and outcome-informed adjudications from retrieval and profile input. Rebuild or independently verify **every derived layer as of cutoff**. | Source-, claim-, alias-, taxonomy-, feature- and label-level adversarial leakage tests |
 | FR-22 | M | Produce a provisional profile of candidate types/relations with evidence paths, similarity rationale, confidence/score and prediction status. | Output schema test |
 | FR-23 | M | Support abstention when evidence is insufficient, ambiguous, contradictory or below a preregistered threshold; output must say why. | Negative-control cases |
 | FR-24 | M | Produce a report-only cold-start profile using the same extraction/normalization and a comparable output schema, without access to the graph similarity result. | Baseline isolation test |
@@ -135,9 +135,9 @@ This is a falsifiable research system, **not** a live operational threat-detecti
 | ID | Pri. | Requirement | Verification |
 |---|---|---|---|
 | FR-27 | M | Define case cutoff, source allowlist, forbidden future sources, reference facts and annotation rules before experiments. | Case manifest validation |
-| FR-28 | M | Execute baseline and graph-assisted methods on the **same** case set, initial evidence and output ontology. | Paired-run audit |
-| FR-29 | M | Persist immutable experiment configuration, code revision, data/graph snapshot, model version, prompt hash, random seed and results. | Re-run provenance audit |
-| FR-30 | M | Score profile facts against held-out later evidence, recording supported/unsupported/contradicted/not-assessable labels. | Gold-label fixture |
+| FR-28 | M | Execute baseline and graph-assisted methods on the **same** selected case set, exact early source versions and extracted/reviewed initial claims, ontology and normalization; only eligible historical background structure differs. | Machine-checked early-input hash parity + paired-run audit |
+| FR-29 | M | Persist immutable experiment configuration, code revision, dependency lock, source/data and graph snapshot hashes, ontology/extractor/ruleset and optional model/prompt versions, random seed if relevant, reviewer/annotation set and results. Freeze predictions **before** held-out labels are opened. | Clean-room reproduction, run manifest validation and gold-access boundary test |
+| FR-30 | M | Score frozen profile facts against separately reviewed later references, recording supported, contradicted, not-assessable and duplicate/out-of-scope decisions. Do **not** count unmentioned predictions automatically as false. | Blinded/reference-separated gold-label fixtures and denominator tests |
 | FR-31 | M | Produce per-case and aggregate results with claim-level traceability and failure/abstention analysis. | Metrics snapshot test |
 | FR-32 | M | Expose a CLI to ingest, validate, build, snapshot, profile, evaluate and export without requiring a dashboard. | CLI smoke scenario |
 | FR-33 | S | Expose authenticated local/research-only read APIs for sources, graphs, evidence, profiles and run artifacts. | API contract test |
@@ -172,7 +172,7 @@ Representative controlled types: **USES**, **TARGETS**, **AFFECTS**, **EXPLOITS*
 | DR-06 | Preserve STIX object IDs, ATT&CK external IDs, CVE identifiers, Falco rule IDs/names, source revisions and canonicalization lineage. |
 | DR-07 | Evidence records are immutable; corrections create superseding records or revisions, not silent replacement. |
 | DR-08 | Represent contradiction, negation and uncertainty as claim properties; absence of reporting is **not** evidence of absence. |
-| DR-09 | Predictions store target snapshot, candidate relation, method, score, calibration status, evidence paths and run ID, separately from observed/sourced claims. |
+| DR-09 | Predictions store target snapshot, candidate relation, method, **uncalibrated rank score (not a probability)**, calibration status, eligible source paths, feature contributions, abstention and run ID, separately from observed/sourced claims. |
 | DR-10 | Link case ground-truth labels only to held-out outcome partitions; never merge them into early-retrieval graph views. |
 
 ### 5.4 Contracts (DR-11) **[DESIGN]**
@@ -187,7 +187,7 @@ Each important persisted record shall carry **schema_version**, stable **id**, c
 |---|---|---|---|
 | NFR-01 | M | Reproducible experiments: same frozen inputs/config and deterministic stages yield byte-stable normalized/graph outputs; nondeterministic model steps record all parameters and residual variance. | CI hash comparison + repeated run audit |
 | NFR-02 | M | Provenance coverage: **100% of scored claims** must have valid source evidence or explicit prediction status with supporting paths. | Automated invariant |
-| NFR-03 | M | Temporal leakage: **zero known forbidden future sources/features** in time-cutoff snapshot or retrieval path. | Adversarial regression suite |
+| NFR-03 | M | Temporal leakage: **zero known forbidden future sources, aliases, ontology/rule revisions, features, cached embeddings, reviewers' later decisions or held-out labels** in profile/rank/explanation paths. | Adversarial time-travel and process-isolation tests |
 | NFR-04 | M | Data integrity: original source hash never changes in place; checksums validated when reused. | Artifact integrity test |
 | NFR-05 | M | Data security: no credentials in repo, logs, prompts or exports; scoped secrets through environment/secret store. | Secret scan and code review |
 | NFR-06 | M | Safe processing: raw inputs treated as untrusted text/JSON/YAML, with size limits and safe parsers; no evaluation of source-supplied code. | Malicious fixture tests |
@@ -260,17 +260,17 @@ Each important persisted record shall carry **schema_version**, stable **id**, c
 
 | ID | Exit criterion | Evidence required |
 |---|---|---|
-| AC-01 | Research protocol reviewed, 4–6 valid cases and 25–40-source pilot curated or deviations explicitly approved. | Corpus and case manifests |
-| AC-02 | Reproducible ingestion and graph build for the pilot; no untraceable scored assertions. | Automated schema/provenance tests |
+| AC-01 | Research protocol signed off, 4–6 valid cases and 25–40-source pilot **independently dated, rights-reviewed and byte verified**, or explicit reviewed deviation. | Frozen corpus/case manifests, archived-hash audit, date and license evidence, approval record |
+| AC-02 | Reproducible **actual source-to-extracted-candidate-to-reviewed-claim-to-graph** pipeline for the pilot; no untraceable scored assertions. | Real source ingest replay + schema, evidence, review and graph tests |
 | AC-03 | Valid extraction metrics on independent manually annotated documents. | Labels, scorer and summary |
-| AC-04 | Historical snapshots and adversarial time-leakage regressions pass. | Cutoff tests and exclusion logs |
-| AC-05 | Both baseline and graph-assisted predictions run on same case manifests, producing structured outputs. | Paired run artifacts |
+| AC-04 | As-of source/claim/alias/ATT&CK/Falco/feature snapshots and adversarial time-leakage regressions pass; evaluator gold store cannot influence either profiler. | Source and feature-level cutoff tests, rejection logs, label-read isolation test |
+| AC-05 | Frozen B0 and G1 runs consume **identical early input bytes/claims** and produce versioned observed and provisional outputs; predictions are not mixed into sourced claims. | Early-input hash equality, separate predictions, run artifacts frozen before scoring |
 | AC-06 | Held-out scoring includes completeness **and** correctness, with casewise evidence and limitations. | Evaluation report + exports |
-| AC-07 | Reproduction instructions work from versioned repository checkout using a no-cost local/mocked path. | Clean-environment smoke test |
+| AC-07 | Reproduction instructions work from versioned repository checkout using no-cost local fixtures; Windows and CI/Linux environments and full dependency versions documented. | Clean-environment offline smoke + dependency manifest and output hash verification |
 | AC-08 | Secrets scan, dependency review, resource budgets and publication-rights checks completed. | Release checklist |
 | AC-09 | Faculty review and symposium-ready methods/results communicated without overstating evidence. | Review notes and presentation |
 
-**Suggested delivery sequence (not a claim about dates):** foundation/corpus → extraction + provenance → graph schema + queries → time-valid case snapshots → baseline + similarity → evaluation/ablations → research outputs. The proposal's Phase I/II/III windows (mid-May to early August) are historical/planned windows whose year and active scheduling must be confirmed before execution.
+**Controlled delivery sequence:** repository hardening/readiness truthfulness (P0) → independently dated/rights-reviewed one-real-case development slice, then full corpus (P1) → real extraction + review (P2) → complete temporal reconstruction (P3) → paired B0/G1 (P4; synthetic G1 engine can be developed in parallel) → independent evaluation (P5) → faculty/reproduction/reporting (P6). **See [BUILD_PLAN](BUILD_PLAN.md) for measurable gates.** The proposal's Phase I/II/III windows (mid-May to early August) are planned historical windows; do not invent a schedule or assume funding authorization.
 
 ## 10. Risk register
 
@@ -311,7 +311,7 @@ Each important persisted record shall carry **schema_version**, stable **id**, c
 | TBD-06 | Graph backing store (local graph vs Neptune)? | Local adapter as reference, Neptune optional |
 | TBD-07 | Embedding/RAG strategy, similarity weights, k and thresholds? | Baseline interpretable graph features; preregister experimental choices |
 | TBD-08 | Manual annotation protocol / mentor reviewer availability? | Written rubric, adjudication log and held-out validation |
-| TBD-09 | Compute environment, authentication needs, hosting model? | Single-user/offline-first prototype |
+| TBD-09 | Compute environment, authentication needs, hosting model? | Greenfield single-user/offline-first Python repository; cloud and hosted API deferred |
 | TBD-10 | Reconciled schedule/year and funding authorization? | No presumption that proposal spending or summer timeline is approved |
 | TBD-11 | Public release policy / exact repository license? | Private until credentials, rights and code ownership reviewed |
 | TBD-12 | Reference model for "ground truth" when reports disagree? | Label supported, contradicted, or not assessable with source evidence |
@@ -334,4 +334,28 @@ The **proposal**, not this document, requests **$2,800 total:** $2,000 student s
 - AWS Neptune documentation: https://docs.aws.amazon.com/neptune/
 - AWS Bedrock documentation: https://docs.aws.amazon.com/bedrock/
 
-**Change policy:** Update this SRS first when the research scope, requirements or acceptance criteria change; update the SDD traceability and tests in the same change set. Never mark a requirement implemented without evidence in code or tests.
+**Change policy:** Update this SRS first when research scope, requirements or acceptance criteria change; update the SDD, [build plan](BUILD_PLAN.md), contracts and tests in the same PR. Never mark a requirement scientifically fulfilled merely because scaffolding exists or synthetic tests pass.
+
+
+## 15. Implementation reality and independent readiness gates (v0.2.0)
+
+The original proposal's **research scope and hypothesis are unchanged**. This section corrects the mistaken historical assertion about a separate prototype, identifies which existing repository components have synthetic coverage, and makes empirical gate conditions explicit. [BUILD_PLAN](BUILD_PLAN.md) defines how to execute them.
+
+| Requirement cluster | Actual greenfield code path | Supported claim **today** | Missing / acceptance gate |
+|---|---|---|---|
+| FR-01,03,05–08 / DR-03–05 | `scripts/validate_research_manifests.py`, `audit_source_artifacts.py`; draft `datasets/manifests/pilot.json` | Source metadata and archived-hash **validation tools** present | No approved real source versions, date evidence or end-to-end collector/batch quarantine/rights audit; AC-01 incomplete |
+| FR-02,04,10–12 | `src/threatragraph/normalized_sources.py`, `pdf_sources.py`, `evidence_alignment.py` | Synthetic-tested citation normalization/verification for a bounded set of formats | Complete adapters, arbitrary report entity/relation **extraction**, measurable extraction quality not present; AC-02/03 incomplete |
+| FR-13–18 / DR-01,02,06–08 | `src/threatragraph/evidence_graph.py`, `semantic_reviews.py` | SQLite typed **sourced-claim** ledger, limited ontology, attributable edges and reviewer-status controls | Versioned alias resolution, reviewer independence, full ontology and export/replay; partial |
+| FR-19,24 | `src/threatragraph/baseline_b0.py`, `scripts/profile_b0.py` | B0 deterministic reviewed **early assertions** and abstention on synthetic fixtures | No real-case run or paired empirical validation |
+| FR-20,22,23,25 / DR-09 | [Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) | Design/requirements only | G1 structural similarity, provisional predictions, evidence-path ranking and no-LLM hypothesis generation absent |
+| FR-21,27–29 / DR-10 | `scripts/freeze_case_snapshots.py`, `project_case_graph.py` | **Source-level** historical B0/G1 allowlisting and claim-derived graph isolation in synthetic tests | Alias/taxonomy/feature as-of reconstruction, approved full case set, prediction-run and label-process isolation missing |
+| FR-30,31 / EV-01–10 | SRS/SDD test design only | Evaluation policy exists as document | Separate held-out annotation, scoring CLI, statistical tables, negative-result audit and real measurements missing |
+| FR-32–36 / NFR-05–09 | Research CLIs, `.github/workflows/quality.yml`, `.gitignore` | Partial offline CLI and CI; AWS off | Full workflow CLI, authenticated API if desired, budget guards for optional cloud, security scanner/branch protections and clean-room replication not demonstrated |
+
+**Required distinction:** A repository CLI may emit `research_ready: true` after **synthetic** records pass its structural checks. That field, an exit code 0, approved-format SHA-256 or a passing unit test cannot establish **independent real-world source dates, licensing, human authenticity or empirical readiness**. Before calling a run scientifically ready, require the separately documented [P1b–P5 signoffs](BUILD_PLAN.md) including actual approved bytes, cutoffs, annotation, freeze and scorer boundaries. Fix misleading in-code readiness semantics in P0.
+
+**Non-negotiable negative tests (link to RC-04–06, FR-11,15,19–24,27–30, DR-03,07–10, NFR-02–04):** fabricated citation, malicious input, unsupported or expired source revision, uncertain publication date, later target report, copied/syndicated evidence, post-cutoff ATT&CK/Falco revisions, later-learned aliases/entity merges, future graph feature/embedding index, contradiction, forged reviewer judgment and held-out reference-label access. No scored run proceeds if any input contains forbidden evidence or an unresolved eligibility failure.
+
+**Experimental scope:** B0 may output **no inferred predictions** and legitimately abstain; it is the report-only reference. G1 must separate early observed assertions from *new provisional* ranker hypotheses and report uncalibrated similarity, provenance and abstentions. Evaluate both using the same case cutoffs, initial evidence, ontology and independently reviewed later labels. A positive result is **not required** for a valid research deliverable.
+
+**Research governance:** Proposed 25–40 sources and 4–6 cases are maintained from the proposal; any change to these sample-size bounds, funding, hypothesis or study design needs an explicit investigator/faculty decision rather than automatic optimization for convenient results.
