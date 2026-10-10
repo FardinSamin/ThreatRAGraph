@@ -119,3 +119,7 @@ Synthetic tests cover stable source claims, independent multi-edge provenance, F
 6. Pair G1 and B0 with independent later labels and scientifically valid scoring.
 
 This deliverable is **sourced graph infrastructure**, not a completed research experiment.
+
+## 7. Evidence-alignment update
+
+The end-to-end CLI now attaches the [M2 citation verifier](M2_EVIDENCE_ALIGNMENT.md) to the SQLite claim ledger: an approved source archive must match its own SHA-256, and a supported text-span or JSON-pointer locator must reproduce the claimed evidence digest. Otherwise the claim is rejected before insertion. The graph edge exposes `evidence_status=aligned`; direct test/developer ledger insertions without a verifier are labeled `unverified`. **Byte alignment is not semantic correctness or independently verified truth.** YAML/PDF normalizers and historical alias controls remain outstanding.
