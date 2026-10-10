@@ -68,7 +68,7 @@ def validate_source_view(view: Any) -> set[str]:
     early = 0
     for source in sources:
         _exact(source, SOURCE_FIELDS, "Historical source entry")
-        if source["role"] not in VIEW_METHODS[method]:
+        if not isinstance(source["role"], str) or source["role"] not in VIEW_METHODS[method]:
             raise ValueError("Unknown/held-out source role in historical view")
         version = _plain_text(source["source_version_id"], "source_version_id")
         if version in seen:
@@ -120,14 +120,18 @@ def validate_graph_projection(graph: Any, view: dict, *, reviewed: bool = False)
             raise ValueError("Graph claim from non-eligible or future source")
         validate_triple(edge["subject_id"], edge["predicate"], edge["object_id"])
         endpoints.update((edge["subject_id"], edge["object_id"]))
-        if edge["assertion_kind"] not in KINDS or edge["polarity"] not in POLARITIES:
+        if (not isinstance(edge["assertion_kind"], str) or
+                not isinstance(edge["polarity"], str) or
+                edge["assertion_kind"] not in KINDS or
+                edge["polarity"] not in POLARITIES):
             raise ValueError("Graph includes unsupported assertion metadata")
         validate_locator(edge["evidence_locator"])
         require_sha(edge["evidence_sha256"], "graph evidence_sha256")
         _plain_text(edge["extractor_version"], "extractor_version", 200)
-        if edge["evidence_status"] not in {"aligned", "unverified"}:
+        if not isinstance(edge["evidence_status"], str) or edge["evidence_status"] not in {"aligned", "unverified"}:
             raise ValueError("Unsupported graph evidence status")
-        if reviewed and edge["semantic_review_status"] not in REVIEW_STATES:
+        if reviewed and (not isinstance(edge["semantic_review_status"], str) or
+                         edge["semantic_review_status"] not in REVIEW_STATES):
             raise ValueError("Unsupported semantic review status")
     if nodes != sorted(endpoints):
         raise ValueError("Graph nodes differ from exact attributed edge endpoints")
