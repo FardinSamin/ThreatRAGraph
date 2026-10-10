@@ -15,6 +15,7 @@
 - [M1 source byte-integrity audit](docs/M1_SOURCE_INTEGRITY.md) — locally verify SHA-256 of frozen CTI source versions while keeping archives out of Git.
 - [M3 historical snapshot contract](docs/M3_HISTORICAL_SNAPSHOTS.md) — deterministic B0/G1 source inputs that exclude held-out later references.
 - [M2 sourced evidence graph](docs/M2_EVIDENCE_GRAPH.md) — reference SQLite claim ledger, typed provenance edges and snapshot-scoped B0/G1 graph queries.
+- [M2 evidence alignment](docs/M2_EVIDENCE_ALIGNMENT.md) — source-byte-backed text and JSON citation validation before graph insertion.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M0 tracking issue](https://github.com/FardinSamin/ThreatRAGraph/issues/1).
 
@@ -77,7 +78,7 @@ The repository now includes a **standalone, testable sourced-claim graph** in `s
 python -m scripts.project_case_graph --help
 ~~~
 
-For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**, and the CLI does not currently extract CTI text or predict novel behavior. Real corpus, cases, and original local prototype integration are still pending.
+For a real case, it will require approved, historically verified source versions, matching archived bytes and reviewed claim JSONL. It builds B0 (early only) and G1 (the same early source claims plus eligible background) **without loading held-out reference claims into either projection**. The reference ledger stores assertions, **not predictions**, and the CLI now verifies source citation spans against archived UTF-8 text/JSON bytes. It does **not** yet extract CTI text or predict novel behavior; Falco YAML and PDF normalization remain pending. Real corpus, cases, and original local prototype integration are still pending.
 
 ## Cloud services and licensing
 
