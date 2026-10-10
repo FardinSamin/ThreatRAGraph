@@ -57,7 +57,7 @@ def claim(version):
             "kind": "text_span", "segment_id": "seg:" + version,
             "start": 0, "end": 5
         },
-        "evidence_sha256": h("quote" + version),
+        "evidence_sha256": h(version[:5]),
         "extractor_version": "synthetic-parser-v1",
     }
 
