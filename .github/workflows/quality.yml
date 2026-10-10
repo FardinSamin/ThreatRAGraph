@@ -30,3 +30,7 @@ jobs:
         run: python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require-all
       - name: Preview historical B0 and G1 source snapshots (no write)
         run: python -m scripts.freeze_case_snapshots datasets/manifests/pilot.json datasets/cases/pilot.json
+      - name: Check graph component compilation and CLI import
+        run: |
+          python -m compileall -q src scripts
+          python -m scripts.project_case_graph --help
