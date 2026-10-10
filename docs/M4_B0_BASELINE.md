@@ -1,6 +1,6 @@
 # M4 — Cold-Start B0 Report-Only Baseline
 
-**Status:** Deterministic, testable **B0 research reference implementation**. Only synthetic sources/cases reviewed in tests; no historical pilot corpus, validated original prototype, or empirical research results.  
+**Status:** Deterministic, testable **B0 research reference implementation**. Only synthetic sources/cases reviewed in tests; no historical pilot corpus or empirical research results; this is greenfield code in the repository.  
 **Tracking:** [Issue #19](https://github.com/FardinSamin/ThreatRAGraph/issues/19)  
 **Traceability:** [SRS](SRS.md) RC-04–06, FR-19, FR-23–24, FR-28, DR-09; [SDD](SDD.md) §4.2, §5 and §9.
 
@@ -118,6 +118,6 @@ The synthetic tests cover one/two early reports, claims with multi-source suppor
 - Any pre-extracted claim using future-informed language-model weights/aliases can contaminate B0 **before** this algorithm sees it. Those must be controlled at original extractor/case reconstruction.
 - Strict \`research_ready\` means the supplied B0 contract and review requirements passed; this lightweight profiler cannot reverify original immutable source archives or publisher chronology. Upstream M1/M2 checks and human review are mandatory.
 - The current repository has **14 unapproved candidate URLs and no validated cases**; no true B0 baseline experiment has been run.
-- Original local prototype import (#1), exact source chronology (#3), reviewed real claims and paired B0/G1 results remain pending.
+- Validation of the repository's actual extraction implementation, exact source chronology (#3), reviewed real claims and paired B0/G1 results remain pending.
 
 **M5** is the next proposed implementation: a separate, time-valid graph-structural similarity candidate engine with attributable feature contributions, inferred-edge isolation and abstention. Do not merge G1 features into this B0 code.
