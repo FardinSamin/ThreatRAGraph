@@ -14,6 +14,7 @@ import sqlite3
 from typing import Any
 
 from .evidence_graph import as_utc, require_sha
+from .sqlite_schema import check_schema
 
 REVIEW_SCHEMA_VERSION = "semantic-evidence-v1"
 DECISIONS = {"supported_by_excerpt", "unsupported_by_excerpt", "uncertain"}
@@ -33,6 +34,7 @@ class SemanticReviewLedger:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
         self.conn.execute("PRAGMA foreign_keys=ON")
+        check_schema(self.conn, ("semantic_reviews",))
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS semantic_reviews (
                 review_id TEXT PRIMARY KEY,
