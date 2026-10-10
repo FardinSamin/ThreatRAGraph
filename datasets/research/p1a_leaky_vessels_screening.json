@@ -57,7 +57,7 @@
       "proposed_role": "early",
       "observed_publication_date": "2024-01-31",
       "published_timestamp_observation": "2024-01-31T20:06:08Z",
-      "date_observation_basis": "Official GitHub Releases API published_at is 2024-01-31T20:06:08Z; annotated tag 20381324e21b5b232fea74d448b5975d85d34d25 points to commit 51d5e94601ceffbbd85688df1c928ecccbfa4685. Git tagger's earlier 2024-01-23 date does NOT mean publicly available.",
+      "date_observation_basis": "Official GitHub Releases API published_at is 2024-01-31T20:06:08Z; the annotated tag and its target commit can be resolved using the upstream tag-ref API. The pre-publication Git tagger date of 2024-01-23 does NOT establish public availability. Only abbreviated discovery IDs appear in this screening record; no archived SHA-256 has been verified.",
       "revision_risk": "Pinned git tag object is a promising immutable text reference, but release page content, source rights and a SHA-256 of the exact archived bytes are not yet verified.",
       "triage_decision": "pin_git_object_then_audit_release_bytes",
       "approved": false,
