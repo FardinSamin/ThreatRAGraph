@@ -25,24 +25,22 @@ class _VisibleHTML(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.parts: list[str] = []
-        self.blocked_depth = 0
+        self.blocked_tags: list[str] = []
 
     def handle_starttag(self, tag, attrs):
-        if self.blocked_depth:
-            self.blocked_depth += 1
-        elif tag.lower() in _BLOCKED:
-            self.blocked_depth = 1
+        if self.blocked_tags or tag.lower() in _BLOCKED:
+            self.blocked_tags.append(tag.lower())
 
     def handle_startendtag(self, tag, attrs):
         # Self-closing elements do not affect the blocked subtree.
         pass
 
     def handle_endtag(self, tag):
-        if self.blocked_depth:
-            self.blocked_depth -= 1
+        if self.blocked_tags and self.blocked_tags[-1] == tag.lower():
+            self.blocked_tags.pop()
 
     def handle_data(self, data):
-        if not self.blocked_depth and data.strip():
+        if not self.blocked_tags and data.strip():
             self.parts.append(data)
 
 
@@ -66,7 +64,7 @@ def normalize_html(raw: bytes) -> str:
         parser.close()
     except (ValueError, AssertionError) as exc:
         raise ValueError("Malformed HTML source") from exc
-    if parser.blocked_depth:
+    if parser.blocked_tags:
         raise ValueError("Unclosed blocked HTML subtree")
     normalized = " ".join(" ".join(parser.parts).split())
     if not normalized or len(normalized.encode("utf-8")) > MAX_HTML_OUTPUT:
