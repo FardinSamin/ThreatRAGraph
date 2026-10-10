@@ -19,6 +19,8 @@ FALCO_NORMALIZER_VERSION = "falco-safe-yaml-v1-pyyaml-6.0.3"
 MAX_NORMALIZER_INPUT = 4 * 1024 * 1024
 MAX_HTML_OUTPUT = 4 * 1024 * 1024
 _BLOCKED = {"head", "script", "style", "template", "iframe", "svg", "noscript"}
+_VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+         "link", "meta", "param", "source", "track", "wbr"}
 
 
 class _VisibleHTML(HTMLParser):
@@ -28,6 +30,8 @@ class _VisibleHTML(HTMLParser):
         self.blocked_tags: list[str] = []
 
     def handle_starttag(self, tag, attrs):
+        if tag.lower() in _VOID:
+            return
         if self.blocked_tags or tag.lower() in _BLOCKED:
             self.blocked_tags.append(tag.lower())
 
