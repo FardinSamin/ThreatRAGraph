@@ -143,7 +143,8 @@ class EvidenceAlignmentTests(unittest.TestCase):
     def test_yaml_path_verified_against_pinned_falco_safe_parser(self):
         self.add_archive("yaml", "- rule: synthetic\n  condition: evt.type=execve\n",
                          kind="falco_rule")
-        record = claim("yaml", {"kind": "yaml_path", "path": "/0/condition"},
+        record = claim("yaml", {"kind": "yaml_path", "path": "/0/condition",
+                                  "normalizer_version": "falco-safe-yaml-v1-pyyaml-6.0.3"},
                        "evt.type=execve")
         self.assertEqual("aligned", self.verifier().verify(record).status)
 
