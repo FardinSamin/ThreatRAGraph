@@ -162,6 +162,34 @@ class EvidenceVerifier:
         if self.root.is_symlink():
             raise ValueError("Archive root cannot be symlinked")
 
+    def read_approved_bytes(self, source_version_id: str) -> bytes:
+        """Read exact archived source bytes only for approved manifest versions.
+
+        Approval is supplied by a separately reviewed manifest, never inferred
+        from SHA-256 equality alone. No dates/rights are certified here.
+        """
+        if (not isinstance(source_version_id, str)
+                or source_version_id not in self.versions):
+            raise ValueError("Source has no approved archived version")
+        digest = require_sha(
+            self.versions[source_version_id]["sha256"], "source.sha256"
+        )
+        folder = self.root / digest[:2]
+        path = folder / digest
+        if folder.is_symlink() or path.is_symlink():
+            raise ValueError("Refusing symlinked archive path")
+        if not path.is_file():
+            raise ValueError("Claim's original archived source not found")
+        if path.stat().st_size > MAX_ARCHIVE_BYTES:
+            raise ValueError("Source archive exceeds size limit")
+        with path.open("rb") as src:
+            raw = src.read(MAX_ARCHIVE_BYTES + 1)
+        if len(raw) > MAX_ARCHIVE_BYTES:
+            raise ValueError("Source archive exceeds size limit")
+        if hashlib.sha256(raw).hexdigest() != digest:
+            raise ValueError("Source archive differs from approved version digest")
+        return raw
+
     def verify(self, claim: dict[str, Any]) -> Alignment:
         if not isinstance(claim, dict):
             raise ValueError("Claim must be an object")
@@ -178,20 +206,7 @@ class EvidenceVerifier:
                 claim.get("assertion_kind") != "rule_semantics"):
             raise ValueError("Falco rule YAML field is rule semantics, not incident observation")
         expected = require_sha(claim.get("evidence_sha256"), "evidence_sha256")
-        folder = self.root / digest[:2]
-        path = folder / digest
-        if folder.is_symlink() or path.is_symlink():
-            raise ValueError("Refusing symlinked archive path")
-        if not path.is_file():
-            raise ValueError("Claim's original archived source not found")
-        if path.stat().st_size > MAX_ARCHIVE_BYTES:
-            raise ValueError("Source archive exceeds size limit")
-        with path.open("rb") as src:
-            raw = src.read(MAX_ARCHIVE_BYTES + 1)
-        if len(raw) > MAX_ARCHIVE_BYTES:
-            raise ValueError("Source archive exceeds size limit")
-        if hashlib.sha256(raw).hexdigest() != digest:
-            raise ValueError("Source archive differs from approved version digest")
+        raw = self.read_approved_bytes(version)
 
         evidence = _evidence_bytes(
             raw, locator, version, source_kind=record.get("source_kind", "")

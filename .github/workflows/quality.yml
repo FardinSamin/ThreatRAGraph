@@ -150,6 +150,8 @@ jobs:
         run: python -m scripts.review_ghsa_candidate --help
       - name: Original pinned GHSA replay CLI smoke (offline only)
         run: python -m scripts.replay_original_ghsa_candidate --help
+      - name: Versioned approved-source compound case CLI smoke (offline only)
+        run: python -m scripts.project_compound_case --help
       - name: G1 paired graph-similarity CLI smoke (offline only)
         run: python -m scripts.profile_g1 --help
       - name: Candidate byte capture CLI interface smoke (no downloads or writes)
