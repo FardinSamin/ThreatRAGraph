@@ -1,8 +1,13 @@
 """Synthetic offline pairing and run-lock tests. No historical approval."""
 import copy
 import hashlib
+import json
+from pathlib import Path
+import tempfile
 import unittest
 
+from scripts.freeze_case_snapshots import snapshot_sha256, write_immutable_view
+from scripts.freeze_paired_run import _load
 from src.threatragraph.evidence_graph import fingerprint
 from src.threatragraph.feature_lineage import (
     ARTIFACT_KIND, CONTRACT_VERSION, EXTRACTION, IDENTITY_POLICY,
@@ -209,6 +214,41 @@ class PairedRunFreezeTests(unittest.TestCase):
         data[5]["random_seed"] = 12345
         with self.assertRaisesRegex(ValueError, "must be null"):
             run(data)
+
+    def test_preview_and_immutable_write_use_identical_artifact_hash(self):
+        profile = run()["run_lock"]
+        digest = snapshot_sha256(profile)
+        with tempfile.TemporaryDirectory() as root:
+            actual, path, created = write_immutable_view(profile, root)
+            self.assertTrue(created)
+            self.assertEqual(digest, actual)
+            self.assertEqual(path.name, digest + ".json")
+            self.assertEqual(json.loads(path.read_text(encoding="utf-8")),
+                             profile)
+            other, repeated, created_again = write_immutable_view(profile, root)
+            self.assertEqual(digest, other)
+            self.assertEqual(path, repeated)
+            self.assertFalse(created_again)
+
+    def test_duplicate_json_keys_cannot_silently_change_metadata(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / "meta.json"
+            path.write_text('{"git_commit_sha":"a","git_commit_sha":"b"}',
+                            encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Duplicate JSON"):
+                _load(str(path))
+
+    def test_symlinked_cli_input_refused(self):
+        with tempfile.TemporaryDirectory() as root:
+            target = Path(root) / "metadata.json"
+            target.write_text("{}", encoding="utf-8")
+            alias = Path(root) / "alias.json"
+            try:
+                alias.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symlink creation unavailable on this OS")
+            with self.assertRaisesRegex(ValueError, "Unsafe"):
+                _load(str(alias))
 
     def test_metadata_declared_not_authenticated(self):
         lock = run()["run_lock"]

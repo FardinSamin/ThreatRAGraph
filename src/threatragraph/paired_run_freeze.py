@@ -24,6 +24,8 @@ _META_FIELDS = frozenset({
 _G1_CONFIG_FIELDS = frozenset({
     "top_k", "min_overlap", "min_background_groups", "max_peers_per_feature",
 })
+
+
 def _metadata(record):
     if not isinstance(record, dict) or set(record) != _META_FIELDS:
         raise ValueError("Run metadata requires exact reproducibility fields")

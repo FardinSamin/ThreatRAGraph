@@ -22,7 +22,9 @@ This is a **preview**. For content-addressed, exclusive-creation disk
 artifacts, add: \`--write --output-dir artifacts/paired_runs\`.
 Both preview and write modes report SHA-256 of identical canonical JSON
 bytes (including the trailing newline). JSON documents with duplicate keys
-are refused to avoid silently changed provenance. A repeat run with identical
+are refused to avoid silently changed provenance. Each individual output is exclusively created; the group of four writes
+is **not** an atomic transaction. If a later write fails, earlier immutable
+artifacts may remain and can be reused on retry. A repeat run with identical
 inputs is byte-stable, and a conflicting
 preexisting output at the same digest path is refused.
 
@@ -74,7 +76,7 @@ WORM storage, a signed certificate or proof of original historical fairness.
 Source byte rights approval, real cutoff research, true labels, paired
 scoring, and faculty review remain separate future tasks.
 
-**Testing phase:** 13 synthetic and adversarial unit tests are authored
+**Testing phase:** 16 synthetic and adversarial unit tests are authored
 for this module. Run local unit tests and full security suite before merging,
 and preserve PR drafts while GitHub Actions cannot allocate runners. The
 earlier passing CI heads do not validate new code.
