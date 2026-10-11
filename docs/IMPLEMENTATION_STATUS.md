@@ -18,14 +18,14 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | SRS ID | Implementation status | Current concrete implementation/test evidence | Missing gate / next step |
 |---|---|---|---|
 | FR-01 | Partial | `datasets/manifests/pilot.json`, `scripts/validate_research_manifests.py`, `tests/test_research_manifests.py` | Real collection/acquisition and complete source metadata |
-| FR-02 | Partial | `src/threatragraph/normalized_sources.py`, `pdf_sources.py`, associated tests | Complete STIX/OTX/CVE adapters and source-to-typed-claim conversion |
+| FR-02 | Partial | `src/threatragraph/normalized_sources.py`, `pdf_sources.py`, plus limited `ghsa_candidates.py` with synthetic tests | Complete STIX/OTX/CVE adapters and reviewed source-to-typed-claim conversion |
 | FR-03 | Partial | `scripts/audit_source_artifacts.py`, `tests/test_source_artifacts.py` | Approved real archive capture and rights evidence |
 | FR-04 | Partial | `evidence_alignment.py`, `normalized_sources.py`, `pdf_sources.py` | Unified segments, versioned canonical IDs, all historical timestamps |
 | FR-05 | Partial | Manifest validator duplicate digest/independence checks | Near-copy/syndication detection and publisher lineage |
 | FR-06 | Partial | Source manifest versions, SHA-256 audit, `freeze_case_snapshots.py` | Immutable real corpus approval and complete preprocessing config |
 | FR-07 | Partial | Candidate shortlist and rationale fields; draft registries | Human inclusion/exclusion approval workflow |
 | FR-08 | Partial | Size/format/hash validation and refusal tests | Robust per-item quarantine and continue-on-error batch ingest |
-| FR-09 | **Missing** | Parsing/validation exists, **not a complete CTI candidate extractor** | Structured STIX and rule-based text typed candidate extraction + gold quality |
+| FR-09 | **Partial / synthetic-tested subset** | New `src/threatragraph/ghsa_candidates.py` + offline CLI extract explicit schema-1.4 CVE-to-Go-package `AFFECTS` review candidates with two exact structured field hashes; no ledger insertion | General CTI/STIX/free-text extraction, multi-field ledger proof, independent review and measured quality |
 | FR-10 | Partial | `normalized_sources.py`, `test_normalized_sources.py` | Actual Falco rule entity/field extraction and relationship mapping |
 | FR-11 | Present/tested synthetic (subset) | `evidence_graph.py` + `evidence_alignment.py`, `test_evidence_alignment.py` | Audited extraction origin across complete real pipeline |
 | FR-12 | Present/tested synthetic (limited ontology) | `evidence_graph.py`, `test_evidence_graph.py` | Full type coverage, schema evolution/migrations |
