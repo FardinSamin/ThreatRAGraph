@@ -39,6 +39,7 @@
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five container vulnerability prospects plus a new G1-v2-compatible **campaign** method screen; no approved cases.
 - [P1b SCARLETEEL campaign screen](docs/research/P1B_SCARLETEEL_CAMPAIGN_SCREEN.md) — source-grounded, candidate-only Kubernetes/AWS campaign with tentative `USES` feature; explicitly refuses same-type peer/G1 eligibility without real evidence.
 - [P1b historical campaign peer follow-up](docs/research/P1B_SCARLETEEL_CAMPAIGN_PEERS.md) — separately names the Chimaera and Kiss-a-dog campaigns as exact XMRig-feature *unverified* peers, clarifying why G1 still requires two independent groups **within each candidate peer’s evidence path**.
+- [P1b original Chimaera URL in 2021/2022 pinned bibliographies](docs/research/P1B_CHIMAERA_HISTORICAL_BIBLIOGRAPHY.md) — real SHA-bound third-party Git reference bytes replayed in CI; the original AT&T 2021 article remains **unfrozen and unapproved**.
 - [M5.2 exact-only as-of feature lineage](docs/M5_ASOF_FEATURE_LINEAGE.md) — mandatory per-claim graph/date and no-alias/no-external-taxonomy contract; **not independent evidence approval**.
 - [**M5 G1 explainable similarity v2**](docs/M5_G1_SIMILARITY.md) — synthetic-tested paired early-source parity, typed graph neighbors, independent provenance paths and provisional hypotheses; **no real empirical claim**. [Remaining M5 work](https://github.com/FardinSamin/ThreatRAGraph/issues/21).
 
