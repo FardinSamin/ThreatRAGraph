@@ -38,6 +38,7 @@ def fixtures():
 
 
 def fake_outputs(cid):
+    lineage = {"schema_version": "fixture-only", "case_id": cid}
     b0_id = "profile:" + fingerprint({"method": "B0", "case_id": cid})
     g1_id = "profile:" + fingerprint({"method": "G1", "case_id": cid})
     run_id = "run:" + fingerprint({"case": cid})
@@ -48,19 +49,24 @@ def fake_outputs(cid):
         "g1_view": {"case_id": cid},
         "b0_graph": {"case_id": cid},
         "g1_graph": {"case_id": cid},
+        "feature_lineage": lineage,
         "b0_profile": {"case_id": cid, "profile_id": b0_id},
         "g1_profile": {
             "case_id": cid, "profile_id": g1_id,
             "predictions": [], "abstention": {"abstained": True},
         },
         "paired_audit": {"case_id": cid, "audit_id": audit_id},
-        "run_lock": {"case_id": cid, "run_id": run_id, "research_ready": False},
+        "run_lock": {
+            "case_id": cid, "run_id": run_id, "research_ready": False,
+            "input_artifact_sha256": {"feature_lineage": fingerprint(lineage)},
+        },
         "pipeline_receipt": {
             "case_id": cid, "pipeline_id": pipeline_id,
             "run_id": run_id, "b0_profile_id": b0_id,
             "g1_profile_id": g1_id, "paired_audit_id": audit_id,
             "research_ready": False, "heldout_labels_opened": False,
             "empirical_evaluation": "not_performed",
+            "feature_lineage_sha256": fingerprint(lineage),
         },
     }
 
@@ -187,6 +193,25 @@ class OfflineBatchTests(unittest.TestCase):
         }), batch["batch_id"])
         self.assertEqual(set(ARTIFACT_NAMES),
                          set(batch["cases"][0]["artifacts"]))
+
+    def test_batch_contains_separately_frozen_feature_lineage(self):
+        output, _ = self.simulate()
+        self.assertIn("feature_lineage", output["case_results"][0])
+        self.assertIn("feature_lineage",
+                      output["batch_receipt"]["cases"][0]["artifacts"])
+        self.assertEqual(10, len(ARTIFACT_NAMES))
+
+    def test_changed_lineage_does_not_match_run_lock(self):
+        objs = [fake_outputs("case-a"), fake_outputs("case-b")]
+        objs[0]["feature_lineage"]["case_id"] = "different"
+        with self.assertRaisesRegex(ValueError, "Unfrozen or unbound"):
+            _receipt(objs, self.plan)
+
+    def test_receipt_cannot_hide_wrong_lineage_digest(self):
+        objs = [fake_outputs("case-a"), fake_outputs("case-b")]
+        objs[0]["pipeline_receipt"]["feature_lineage_sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "Unfrozen or unbound"):
+            _receipt(objs, self.plan)
 
     def test_tampered_case_run_id_is_refused(self):
         objects = [fake_outputs("case-a"), fake_outputs("case-b")]

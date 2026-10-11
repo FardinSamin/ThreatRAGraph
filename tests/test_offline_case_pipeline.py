@@ -212,6 +212,25 @@ class OfflineCasePipelineTests(unittest.TestCase):
         self.assertFalse(run["pipeline_receipt"]["research_ready"])
         self.assertNotIn('"source_version_id": "heldout"', json.dumps(run))
 
+    def test_lineage_is_preserved_as_tenth_frozen_artifact(self):
+        result = self.build()
+        self.assertEqual(10, len(result))
+        self.assertEqual(self.lineage, result["feature_lineage"])
+        expected = fingerprint(self.lineage)
+        self.assertEqual(
+            expected, result["run_lock"]["input_artifact_sha256"]["feature_lineage"]
+        )
+        self.assertEqual(
+            expected, result["pipeline_receipt"]["feature_lineage_sha256"]
+        )
+
+    def test_input_lineage_mutations_do_not_rewrite_frozen_result(self):
+        result = self.build()
+        before = fingerprint(result["feature_lineage"])
+        self.lineage["limitations"] = "Mutated after the frozen run"
+        self.assertEqual(before, fingerprint(result["feature_lineage"]))
+        self.assertNotEqual(self.lineage, result["feature_lineage"])
+
     def test_deterministic_case_outputs_and_run_ids(self):
         self.assertEqual(self.build(), self.build())
 

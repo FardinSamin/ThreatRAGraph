@@ -1,6 +1,6 @@
 # M6.3 — Offline source-to-paired-profile case orchestration
 
-**Status:** Engineering-only draft; 16 authored synthetic/adversarial tests NOT executed. Zero approved real cases or empirical results. Depends on draft PRs #52 and #53.
+**Status:** Engineering-only draft; 18 authored synthetic/adversarial tests NOT executed. Zero approved real cases or empirical results. Depends on draft PRs #52 and #53.
 
 ## Boundary
 
@@ -42,11 +42,12 @@ Run the following as one line from the local repository root:
     python -m scripts.run_offline_case_pipeline --sources datasets/manifests/pilot.json --cases datasets/cases/pilot.json --case-id REVIEWED-CASE-ID --claims artifacts/private/source-claims.jsonl --archive-root artifacts/source_versions/sha256 --reviews artifacts/private/semantic-reviews.jsonl --feature-lineage artifacts/private/reviewed-asof-lineage.json --metadata artifacts/private/pinned-run-metadata.json --g1-config artifacts/private/g1-config.json --dependency-lock artifacts/private/dependency-lock.txt
 
 The default produces a nonwriting preview of canonical artifact hashes,
-case ID and run ID. Add --write to persist nine individually content-
+case ID and run ID. Add --write to persist ten individually content-
 addressed, exclusive-create JSON files in artifacts/offline_case_pipeline:
 
 - b0_view and g1_view
 - b0_graph and g1_graph
+- feature_lineage (the original exact as-of claim-to-source lineage object)
 - b0_profile and g1_profile
 - paired_audit and run_lock
 - pipeline_receipt
@@ -55,6 +56,8 @@ A write retry can reuse exact same-byte artifacts; a different existing
 artifact is rejected. The output group is not atomic, so some complete
 files can remain after a later write failure. No raw article bodies or
 outcome labels are emitted in output artifacts.
+
+The pipeline receipt records the full feature_lineage_sha256, which must equal the paired run-lock input digest. The separately persisted lineage object is content-addressed and can later be recomputed against the graph. Keeping this artifact does not grant human or publisher approval.
 
 The pipeline receipt explicitly declares heldout_labels_opened=false,
 empirical_evaluation=not_performed, and research_ready=false.
@@ -67,7 +70,7 @@ self-hashes are not independently authenticated freeze timestamps.
 
 ## Deferred work
 
-- Run this branch's 16 tests and the whole repository suite locally, then
+- Run this branch's 18 tests and the whole repository suite locally, then
   cross-OS CI after the GitHub Actions allowance becomes usable again.
 - Independently approve publisher source dates and rights, typed identities,
   exact original citation semantics, reviewer authenticity and lineage.

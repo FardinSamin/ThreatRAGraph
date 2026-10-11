@@ -15,10 +15,12 @@ import re
 
 from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256
 from scripts.run_offline_case_batch import ARTIFACT_NAMES, MAX_CASES, VERSION
+from src.threatragraph.baseline_b0 import build_b0_profile
 from src.threatragraph.contracts import validate_graph_projection
 from src.threatragraph.evidence_graph import fingerprint, require_sha
 from src.threatragraph.paired_profile_audit import audit_paired_profiles
 from src.threatragraph.paired_run_freeze import RUN_LOCK_VERSION, _metadata
+from src.threatragraph.similarity_g1 import build_g1_profile
 
 REPLAY_VERSION = "unscored-batch-integrity-replay-v1"
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
@@ -52,7 +54,8 @@ PIPELINE_FIELDS = frozenset({
     "schema_version", "artifact_kind", "pipeline_version", "case_id",
     "cutoff_at", "run_id", "paired_audit_id", "b0_profile_id",
     "g1_profile_id", "input_file_sha256", "source_manifest_sha256",
-    "case_manifest_sha256", "graph_sha256", "early_source_version_ids",
+    "case_manifest_sha256", "feature_lineage_sha256",
+    "graph_sha256", "early_source_version_ids",
     "raw_claim_records", "semantic_review_records",
     "source_archive_bytes_checked_by_projection",
     "historical_publication_dates_independently_authenticated",
@@ -123,12 +126,95 @@ def _self_sealed(obj, prefix, key, kind):
         raise ValueError("Tampered or malformed " + kind + " identity")
 
 
+def _check_support_path(records, edge_index, groups, *,
+                        expected_subject, expected_relation):
+    """Bind each declared G1 evidence citation to exact stored sourced edges."""
+    if not isinstance(records, list) or not records:
+        raise ValueError("Empty or malformed G1 historical support path")
+    for support in records:
+        if not isinstance(support, dict) or set(support) != {
+                "claim_id", "source_version_id", "independence_group",
+                "evidence_sha256", "evidence_locator"}:
+            raise ValueError("Unexpected G1 historical support fields")
+        edge = edge_index.get(support["claim_id"])
+        if edge is None or (
+                edge["subject_id"] != expected_subject
+                or (edge["predicate"], edge["object_id"]) != expected_relation
+                or edge["assertion_kind"] != "report_assertion"
+                or edge["polarity"] != "positive"
+                or edge["evidence_status"] != "aligned"
+                or edge["semantic_review_status"] != "supported_by_excerpt"):
+            raise ValueError("G1 support not backed by an eligible graph claim")
+        expected = {
+            "claim_id": edge["claim_id"],
+            "source_version_id": edge["source_version_id"],
+            "independence_group": groups[edge["source_version_id"]],
+            "evidence_sha256": edge["evidence_sha256"],
+            "evidence_locator": edge["evidence_locator"],
+        }
+        if support != expected:
+            raise ValueError("G1 support citation differs from exact graph evidence")
+
+
+def _check_g1_support(g1, b0v, g1v, b0g, g1g):
+    """Verify reported support paths; does not recompute G1 ranking."""
+    target = b0v["target_entity_id"]
+    early_versions = {source["source_version_id"] for source in b0v["sources"]}
+    all_groups = {s["source_version_id"]: s["independence_group"]
+                  for s in g1v["sources"]}
+    early_claims = {edge["claim_id"]: edge for edge in b0g["edges"]}
+    historical_claims = {
+        edge["claim_id"]: edge for edge in g1g["edges"]
+        if edge["source_version_id"] not in early_versions
+    }
+    possible_groups = {
+        all_groups[edge["source_version_id"]]
+        for edge in historical_claims.values()
+    }
+    for proposal in g1["predictions"]:
+        peer = proposal.get("analog_peer_id")
+        if (type(peer) is not str or peer == target
+                or peer.split(":", 1)[0] != target.split(":", 1)[0]):
+            raise ValueError("G1 analogy peer has unsupported identity")
+        relation = (proposal["predicate"], proposal["object_id"])
+        _check_support_path(
+            proposal["proposed_relation_historical_support"],
+            historical_claims, all_groups,
+            expected_subject=peer, expected_relation=relation,
+        )
+        matching = proposal.get("matching_features")
+        if not isinstance(matching, list) or not matching:
+            raise ValueError("G1 matching feature paths must be nonempty")
+        for feature in matching:
+            if not isinstance(feature, dict) or set(feature) != {
+                    "feature", "early_support", "historical_support"}:
+                raise ValueError("G1 matching feature structure differs")
+            detail = feature["feature"]
+            if not isinstance(detail, dict) or set(detail) != {
+                    "predicate", "object_id"}:
+                raise ValueError("G1 matching feature relation differs")
+            relation_feature = (detail["predicate"], detail["object_id"])
+            _check_support_path(
+                feature["early_support"], early_claims, all_groups,
+                expected_subject=target, expected_relation=relation_feature,
+            )
+            _check_support_path(
+                feature["historical_support"], historical_claims, all_groups,
+                expected_subject=peer, expected_relation=relation_feature,
+            )
+        declared_groups = proposal.get("historical_independence_groups")
+        if (not isinstance(declared_groups, list)
+                or not set(declared_groups) <= possible_groups):
+            raise ValueError("G1 declares unsupported historical publisher group")
+
+
 def _check_case(item, artifacts, batch):
     case_id = item["case_id"]
     b0v, g1v = artifacts["b0_view"], artifacts["g1_view"]
     b0g, g1g = artifacts["b0_graph"], artifacts["g1_graph"]
     b0, g1 = artifacts["b0_profile"], artifacts["g1_profile"]
     audit, lock = artifacts["paired_audit"], artifacts["run_lock"]
+    lineage = artifacts["feature_lineage"]
     pipe = artifacts["pipeline_receipt"]
 
     for artifact in (b0v, g1v, b0g, g1g, b0, g1, audit, lock, pipe):
@@ -225,6 +311,23 @@ def _check_case(item, artifacts, batch):
         if name != "feature_lineage" and hashes[name] != fingerprint(
                 artifacts[name]):
             raise ValueError("Run-lock source/graph digest mismatch")
+    if b0 != build_b0_profile(
+            b0v, b0g, development_only=lock["development_only"]):
+        raise ValueError("Saved B0 facts differ from deterministic source graph")
+    if hashes["feature_lineage"] != fingerprint(lineage):
+        raise ValueError("Frozen feature lineage differs from run-lock digest")
+    # Check exact citations first, so forged witnesses receive a specific
+    # refusal even when a malicious operator also rehashes the full profile.
+    _check_g1_support(g1, b0v, g1v, b0g, g1g)
+    # Recompute the FULL G1 profile from frozen graph/view/lineage records
+    # and the stored deterministic config. No reference labels are accessed.
+    expected_g1 = build_g1_profile(
+        b0v, b0g, g1v, g1g, feature_lineage=lineage,
+        development_only=lock["development_only"],
+        **lock["g1_algorithm_config"],
+    )
+    if g1 != expected_g1:
+        raise ValueError("Saved G1 profile differs from deterministic recomputation")
     if g1["feature_lineage_sha256"] != hashes["feature_lineage"]:
         raise ValueError("Lineage hash differs between G1 and run lock")
     lineage_report = g1.get("feature_lineage_contract")
@@ -245,7 +348,8 @@ def _check_case(item, artifacts, batch):
         raise ValueError("Unexpected pipeline input-file hashes")
     for value in file_hashes.values():
         require_sha(value, "declared pipeline input")
-    for field in ("source_manifest_sha256", "case_manifest_sha256"):
+    for field in ("source_manifest_sha256", "case_manifest_sha256",
+                  "feature_lineage_sha256"):
         require_sha(pipe[field], field)
     if (file_hashes["semantic_reviews_jsonl"] !=
             lock["declared_provenance"]["review_set_sha256"]
@@ -255,6 +359,7 @@ def _check_case(item, artifacts, batch):
             lock["declared_provenance"]["source_manifest_sha256"]
             or pipe["case_manifest_sha256"] !=
             lock["declared_provenance"]["case_manifest_sha256"]
+            or pipe["feature_lineage_sha256"] != hashes["feature_lineage"]
             or pipe["graph_sha256"] != {
                 "B0": fingerprint(b0g), "G1": fingerprint(g1g)}
             or pipe["cutoff_at"] != b0v["cutoff_at"]
@@ -348,6 +453,10 @@ def replay_batch(root, receipt_digest):
         "case_results": statuses,
         "canonical_hashes_checked": True,
         "cross_case_linkage_checked": True,
+        "b0_deterministically_recomputed": True,
+        "g1_historical_citations_checked": True,
+        "g1_ranking_recomputed": True,
+        "feature_lineage_artifact_reloaded": True,
         "raw_archive_bytes_reread": False,
         "feature_lineage_original_bytes_reread": False,
         "batch_plan_bytes_reread": False,
