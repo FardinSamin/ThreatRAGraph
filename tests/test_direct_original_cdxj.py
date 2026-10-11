@@ -104,6 +104,8 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
         # predecessor-only window cannot substitute for a second key search.
         fake = _FakeOriginalArchive()
         gzip_name = "cdx-00000.gz"
+        # Replace the default fixture data before assigning fresh offsets.
+        fake.files[gzip_name] = b""
         index_lines = []
         offset = 0
         for i in range(12):
