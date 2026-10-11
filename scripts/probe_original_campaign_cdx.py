@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
-import hashlib
 import json
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlsplit
