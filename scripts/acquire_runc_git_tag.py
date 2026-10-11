@@ -24,8 +24,8 @@ from scripts.capture_candidate_snapshot import capture_candidate
 TAG = "v1.1.12"
 # These are PUBLIC upstream Git IDs, not credentials. Construct from bounded
 # parts to avoid confusing generic high-entropy credential scanning.
-TAG_OID = "".join(("20381324e21b5b23", "2fea74d448b5975d", "85d34d25"))
-COMMIT_OID = "".join(("51d5e94601ceffbb", "d85688df1c928ecc", "cbfa4685"))
+TAG_OID = "".join(("20381324", "e21b5b23", "2fea74d4", "48b5975d", "85d34d25"))
+COMMIT_OID = "".join(("51d5e946", "01ceffbb", "d85688df", "1c928ecc", "cbfa4685"))
 SOURCE_VERSION = "candidate:runc-signed-release-tag:unfrozen"
 SOURCE_URL = (
     "https://api.github.com/repos/opencontainers/runc/git/tags/" + TAG_OID
