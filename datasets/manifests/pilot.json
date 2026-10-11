@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
   "dataset_version": "0.1.0-candidate",
-  "description": "20 candidate-only public sources, including one separately pinned original runc signed Git tag (2026-10-10 evidence-acquisition development). Exact tag object bytes are retrievable in an isolated Git object store; original source rights, independently verified first-public chronology and researcher approval remain PENDING. Zero approved research case/source versions.",
+  "description": "21 candidate source versions, including the pinned runc signed tag and original GHSA JSON linked to an independently retained public push event. Measured provenance receipts are separate from source rights, historical eligibility and investigator approval. Zero approved source versions or selected cases.",
   "sources": [
     {
       "source_id": "src:crio-crowdstrike",
@@ -343,6 +343,23 @@
       "sha256": null,
       "redistribution": "unknown",
       "selection_rationale": "Immutable content-addressed primary publisher advisory tag containing original CVE disclosure text, distinct from mutable release HTML; same publisher and not an independent extra early source"
+    },
+    {
+      "source_id": "src:runc-ghsa-original",
+      "source_version_id": "candidate:runc-ghsa-original:20240131",
+      "source_kind": "cve_advisory",
+      "title": "Original January 31 GHSA-xr7r-f8xq-vfvv JSON at independently archived public commit",
+      "publisher": "GitHub Advisory Database / opencontainers runc maintainers",
+      "url": "https://github.com/github/advisory-database/blob/02a8b9a4f9d305f0e028ef58f0dcf28f55bf10ae/advisories/github-reviewed/2024/01/GHSA-xr7r-f8xq-vfvv/GHSA-xr7r-f8xq-vfvv.json",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "Original 13,105-byte JSON is bound by Git object identities to commit 02a8b9a4f9d305f0e028ef58f0dcf28f55bf10ae. GH Archive public PushEvent 35293494004 names that exact commit at 2024-01-31T22:46:10Z. Offline replay verifies the full hourly archive, exact event line and commit/tree/blob chain. Proposed public-by time requires investigator acceptance of the archive and event timestamp, not first-ever publication or a cryptographic timestamp. See docs/research/P1A_ORIGINAL_ADVISORY_WITNESS.md and docs/research/P1A_ORIGINAL_ADVISORY_RECEIPT.md.",
+      "independence_group": "runc-maintainer-releases",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "Alternative pinned early maintainer source, not a third early report or independent corroboration. Same-commit README/LICENSE provide CC-BY-4.0 evidence for source-specific review. Measured bytes are recorded separately; study approval fields stay unset."
     }
   ]
 }

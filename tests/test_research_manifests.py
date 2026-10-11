@@ -2,9 +2,14 @@
 
 import copy
 import hashlib
+import io
+import json
+from contextlib import redirect_stdout
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 
-from scripts.validate_research_manifests import validate
+from scripts.validate_research_manifests import main, validate
 
 
 def source(version, date, group):
@@ -56,6 +61,28 @@ def study():
 
 
 class ResearchManifestTests(unittest.TestCase):
+    def test_strict_synthetic_metadata_never_claims_research_approval(self):
+        sources, cases = study()
+        sources["sources"].extend(
+            source(f"extra-{i}", "2023-01-01T00:00:00Z", f"fixture-{i}")
+            for i in range(22)
+        )
+        template = cases["cases"][0]
+        cases["cases"] = [dict(template, case_id=f"case-{i}",
+                               target_entity_id=f"malware:fixture-{i}") for i in range(4)]
+        with TemporaryDirectory() as directory:
+            paths = [Path(directory) / "sources.json", Path(directory) / "cases.json"]
+            for path, data in zip(paths, [sources, cases]):
+                path.write_text(json.dumps(data), encoding="utf-8")
+            output = io.StringIO()
+            with redirect_stdout(output):
+                code = main([*map(str, paths), "--strict"])
+        result = json.loads(output.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual("strict_metadata_valid", result["status"])
+        self.assertFalse(result["research_ready"])
+        self.assertEqual({"sources": 25, "approved_sources": 25, "cases": 4}, result["counts"])
+
     def test_draft_empty_accepted_but_not_research_ready(self):
         a, b = study()
         a["sources"] = []

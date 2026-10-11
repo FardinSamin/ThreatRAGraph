@@ -1,4 +1,4 @@
-"""M5 G1 v1: deterministic, non-probabilistic graph-analogy hypotheses.
+"""M5 G1 v2: deterministic, non-probabilistic graph-analogy hypotheses.
 
 G1 receives paired sealed B0/G1 source views and attributed graphs. It never
 loads original corpus text, reference labels, model weights, embeddings, or
@@ -12,7 +12,7 @@ from collections import Counter, defaultdict
 
 from .baseline_b0 import build_b0_profile
 from .contracts import validate_graph_projection
-from .evidence_graph import fingerprint, require_id, validate_triple
+from .evidence_graph import RELATIONS, fingerprint, require_id, validate_triple
 from .feature_lineage import validate_asof_lineage
 from .readiness import readiness_disclosure
 
@@ -240,8 +240,12 @@ def build_g1_profile(
         })
     ranked.sort(key=lambda h: (-h["ranking_score"], h["predicate"], h["object_id"], h["analog_peer_id"]))
     predictions = ranked[:top_k]
+    target_feature_predicates = sorted(
+        predicate for predicate in FEATURE_PREDICATES if peer_type in RELATIONS[predicate][0]
+    )
     reason = None if predictions else (
-        "no_reviewed_early_target_features" if not target_features
+        "unsupported_target_type_for_current_features" if not target_feature_predicates
+        else "no_reviewed_early_target_features" if not target_features
         else "no_eligible_historical_analogy_with_independent_support"
     )
     output = {
@@ -269,6 +273,8 @@ def build_g1_profile(
             "max_peers_per_feature": max_peers_per_feature,
         },
         "diagnostics": {
+            "target_type_supported": bool(target_feature_predicates),
+            "target_type_feature_predicates": target_feature_predicates,
             "reviewed_target_feature_count": len(target_features),
             "historical_background_source_count": len(bg_versions),
             "historical_peer_count": len(peer_features),
