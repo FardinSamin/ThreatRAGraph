@@ -152,10 +152,10 @@ def probe(*, targets=None, collections=None, client=None) -> dict:
                 except HTTPError as exc:
                     qstatus = "index_record_absent_http_404" if exc.code == 404 else f"index_http_error_{exc.code}"
                     count = 0
-                except (OSError, URLError, TimeoutError) as exc:
+                except (OSError, URLError, TimeoutError):
                     qstatus = "index_transport_unavailable"
                     count = 0
-                except (ValueError, TypeError) as exc:
+                except (ValueError, TypeError):
                     qstatus = "index_data_invalid_or_nonconforming"
                     count = 0
                 queries.append({
