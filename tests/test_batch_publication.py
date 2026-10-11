@@ -367,6 +367,21 @@ class BatchPublicationTests(unittest.TestCase):
             publish_batch(self.built, self.root)
         self.assertFalse(self.root.exists())
 
+    def test_legacy_windows_reparse_batch_root_refused_before_writes(self):
+        from types import SimpleNamespace
+        from src.threatragraph import batch_publication
+        from src.threatragraph.local_file_inputs import WINDOWS_REPARSE_POINT
+        self.root.mkdir()
+        marker = SimpleNamespace(st_file_attributes=WINDOWS_REPARSE_POINT)
+        with (patch.object(Path, "is_symlink", return_value=False),
+              patch.object(Path, "is_junction", new=None, create=True),
+              patch.object(Path, "lstat", return_value=marker),
+              patch.object(batch_publication, "write_immutable_view",
+                           side_effect=AssertionError("must not write"))):
+            with self.assertRaisesRegex(ValueError, "reparse"):
+                publish_batch(self.built, self.root)
+        self.assertEqual([], list(self.root.glob("*.json")))
+
     def test_extra_uncommitted_staging_file_is_not_completion(self):
         self.root.mkdir()
         (self.root / ".stage-abandoned.partial").write_bytes(b"truncated")

@@ -21,7 +21,9 @@ from src.threatragraph.evidence_graph import fingerprint, require_sha
 from src.threatragraph.paired_profile_audit import audit_paired_profiles
 from src.threatragraph.paired_run_freeze import RUN_LOCK_VERSION, _metadata
 from src.threatragraph.similarity_g1 import build_g1_profile
-from src.threatragraph.local_file_inputs import read_local_text
+from src.threatragraph.local_file_inputs import (
+    is_linked_path_component, read_local_text,
+)
 
 REPLAY_VERSION = "unscored-batch-integrity-replay-v1"
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
@@ -86,10 +88,8 @@ def _root_directory(path):
     # must not rely on an implicit symlinked directory being safe.
     node = root.absolute()
     for segment in (node, *node.parents):
-        is_junction = getattr(segment, "is_junction", None)
-        if (segment.is_symlink()
-                or (is_junction is not None and is_junction())):
-            raise ValueError("Symlinked or junction batch artifact root/ancestor")
+        if is_linked_path_component(segment):
+            raise ValueError("Symlinked or reparse batch artifact root/ancestor")
     if not node.is_dir():
         raise ValueError("Batch artifact root must be a directory")
     return node.resolve(strict=True)

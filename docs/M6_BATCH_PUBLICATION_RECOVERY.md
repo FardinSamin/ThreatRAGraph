@@ -1,6 +1,6 @@
 # M6.7 — Unscored batch publication and read-only recovery
 
-**Status:** Draft, 27 recovery tests plus 25 replay tests authored on this integration branch; NOT executed. Based on the
+**Status:** Draft, 28 recovery tests plus 26 replay tests authored on this integration branch; NOT executed. Based on the
 unmerged consolidated integration PR #61. No research case is approved, no
 gold labels are used, and no tests or real experiments have been verified.
 
@@ -76,7 +76,7 @@ who controls all stored data can still replace all self-hashes.
 ## Deferred gates
 
 - Execute `python -m unittest discover -s tests -p 'test_batch_publication.py' -v`
-  (27 synthetic/failure-injection tests authored, not run).
+  (28 synthetic/failure-injection tests authored, not run).
 - Run original `test_batch_replay.py`, `test_offline_case_batch.py`,
   `test_immutable_artifacts.py` and two-case byte-backed synthetic
   integration tests on the exact branch head.
@@ -120,6 +120,17 @@ lower-level immutable writer can support larger unrelated artifacts.
 Six additional replay tests cover leaf and parent symlinks, named pipes,
 replacing a file at descriptor open, and use of the descriptor reader instead
 of a racy pathname read. Two additional batch publication tests cover
-oversized in-memory leaves/receipts. **27 publication tests and 25 replay
+oversized in-memory leaves/receipts. **28 publication tests and 26 replay
 tests exist on this PR tip; all are authored and unexecuted.** The separate
 parent PR #58 retains its original 19 replay tests.
+
+### Legacy-Windows reparse roots (follow-up)
+
+The batch replay root check now delegates to the same shared reparse-point
+classifier as the input reader and atomic writer, including Windows file
+attributes when the Python interpreter lacks `Path.is_junction`. An exact
+batch's existing output root is refused before publishing new artifacts if
+those attributes indicate a junction or other reparse point. One new replay
+test and one new publication test simulate the legacy interpreter path;
+**both are authored, not executed**, making 26 and 28 methods respectively.
+Windows concurrent path replacement still requires live platform validation.

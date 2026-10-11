@@ -117,7 +117,7 @@ best-effort component/junction checks, not a full adversarial filesystem
 sandbox. Input reading preserves exact line-ending bytes. This helper is
 shared with the alias and integration CLIs when branches are reconciled.
 
-**24 exchange tests plus 15 shared-reader tests are authored, not executed.**
+**24 exchange tests plus 18 shared-reader tests are authored, not executed.**
 Neither module proves publisher rights, dates, original-source authenticity,
 or trustworthy independent review. File I/O behavior under hostile concurrent
 filesystem mutation requires actual Linux/Windows testing before merge.
@@ -125,7 +125,7 @@ filesystem mutation requires actual Linux/Windows testing before merge.
 ## Atomic immutable output publication — authored, not tested
 
 Shared JSON snapshot and portable CSV writers now use
-`src/threatragraph/immutable_artifacts.py`, with 16 authored
+`src/threatragraph/immutable_artifacts.py`, with 18 authored
 synthetic/failure-injection tests. POSIX opens output directory ancestors
 through no-follow directory descriptors; the Windows fallback checks
 symlinks and junctions without claiming adversarial race isolation.
@@ -134,7 +134,19 @@ exclusive hardlink; previously present content is only reused if its exact
 bytes match and it has no persistent extra hardlinks. Concurrent
 identical writes should result in one new file and safe retries.
 
-These 16 tests have **not been executed**, including on Windows; the
+These 18 tests have **not been executed**, including on Windows; the
 filesystem-specific guarantees require live cross-platform verification.
 Partial *multi-file* runs are not rolled back. No source history,
 rights, gold labels, or scientific readiness is established by this change.
+
+### Windows reparse-point and binary-file compatibility (draft)
+
+The shared input reader rejects Windows file attribute
+`FILE_ATTRIBUTE_REPARSE_POINT` (including when an older Python interpreter
+lacks `Path.is_junction`), not merely named symlinks or junctions. The
+Windows fallback opens input descriptors with `O_BINARY` for exact UTF-8
+byte and line-ending integrity. The same component check is used by the
+immutable-output fallback for ancestors and existing digest destinations.
+Three added synthetic reader tests and two writer tests are **unexecuted**:
+there are now 18 reader and 18 writer test methods. These observational
+checks DO NOT rule out malicious simultaneous Windows filesystem replacement.

@@ -182,13 +182,14 @@
         "tests/test_local_file_inputs.py",
         "tests/test_immutable_artifacts.py"
       ],
-      "min_authored_test_methods": 55,
+      "min_authored_test_methods": 60,
       "test_command": "python -m unittest discover -s tests -p 'test_portable_exchange.py' -v",
       "manual_gates": [
         "Verify CSV/JSON round-trip, duplicate keys and spreadsheet formula refusal",
         "Confirm exports contain no third-party source bodies or gold labels",
-        "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 15 shared input tests authored but not executed",
-        "Verify staged/fsynced atomic no-replace publication, interrupted write cleanup and idempotent retry on Linux/Windows before approving any M6 batch writes"
+        "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 18 shared input tests authored but not executed",
+        "Verify staged/fsynced atomic no-replace publication, interrupted write cleanup and idempotent retry on Linux/Windows before approving any M6 batch writes",
+        "Check raw reparse attributes even without Path.is_junction, plus Windows O_BINARY byte preservation and race limitations"
       ]
     },
     {
@@ -263,7 +264,7 @@
         "tests/test_batch_publication.py",
         "tests/test_batch_replay.py"
       ],
-      "min_authored_test_methods": 52,
+      "min_authored_test_methods": 54,
       "test_command": "python -m unittest discover -s tests -p 'test_batch_*.py' -v",
       "manual_gates": [
         "Execute two-case REAL synthetic B0/G1 full replay under exact branch head before trusting saved receipts",
@@ -274,7 +275,8 @@
         "Run two parallel same-batch publications and confirm only one new digest-named final receipt is created; validate no-write already-sealed retries",
         "Check corrupt pre-existing receipts and missing associated leaves block retries before any new artifact writes",
         "Reject symlinked and concurrently replaced replay leaf/parent paths with single no-follow descriptors; test named pipes and Windows junctions",
-        "Refuse replay-incompatible leaf/receipt sizes before creating an output directory"
+        "Refuse replay-incompatible leaf/receipt sizes before creating an output directory",
+        "Simulate legacy Windows reparse-point roots without Path.is_junction and require read/publication refusal before leaf writes"
       ]
     }
   ]

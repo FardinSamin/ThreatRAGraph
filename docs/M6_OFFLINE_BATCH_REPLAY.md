@@ -118,3 +118,11 @@ PR #62 extend the 19-test replay suite to **25 authored but unexecuted**
 methods, including a simulated path replacement at the moment of open.
 PR #58 itself remains unchanged until explicitly integrated. Neither
 version is scientific or historical-source authentication.
+
+### Legacy Windows filesystem verification (dependent draft PR #62)
+
+The dependent integration branch also rejects Windows reparse metadata
+without depending on the newer `Path.is_junction` method. The replay
+suite on that branch has **26 authored, unexecuted** tests (the parent PR
+#58 remains at 19), including a synthetic missing-junction-method case.
+This is best-effort local filesystem hygiene, not an OS-wide sandbox.

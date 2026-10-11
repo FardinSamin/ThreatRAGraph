@@ -332,6 +332,16 @@ class FrozenBatchReplayTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Nonfinite"):
                 _read_canonical(file)
 
+    def test_legacy_windows_reparse_root_without_junction_method_refused(self):
+        from types import SimpleNamespace
+        from src.threatragraph.local_file_inputs import WINDOWS_REPARSE_POINT
+        marker = SimpleNamespace(st_file_attributes=WINDOWS_REPARSE_POINT)
+        with (patch.object(Path, "is_symlink", return_value=False),
+              patch.object(Path, "is_junction", new=None, create=True),
+              patch.object(Path, "lstat", return_value=marker)):
+            with self.assertRaisesRegex(ValueError, "reparse"):
+                replay_batch(self.root, self.batch_sha)
+
     def test_symlinked_batch_root_refused(self):
         with tempfile.TemporaryDirectory() as folder:
             link = Path(folder) / "alias"
