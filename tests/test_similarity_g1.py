@@ -123,6 +123,23 @@ def profile(params=None, **kw):
 
 
 class G1SimilarityTests(unittest.TestCase):
+    def test_vulnerability_is_explicitly_unsupported_despite_valid_early_facts(self):
+        b0, _, g1, _ = fixtures()
+        for v in (b0, g1):
+            v["target_entity_id"] = "vulnerability:CVE-2024-21626"
+        early = edge(40, "early", b0["target_entity_id"], "AFFECTS", "container-component:runc")
+        historical = [
+            edge(41, "back-one", "vulnerability:synthetic-older", "AFFECTS", "container-component:runc"),
+            edge(42, "back-two", "vulnerability:synthetic-older", "APPLIES_TO_COMPONENT", "container-component:runc"),
+        ]
+        result = profile((b0, graph(b0, [early]), g1, graph(g1, [early, *historical])))
+        self.assertEqual(1, len(result["observed_early_facts"]))
+        self.assertEqual([], result["predictions"])
+        self.assertEqual("unsupported_target_type_for_current_features", result["abstention"]["reason"])
+        self.assertFalse(result["diagnostics"]["target_type_supported"])
+        self.assertEqual([], result["diagnostics"]["target_type_feature_predicates"])
+        self.assertFalse(result["research_ready"])
+
     def test_valid_g1_emits_separate_provisional_prediction(self):
         result = profile()
         self.assertEqual("G1", result["method"])

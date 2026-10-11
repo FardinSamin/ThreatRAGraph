@@ -1,6 +1,6 @@
 # M1 — Immutable Source Artifact Verification
 
-**Status:** Offline integrity tool available for review; **no real source archives have been collected or validated**.  
+**Status:** Offline integrity tool available; original runc tag and advisory candidate bytes have been measured, but **zero source versions are approved for research**. See the [original-advisory witness](research/P1A_ORIGINAL_ADVISORY_WITNESS.md).  
 **Tracking:** [M1 Issue #3](https://github.com/FardinSamin/ThreatRAGraph/issues/3)  
 **Related:** [Corpus and chronology protocol](M1_CORPUS_PROTOCOL.md), [SRS](SRS.md) FR-03, FR-06, DR-03–07, RC-05, [SDD](SDD.md) ``5, 7.
 
@@ -66,7 +66,7 @@ Require exact stored bytes for all approved records:
 python scripts/audit_source_artifacts.py datasets/manifests/pilot.json --require-all
 ~~~
 
-On the current **19-candidate, zero-approved** corpus, these commands cannot establish any real source validity. In particular, an exit code 0 with zero approved sources is **not** a research-readiness result. The strict data-readiness check must also pass:
+On the current **21-candidate, zero-approved** corpus, these commands do not verify approved research bytes. In particular, an exit code 0 with zero approved sources is **not** a research-readiness result. Strict metadata checks are also required and do not confer independent approval:
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json --strict

@@ -2,7 +2,7 @@
 """Offline validator for source-version and time-gated research case manifests.
 
 No network access, external libraries, CTI processing, or cloud services.
-Draft validation is intentionally different from strict pilot readiness.
+Draft and strict metadata validation do not certify research readiness.
 """
 import argparse
 from datetime import datetime, timezone
@@ -268,11 +268,14 @@ def main(argv=None):
         sources = load_json(args.sources)
         cases = load_json(args.cases)
     except (ValueError, OSError, json.JSONDecodeError) as exc:
-        print(json.dumps({"status": "read_error", "detail": str(exc)}, indent=2))
+        print(json.dumps({"status": "read_error", "detail": str(exc),
+                          "research_ready": False}, indent=2))
         return 1
     errors, warnings, counts = validate(sources, cases, strict=args.strict)
     print(json.dumps({
-        "status": "invalid" if errors else ("research_ready" if args.strict else "draft_valid"),
+        "status": "invalid" if errors else ("strict_metadata_valid" if args.strict else "draft_valid"),
+        "research_ready": False,
+        "scope": "metadata_structure_only_not_independent_research_approval",
         "strict": args.strict, "counts": counts,
         "errors": errors, "warnings": warnings,
     }, indent=2))

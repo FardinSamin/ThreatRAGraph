@@ -29,6 +29,7 @@
 - [P1a signed upstream release provenance](docs/research/P1A_RUNC_RELEASE_WITNESS.md) — replayable offline audit of runc GitHub release, annotated tag, reported PGP signature and hard historical-approval boundaries.
 - [P1a actual pinned upstream tag acquisition](docs/research/P1A_PINNED_TAG_ACQUISITION.md) — GitHub CI fetches the original signed Git object and measures byte-level SHA-256; **candidate-only, no case/source approval**.
 - [P1a release-era GnuPG signer verification](docs/research/P1A_RUNC_SIGNER_VERIFICATION.md) — authentic PGP signature verified with a historically pinned runc keyring in isolated CI; exact first-public date and reviewer approval still pending.
+- [P1a original advisory public-event witness](docs/research/P1A_ORIGINAL_ADVISORY_WITNESS.md) — original advisory bytes tied to an independently retained pre-cutoff public commit, with repeatable offline verification and pending investigator approval.
 - [Private candidate byte capture](docs/research/P1A_LEAKY_VESSELS_CASE.md#safe-manual-source-byte-preservation-private-not-approval) — bounded offline original-byte archiving and unapproved receipts; not proof of historical content or rights.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M5.2 exact-only as-of feature lineage](docs/M5_ASOF_FEATURE_LINEAGE.md) — mandatory per-claim graph/date and no-alias/no-external-taxonomy contract; **not independent evidence approval**.
@@ -38,7 +39,7 @@
 
 **Next PR:** [P0 CI/contract/readiness hardening — Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23). **In parallel:** [P1a verify one real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), and extend the [synthetic-tested M5 G1 v2 similarity ranker](docs/M5_G1_SIMILARITY.md) without claiming historically approved or empirical effectiveness. [Details and exit gates](docs/BUILD_PLAN.md).
 
-No completed real-data GraphRAG comparison exists yet. The 20 source entries remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
+No completed real-data GraphRAG comparison exists yet. The 21 source entries remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
 
 ## Research plan
 
@@ -61,7 +62,7 @@ The historical `scripts/preflight_import.py` utility is optional for future exte
 
 ## Research manifests (draft only)
 
-The M1 **source registry now contains 20 preliminary source candidate entries**, but **zero approved/frozen source versions and zero selected evaluation cases**. These links require historical version, timestamp, rights and hash review before scientific use. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
+The M1 **source registry now contains 21 preliminary source candidate entries**, but **zero approved/frozen source versions and zero selected evaluation cases**. These links require historical version, timestamp, rights and hash review before scientific use. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json

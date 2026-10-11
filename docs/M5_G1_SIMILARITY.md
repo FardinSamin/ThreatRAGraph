@@ -47,7 +47,7 @@ The five inputs must originate from an audited M1/M2/M3 preparation pipeline; a 
 
 ### Non-goals / remaining research gates
 
-- **No genuine historical pilot yet:** 19 source URLs are candidates, **0 approved real versions and 0 case manifests**; there are **0 real B0/G1 results**.
+- **No genuine historical pilot yet:** 21 source versions are candidates, **0 approved real versions and 0 case manifests**; there are **0 real B0/G1 results**.
 - **M5.2 now checks declared exact-only per-claim source/date lineage**, refusing aliases and external taxonomy/rule enrichment. Actual historic identifier and original-byte authentication, real taxonomy versions and cache replay remain **unverified**. See [M5.2 contract](M5_ASOF_FEATURE_LINEAGE.md).
 - **No independent gold-label store, outcome scorer, feature ablation, calibrated ranking probabilities, historical publication proof or human reviewer authentication.** All remain pending in P1–P5.
 - **No synonym merging, graph embeddings, LLM inference, NetworkX requirement, cloud backend or operational detection product.**
@@ -56,3 +56,7 @@ The five inputs must originate from an audited M1/M2/M3 preparation pipeline; a 
 ## Validation
 
 `python -m unittest discover -s tests -v` plus CI Windows/Ubuntu, Ruff lint, secret scan and runtime vulnerability audit. Synthetic adversarial cases include source/cutoff leakage, mirrored reporting groups, target-specific background, Falco rule false inference, absent reviews, contradictions in early evidence **and** historical source claims, generic/popular features, unknown aliases, score determinism and CLI refusal. A passing suite certifies only these implementation properties, not a live cybersecurity threat profile.
+
+## Unsupported target types
+
+G1 derives supported subject types from the feature predicates and ontology. A vulnerability target cannot supply USES or HAS_BEHAVIOR features. Valid early AFFECTS facts remain in B0, but G1 reports `unsupported_target_type_for_current_features`, `target_type_supported: false`, and an empty `target_type_feature_predicates` list. This is a method-scope limitation, not a measured null result. Supported types lacking reviewed evidence still report `no_reviewed_early_target_features`. See the [case scope disposition](research/P1A_ORIGINAL_ADVISORY_WITNESS.md#case-scope-disposition).

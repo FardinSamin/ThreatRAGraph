@@ -28,7 +28,7 @@ class CaseScreeningTests(unittest.TestCase):
         self.assertFalse(result["research_ready"])
         self.assertEqual(0, result["approved_case_count"])
         self.assertEqual(0, result["approved_source_count"])
-        self.assertEqual(8, result["candidate_records_reviewed"])
+        self.assertEqual(9, result["candidate_records_reviewed"])
         self.assertEqual(2, result["role_counts"]["early"])
         self.assertEqual(1, result["role_counts"]["background"])
         self.assertEqual(1, result["role_counts"]["later"])

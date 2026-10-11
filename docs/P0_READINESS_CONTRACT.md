@@ -10,6 +10,10 @@ Before P0, a Python runner returned `research_ready: true` whenever **strict str
 
 The difference matters: the project has **no approved historical corpus or real study cases**, so no automated combination of current manifest counts, hashes and review JSON may certify a genuine research experiment.
 
+## Manifest CLI disclosure
+
+Strict metadata success now reports `status: strict_metadata_valid` instead of `research_ready`. All CLI results include `research_ready: false`. Draft/invalid statuses and exit codes are unchanged. A synthetic 25-source, four-case regression demonstrates strict success without research approval. Consumers matching the old success string must use the new status or unchanged zero exit code for metadata validity only.
+
 ## Contract, v1
 
 A successful `scripts.project_case_graph.run()` and `baseline_b0.build_b0_profile()` now return:
