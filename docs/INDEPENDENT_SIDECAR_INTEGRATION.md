@@ -18,7 +18,9 @@ study scoring. This is not a merge to main or independent empirical result.
   is structurally supported.
 - New sidecar reconciliation module: compares the exact saved B0/G1
   source views and reviewed graph objects with their separately prepared
-  portable bundles, checks B0/G1 early-source parity, and optionally checks
+  portable bundles, checks B0/G1 early-source parity, supported and byte-aligned reviewed
+  source claims, independent historical background publisher groups, and
+  excludes background target-specific claims. It optionally checks
   a candidate alias history tied exactly to the B0 view. Results contain
   only digests, candidate counts and explicit caveats, never raw articles.
 
@@ -55,8 +57,8 @@ entity. Neither becomes a pipeline input or feature enrichment.
 
 ## Validation gates
 
-- 19 synthetic original-CDXJ tests, 17 exchange tests, 17 alias tests,
-  and 9 sidecar integration tests are **authored but not executed** in
+- 19 synthetic original-CDXJ tests, 21 exchange tests, 18 alias tests,
+  and 14 sidecar integration tests are **authored but not executed** in
   this branch. Those counts are inventories, not pass rates.
 - `python -m scripts.preflight_validation_plan --scope all` is a
   static check only; do not claim passing tests. Real unit/CLI tests,
@@ -71,3 +73,19 @@ entity. Neither becomes a pipeline input or feature enrichment.
 All outputs and the status ledger remain candidate-only and
 `research_ready=false`. Parent branches #51/#54/#55 are not rewritten
 or force-pushed.
+
+## Static integration-review hardening
+
+This integration draft also incorporates narrowly scoped upstream fixes:
+PR #54 now rejects invisible Unicode spreadsheet-formula prefixes and
+embedded control characters in exported CSV fields, and verifies canonical
+CSV bytes in addition to parsed claim rows (21 authored, unexecuted tests).
+PR #55 now reports contradictory supported/rejected identity evidence as
+**conflicting_evidence_requires_adjudication**, not a single uncontested
+candidate (18 authored, unexecuted tests). The sidecar reconciler refuses
+unaligned, unsupported or background-contaminated source evidence and counts
+competing/rebutted alias mappings without converting them into features.
+Its 14 authored synthetic tests are unexecuted.
+
+No historical source rights, dates, semantic truth or reviewer identities
+were independently authenticated by these contract fixes.

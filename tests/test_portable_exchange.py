@@ -166,6 +166,22 @@ class PortableGraphExchangeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unsafe"):
             export_claims_csv(candidate)
 
+    def test_invisible_unicode_prefix_cannot_hide_spreadsheet_formula(self):
+        for invisible in ("\ufeff", "\u200b", "\u2060", "\u200f"):
+            with self.subTest(prefix=repr(invisible)):
+                view, graph = fixture()
+                graph["edges"][0]["extractor_version"] = invisible + "=1+1"
+                candidate = create_bundle(view, graph, reviewed=True)
+                with self.assertRaisesRegex(ValueError, "Unsafe"):
+                    export_claims_csv(candidate)
+
+    def test_csv_evidence_cell_cannot_embed_control_line_breaks(self):
+        view, graph = fixture()
+        graph["edges"][0]["extractor_version"] = "fixture-v1\r=1+1"
+        candidate = create_bundle(view, graph, reviewed=True)
+        with self.assertRaisesRegex(ValueError, "Unsafe"):
+            export_claims_csv(candidate)
+
     def test_empty_graph_has_only_csv_header(self):
         value = bundle(edge_count=0)
         content = export_claims_csv(value)
@@ -179,6 +195,20 @@ class PortableGraphExchangeTests(unittest.TestCase):
         content = content.replace(first, first + "," + first, 1)
         with self.assertRaisesRegex(ValueError, "Duplicate JSON"):
             parse_bundle_json(content)
+
+    def test_canonical_csv_rejects_ignored_blank_physical_rows(self):
+        original = bundle()
+        content = export_claims_csv(original) + "\n"
+        with self.assertRaisesRegex(ValueError, "canonical v1 export"):
+            verify_claims_csv(content, original)
+
+    def test_canonical_csv_rejects_equivalent_unquoted_row_format(self):
+        original = bundle()
+        content = export_claims_csv(original)
+        # Same CSV semantics, but first header column is not canonically quoted.
+        changed = content.replace('"claim_id"', "claim_id", 1)
+        with self.assertRaisesRegex(ValueError, "canonical v1 export"):
+            verify_claims_csv(changed, original)
 
     def test_extra_csv_column_refused(self):
         value = bundle()

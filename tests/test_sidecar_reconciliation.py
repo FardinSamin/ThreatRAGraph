@@ -167,6 +167,59 @@ class SidecarReconciliationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Portable B0 evidence sidecar drift"):
             reconcile_sidecars(*values[:6])
 
+    def test_unaligned_graph_cannot_pass_export_sidecar_audit(self):
+        values = list(fixture())
+        graph = copy.deepcopy(values[1])
+        graph["edges"][0]["evidence_status"] = "unverified"
+        values[1] = graph
+        values[4] = create_bundle(values[0], graph, reviewed=True)
+        with self.assertRaisesRegex(ValueError, "Unaligned or unsupported"):
+            reconcile_sidecars(*values[:6])
+
+    def test_unreviewed_semantic_evidence_cannot_pass_reconciliation(self):
+        values = list(fixture())
+        graph = copy.deepcopy(values[3])
+        graph["edges"][1]["semantic_review_status"] = "unreviewed"
+        values[3] = graph
+        values[5] = create_bundle(values[2], graph, reviewed=True)
+        with self.assertRaisesRegex(ValueError, "Unaligned or unsupported"):
+            reconcile_sidecars(*values[:6])
+
+    def test_background_cannot_share_early_publisher_group(self):
+        values = list(fixture())
+        view = copy.deepcopy(values[2])
+        view["sources"][1]["independence_group"] = "early-publisher"
+        graph = copy.deepcopy(values[3])
+        graph["source_view_sha256"] = fingerprint(view)
+        values[2], values[3] = view, graph
+        values[5] = create_bundle(view, graph, reviewed=True)
+        with self.assertRaisesRegex(ValueError, "shares an early publisher"):
+            reconcile_sidecars(*values[:6])
+
+    def test_background_target_specific_evidence_is_refused(self):
+        values = list(fixture())
+        graph = copy.deepcopy(values[3])
+        graph["edges"][1]["subject_id"] = "malware:target"
+        graph["nodes"] = sorted({
+            field for e in graph["edges"]
+            for field in (e["subject_id"], e["object_id"])
+        })
+        values[3] = graph
+        values[5] = create_bundle(values[2], graph, reviewed=True)
+        with self.assertRaisesRegex(ValueError, "Target-specific"):
+            reconcile_sidecars(*values[:6])
+
+    def test_contradictory_alias_evidence_is_reported_as_conflict(self):
+        values = list(fixture())
+        original = copy.deepcopy(values[6]["entries"][0])
+        rebuttal = dict(original, evidence_sha256="6" * 64,
+                        decision="candidate_rejected")
+        values[6] = create_history(values[0], [original, rebuttal])
+        result = reconcile_sidecars(*values[:6], alias_history=values[6])
+        self.assertEqual(1, result["alias_names_inspected"])
+        self.assertEqual(1, result["ambiguous_alias_names"])
+        self.assertFalse(result["automatic_alias_rewrites"])
+
     def test_cli_read_only_candidate_report(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

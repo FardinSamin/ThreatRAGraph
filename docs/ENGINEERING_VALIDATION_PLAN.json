@@ -178,7 +178,7 @@
       "test_paths": [
         "tests/test_portable_exchange.py"
       ],
-      "min_authored_test_methods": 17,
+      "min_authored_test_methods": 21,
       "test_command": "python -m unittest discover -s tests -p 'test_portable_exchange.py' -v",
       "manual_gates": [
         "Verify CSV/JSON round-trip, duplicate keys and spreadsheet formula refusal",
@@ -199,7 +199,7 @@
       "test_paths": [
         "tests/test_alias_history.py"
       ],
-      "min_authored_test_methods": 17,
+      "min_authored_test_methods": 18,
       "test_command": "python -m unittest discover -s tests -p 'test_alias_history.py' -v",
       "manual_gates": [
         "Audit real as-of source chronology and typed alias ambiguities",
@@ -225,7 +225,7 @@
       "test_paths": [
         "tests/test_sidecar_reconciliation.py"
       ],
-      "min_authored_test_methods": 9,
+      "min_authored_test_methods": 14,
       "test_command": "python -m unittest discover -s tests -p 'test_sidecar_reconciliation.py' -v",
       "manual_gates": [
         "Verify original source discovery remains unapproved and no costly workflow jobs are triggered",

@@ -122,6 +122,7 @@ def inspect_alias(view, history, typed_id):
         if item["alias_id"] == typed_id
         and item["decision"] != "candidate_supported"
     })
+    conflicting = bool(set(candidates) & set(disputed))
     result = {
         "schema_version": "1.0",
         "artifact_kind": "unapproved_asof_alias_inspection",
@@ -133,6 +134,7 @@ def inspect_alias(view, history, typed_id):
         "disputed_or_uncertain_ids": disputed,
         "status": (
             "no_candidate" if not candidates else
+            "conflicting_evidence_requires_adjudication" if conflicting else
             "ambiguous_candidates_require_adjudication" if len(candidates) > 1
             else "single_candidate_still_unapproved"
         ),

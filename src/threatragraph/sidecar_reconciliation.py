@@ -6,7 +6,7 @@ This cannot authenticate historical sources, labels or reviewer identity.
 """
 from __future__ import annotations
 
-from .alias_history import inspect_alias, validate_history
+from .alias_history import validate_history
 from .contracts import validate_graph_projection
 from .evidence_graph import fingerprint
 from .portable_exchange import verify_bundle
@@ -32,6 +32,27 @@ def reconcile_sidecars(b0_view, b0_graph, g1_view, g1_graph,
                 if s["role"] == "early"}
     if b0_early != g1_early:
         raise ValueError("G1 early sources differ from B0")
+    backgrounds = [entry for entry in g1_view["sources"]
+                   if entry["role"] == "background"]
+    early_groups = {entry["independence_group"] for entry in b0_early.values()}
+    if any(entry["independence_group"] in early_groups for entry in backgrounds):
+        raise ValueError("Historical background shares an early publisher group")
+    background_ids = {entry["source_version_id"] for entry in backgrounds}
+    if any(
+        edge["source_version_id"] in background_ids
+        and b0_view["target_entity_id"] in (edge["subject_id"], edge["object_id"])
+        for edge in g1_graph["edges"]
+    ):
+        raise ValueError("Target-specific graph evidence contaminated background")
+    # Unlike the metadata-only export, a *profile-sidecar reconciliation*
+    # requires actual aligned excerpts and explicit supported semantic status
+    # for every edge it claims to reconcile.
+    if any(
+        edge["evidence_status"] != "aligned"
+        or edge["semantic_review_status"] != "supported_by_excerpt"
+        for graph in (b0_graph, g1_graph) for edge in graph["edges"]
+    ):
+        raise ValueError("Unaligned or unsupported evidence cannot pass sidecar audit")
     early_claims = {e["claim_id"]: e for e in b0_graph["edges"]}
     g1_early_claims = {e["claim_id"]: e for e in g1_graph["edges"]
                        if e["source_version_id"] in b0_early}
@@ -59,9 +80,19 @@ def reconcile_sidecars(b0_view, b0_graph, g1_view, g1_graph,
         alias_digest = alias_history["history_id"]
         aliases = sorted({x["alias_id"] for x in alias_history["entries"]})
         alias_candidates = len(aliases)
+        supported = {}
+        disputed = {}
+        for entry in alias_history["entries"]:
+            target = (supported if entry["decision"] == "candidate_supported"
+                      else disputed)
+            target.setdefault(entry["alias_id"], set()).add(
+                entry["canonical_candidate_id"]
+            )
+        # Count competing supported canonical candidates *and* contradictory
+        # reviewer decisions for the exact same name/identity pair.
         alias_conflicts = sum(
-            inspect_alias(b0_view, alias_history, name)["status"]
-            == "ambiguous_candidates_require_adjudication"
+            len(supported.get(name, set())) > 1
+            or bool(supported.get(name, set()) & disputed.get(name, set()))
             for name in aliases
         )
 
