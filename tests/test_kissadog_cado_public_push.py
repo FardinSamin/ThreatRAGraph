@@ -105,8 +105,8 @@ class HistoricalKissadogPublicPushTests(unittest.TestCase):
             "2022-12-23T11:60:00Z",
             "2022-12-23T11:30:00+00:00",
         ):
-            with self.subTest(t=time), self.assertFalse(event_matches(_event(time))):
-                pass
+            with self.subTest(t=time):
+                self.assertFalse(event_matches(_event(time)))
 
     def test_no_target_event_in_full_hour_is_not_a_positive_receipt(self):
         wrong = _event()
