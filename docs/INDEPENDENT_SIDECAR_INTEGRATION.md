@@ -65,7 +65,7 @@ entity. Neither becomes a pipeline input or feature enrichment.
 ## Validation gates
 
 - 19 synthetic original-CDXJ tests, 24 exchange tests, 15 shared
-  local-file tests, 21 alias tests, and 25 sidecar integration tests are **authored but not executed** in
+  local-file tests, 16 atomic-output tests, 21 alias tests, and 25 sidecar integration tests are **authored but not executed** in
   this branch. Those counts are inventories, not pass rates.
 - `python -m scripts.preflight_validation_plan --scope all` is a
   static check only; do not claim passing tests. Real unit/CLI tests,
@@ -122,3 +122,21 @@ These local filesystem protections do **not** authenticate original
 publisher evidence, prove reviewer independence, replace sandboxing, or
 establish that the historical case is research-ready. CI and local tests
 remain deferred; no passing outcome is implied by authored test counts.
+
+## Atomic per-file publication (new draft storage hardening)
+
+The bundle JSON, CSV exports, single-case artifacts, multi-case artifacts
+and immutable research views now route through a shared SHA-addressed byte
+publisher in `src/threatragraph/immutable_artifacts.py`. It stages and
+fsyncs complete bytes under a private name, then creates each final digest
+filename with a no-replace hardlink. The stage is removed on normal errors.
+An abrupt kill can leave private incomplete stage files, but cannot publish
+an incomplete digest-named destination through this writer.
+
+This does **not** make a multi-artifact batch transaction atomic or prove
+that a source was historical or independently reviewed. The last-written
+batch receipt marks the logical completion of per-case file publication;
+a filesystem failure may still leave reusable individual digest files.
+Cross-platform filesystem semantics, concurrent write behavior and crash
+recovery require executed validation. **16 writer failure-injection tests
+were authored but not run**. See `docs/IMMUTABLE_ARTIFACT_OUTPUT_POLICY.md`.

@@ -174,18 +174,21 @@
       "source_paths": [
         "src/threatragraph/local_file_inputs.py",
         "src/threatragraph/portable_exchange.py",
-        "scripts/exchange_graph_bundle.py"
+        "scripts/exchange_graph_bundle.py",
+        "src/threatragraph/immutable_artifacts.py"
       ],
       "test_paths": [
         "tests/test_portable_exchange.py",
-        "tests/test_local_file_inputs.py"
+        "tests/test_local_file_inputs.py",
+        "tests/test_immutable_artifacts.py"
       ],
-      "min_authored_test_methods": 39,
+      "min_authored_test_methods": 55,
       "test_command": "python -m unittest discover -s tests -p 'test_portable_exchange.py' -v",
       "manual_gates": [
         "Verify CSV/JSON round-trip, duplicate keys and spreadsheet formula refusal",
         "Confirm exports contain no third-party source bodies or gold labels",
-        "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 15 shared input tests authored but not executed"
+        "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 15 shared input tests authored but not executed",
+        "Verify staged/fsynced atomic no-replace publication, interrupted write cleanup and idempotent retry on Linux/Windows before approving any M6 batch writes"
       ]
     },
     {
