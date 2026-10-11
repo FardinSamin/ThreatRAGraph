@@ -12,7 +12,7 @@ from src.threatragraph.compound_claims import (
     CLAIM_SCHEMA, REVIEW_SCHEMA, PROJECTION_SCHEMA, CompoundSourcedClaimLedger,
 )
 from src.threatragraph.evidence_alignment import EvidenceVerifier
-from src.threatragraph.evidence_graph import EvidenceGraph
+from src.threatragraph.evidence_graph import EvidenceGraph, fingerprint
 from src.threatragraph.ghsa_candidates import extract_ghsa_candidates
 from src.threatragraph.ghsa_review_packets import build_packet
 
@@ -131,10 +131,7 @@ class CompoundClaimsTests(unittest.TestCase):
             "schema_version": REVIEW_SCHEMA,
             "claim_id": cid,
             "source_version_id": self.source_id,
-            "compound_evidence_sha256": __import__(
-                "src.threatragraph.evidence_graph",
-                fromlist=["fingerprint"],
-            ).fingerprint(self.packet["field_evidence"]),
+            "compound_evidence_sha256": fingerprint(self.packet["field_evidence"]),
             "decision": decision,
             "reviewer_id": "reviewer-01",
             "reviewed_at": "2026-10-10T22:00:00Z",
@@ -299,6 +296,56 @@ class CompoundClaimsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Conflicting"):
             self.ledger.review(change)
         self.assertEqual(first, self.ledger.project(self.view)["edges"][0]["review_id"])
+
+    def test_offline_compound_runner_uses_approved_bytes_and_sealed_views(self):
+        from scripts.project_compound_case import run
+        complete = []
+        for i, record in enumerate(self.sources):
+            complete.append({
+                **record,
+                "title": "Synthetic GHSA fixture",
+                "publisher": "Test only",
+                "url": "https://example.org/fixture/" + str(i),
+                "published_at": record["available_at"],
+                "independence_group": "synthetic-group-" + str(i),
+                "redistribution": "restricted",
+                "selection_rationale": "Synthetic test fixture, not source approval",
+            })
+        sources = {
+            "schema_version": "1.0", "dataset_id": "synthetic",
+            "dataset_version": "fixture-v1", "sources": complete,
+        }
+        cases = {
+            "schema_version": "1.0", "dataset_id": "synthetic",
+            "dataset_version": "fixture-v1",
+            "cases": [{
+                "case_id": "case:fixture",
+                "target_entity_id": "vulnerability:CVE-2024-21626",
+                "selection_rationale": "Synthetic end-to-end compound case",
+                "cutoff_at": "2024-02-01T00:00:00Z",
+                "early_source_version_ids": [self.source_id],
+                "background_source_version_ids": [],
+                "later_reference_source_version_ids": [self.later_id],
+            }],
+        }
+        claims_path = self.root / "claims.jsonl"
+        claims_path.write_text(json.dumps(self.claim) + "\n", encoding="utf-8")
+        result = run(sources, cases, "case:fixture", claims_path, self.root,
+                     development_only=True)
+        self.assertFalse(result["research_ready"])
+        self.assertFalse(result["g1_ranker_input_eligible"])
+        self.assertEqual(1, len(result["B0_compound_evidence"]["edges"]))
+        self.assertEqual(1, len(result["G1_compound_evidence"]["edges"]))
+        self.assertEqual("unreviewed", result["B0_compound_evidence"]["edges"][0][
+            "semantic_review_status"])
+        with self.assertRaises(ValueError):
+            run(sources, cases, "case:fixture", claims_path, self.root)
+        # Future label source never enters an early/inference claim file.
+        later = self._claim(self._packet(self.later_raw, self.later_id))
+        claims_path.write_text(json.dumps(later) + "\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "Disallowed historical source"):
+            run(sources, cases, "case:fixture", claims_path, self.root,
+                development_only=True)
 
     def test_incompatible_existing_tables_not_migrated(self):
         with closing(sqlite3.connect(":memory:")) as db:
