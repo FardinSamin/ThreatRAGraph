@@ -43,6 +43,7 @@ WITNESSES = {
         "git_blob_sha1": "c51a7ae9d06cc31451bf9cad5b60a102b6f92aab",
         "declared_commit_time": "2022-05-05T14:44:52Z",
         "citation_marker": "AT&T Alien Labs. (2021, September 8). TeamTNT with new campaign aka Chimaera.",
+        "conflicting_source_name_label": "ATT TeamTNT Chimaera September 2020",
     },
 }
 
@@ -69,6 +70,9 @@ def validate_witness(raw: bytes, witness: str) -> dict:
     if (content.count(ORIGINAL_URL) < 1 or
             record["citation_marker"] not in content):
         raise ValueError("Pinned bibliography lacks exact 2021 Chimaera citation")
+    conflict_label = record.get("conflicting_source_name_label")
+    if conflict_label is not None and conflict_label not in content:
+        raise ValueError("Historical bibliography year-conflict marker not present")
     # A bibliography citation can support a dated *pointer* to a report,
     # never the fact that a publisher's original report body had these bytes.
     return {
@@ -82,6 +86,7 @@ def validate_witness(raw: bytes, witness: str) -> dict:
         "byte_count": len(raw),
         "original_publisher_url": ORIGINAL_URL,
         "original_2021_citation_present": True,
+        "internal_2020_vs_2021_citation_label_conflict": conflict_label is not None,
         "declared_git_commit_time_not_independently_certified": record["declared_commit_time"],
         "verified_scope": "exact_pinned_third_party_bibliography_bytes_and_report_url",
         "original_publisher_article_bytes_verified": False,
