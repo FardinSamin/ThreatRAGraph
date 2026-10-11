@@ -354,11 +354,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m scripts.replay_original_cado_20230206 \
-            --warc-member "$RUNNER_TEMP/cado-original-20230206-member.warc.gz" \
-            --range-headers "$RUNNER_TEMP/cado-original-20230206-range-headers.txt" \
-            > "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
-          cat "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
+          if python -m scripts.replay_original_cado_20230206 \
+              --warc-member "$RUNNER_TEMP/cado-original-20230206-member.warc.gz" \
+              --range-headers "$RUNNER_TEMP/cado-original-20230206-range-headers.txt" \
+              > "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"; then
+            cat "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
+          else
+            cat "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
+            exit 2
+          fi
       - name: Retain only original-Cado WARC metadata and hashes, never report HTML
         uses: actions/upload-artifact@v4
         with:
