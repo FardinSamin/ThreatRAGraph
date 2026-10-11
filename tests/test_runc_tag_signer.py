@@ -58,7 +58,7 @@ class HistoricalSignerTests(unittest.TestCase):
     def test_signed_status_cannot_be_truncated(self):
         s = status()
         s = s[:s.index("[GNUPG:] VALIDSIG")] + "[GNUPG:] VALIDSIG 0101\n"
-        with self.assertRaisesRegex(ValueError, "VALIDSIG must contain"):
+        with self.assertRaisesRegex(ValueError, "VALIDSIG missing signing"):
             parse_verified_signer(s)
 
     def test_good_signer_and_valid_signer_must_match(self):
