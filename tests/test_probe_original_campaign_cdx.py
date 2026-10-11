@@ -3,6 +3,8 @@ from contextlib import redirect_stdout
 import io
 import json
 import unittest
+from unittest.mock import patch
+from scripts import probe_original_campaign_cdx as script
 from urllib.error import HTTPError
 
 from scripts.probe_original_campaign_cdx import (
@@ -159,10 +161,12 @@ class HistoricalOriginalReportCDXProbeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "numerous"):
             _parse_response_bytes(line * 9)
 
-    def test_cli_real_network_not_needed_for_offline_syntax_smoke(self):
-        with redirect_stdout(io.StringIO()) as o:
-            self.assertEqual(2, main(["--targets", "nonexistent"]))
-        self.assertEqual("", o.getvalue())
+    def test_cli_invokes_no_network_under_synthetic_stub(self):
+        with patch.object(script, "probe", return_value={"research_ready": False}) as fake:
+            with redirect_stdout(io.StringIO()) as output:
+                self.assertEqual(0, main(["--targets", "cado-original-2022"]))
+        self.assertEqual({"research_ready": False}, json.loads(output.getvalue()))
+        self.assertTrue(fake.called)
 
 
 if __name__ == "__main__":
