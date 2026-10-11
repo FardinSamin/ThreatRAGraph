@@ -24,11 +24,14 @@ LIMIT_COMPRESSED = 4 * 1024 * 1024
 LIMIT_UNCOMPRESSED = 8 * 1024 * 1024
 LIMIT_PAYLOAD = 4 * 1024 * 1024
 CUTOFF = "2023-03-01T00:00:00Z"
-CANDIDATES = {
-    "candidate:scarleteel-sysdig-20230228:unfrozen",
-    "candidate:chimaera-alienlabs-20210908:unfrozen",
-    "candidate:kissadog-crowdstrike-20221026:unfrozen",
+FIRST_CLAIMED_PUBLICATION_DAY = {
+    # Screening-only lower bounds derived from current publisher pages and
+    # independent contemporary references, NOT verified historical release times.
+    "candidate:scarleteel-sysdig-20230228:unfrozen": "2023-02-28T00:00:00Z",
+    "candidate:chimaera-alienlabs-20210908:unfrozen": "2021-09-08T00:00:00Z",
+    "candidate:kissadog-crowdstrike-20221026:unfrozen": "2022-10-26T00:00:00Z",
 }
+CANDIDATES = set(FIRST_CLAIMED_PUBLICATION_DAY)
 WARC_PATH = re.compile(
     r"crawl-data/CC-MAIN-[0-9]{4}-[0-9]{2}/segments/"
     r"[0-9]+\.[0-9]+/warc/CC-MAIN-[A-Za-z0-9.-]+\.warc\.gz"
@@ -184,6 +187,8 @@ def validate_capture(index: dict, gzip_member: bytes, manifest: dict,
         raise ValueError("Invalid CDX UTC calendar timestamp") from exc
     cutoff_dt = _instant(cutoff)
     _require(observed < cutoff_dt, "Archived capture not earlier than screen cutoff")
+    _require(observed >= _instant(FIRST_CLAIMED_PUBLICATION_DAY[source_version_id]),
+             "Capture precedes even the unverified first-published calendar day")
 
     decompressed = _decode_member(gzip_member)
     wh, remainder = _headers(decompressed, b"WARC/1.")
@@ -239,6 +244,9 @@ def validate_capture(index: dict, gzip_member: bytes, manifest: dict,
         "cdx_sha1_base32_verified_against_html": body_b32,
         "cdx_and_warc_declared_observation_time": observed.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "declared_observation_precedes_proposed_cutoff": True,
+        "publisher_page_calendar_lower_bound_not_independently_verified": (
+            FIRST_CLAIMED_PUBLICATION_DAY[source_version_id]
+        ),
         "declared_cutoff_utc": cutoff,
         "capture_from_genuine_commoncrawl_origin_authenticated": False,
         "archive_timestamp_independently_authenticated": False,
