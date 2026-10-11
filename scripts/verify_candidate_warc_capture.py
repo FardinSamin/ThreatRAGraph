@@ -128,7 +128,6 @@ def _decode_member(raw: bytes) -> bytes:
     d = zlib.decompressobj(wbits=16 + 15)
     try:
         payload = d.decompress(raw, LIMIT_UNCOMPRESSED + 1)
-        payload += d.flush()
     except zlib.error as exc:
         raise ValueError("Invalid compressed WARC member") from exc
     _require(d.eof and not d.unused_data and not d.unconsumed_tail
