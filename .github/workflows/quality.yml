@@ -373,53 +373,6 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-  p1f-original-crowdstrike-targeted-discovery:
-    name: P1f historical original CrowdStrike/CSA/Sysdig archive research candidates
-    runs-on: ubuntu-latest
-    timeout-minutes: 9
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-      - name: Investigate original pre-cutoff publisher archive indexes (metadata only)
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import json
-          from scripts.probe_original_campaign_cdx import probe
-          scopes = (
-              ("crowdstrike-original-2022", "CC-MAIN-2023-06"),
-              ("crowdstrike-csa-republication-2022", "CC-MAIN-2023-06"),
-              ("sysdig-early-2023", "CC-MAIN-2023-07"),
-              ("crowdstrike-original-2022", "CC-MAIN-2022-49"),
-              ("crowdstrike-original-2022", "CC-MAIN-2023-07"),
-          )
-          results = []
-          for target, collection in scopes:
-              outcome = probe(targets=[target], collections=[collection])
-              print("P1F_SCOPE", target, collection, flush=True)
-              for q in outcome["query_receipts"]:
-                  print("P1F_QUERY", json.dumps(q, sort_keys=True), flush=True)
-              for row in outcome["candidate_metadata_rows"]:
-                  print("P1F_CANDIDATE", json.dumps(row, sort_keys=True), flush=True)
-              results.append(outcome)
-          with open("/tmp/p1f-original-archive-cdx-receipts.json", "w", encoding="utf-8") as fp:
-              json.dump(results, fp, indent=2, sort_keys=True)
-          assert all(r["research_ready"] is False and r["source_version_approved"] is False
-                     and r["original_article_body_recovered"] is False for r in results)
-          PY
-      - name: Retain research-index metadata only, never claimed source article text
-        uses: actions/upload-artifact@v4
-        with:
-          name: p1f-crowdstrike-csa-sysdig-historical-index-leads
-          path: /tmp/p1f-original-archive-cdx-receipts.json
-          retention-days: 14
-          if-no-files-found: error
-
   preflight-and-tests:
     strategy:
       fail-fast: false
