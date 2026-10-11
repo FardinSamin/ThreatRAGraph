@@ -71,10 +71,27 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
         self.assertFalse(receipt["archive_article_bytes_acquired"])
         self.assertFalse(receipt["research_ready"])
         self.assertFalse(receipt["source_version_approved"])
+        self.assertTrue(receipt["known_cado_20230206_positive_control_matched"])
         for row in receipt["candidate_metadata_rows"]:
             self.assertFalse(row["research_ready"])
             self.assertFalse(row["source_version_approved"])
             self.assertTrue(row["cdxj_direct_index_original_bytes_verified"])
+
+    def test_archived_original_source_url_can_have_different_stored_surt_key(self):
+        # Older index dumps sometimes preserve www in the URLKEY even where
+        # the original JSON URL is exact. Do not drop a real first-party hit.
+        url = TARGETS["cado-original-2022"][0]
+        raw = _cdx_line(url)
+        leading = module._url_key(url).encode("utf-8")
+        alternate = b"com,cadosecurity,www)/" + leading.split(b")/", 1)[1]
+        payload = gzip.compress(raw.replace(leading, alternate, 1), mtime=0)
+        found = module._parse_cdxj(
+            payload, "cado-original-2022", url, "CC-MAIN-2023-06"
+        )
+        self.assertEqual(1, len(found))
+        self.assertEqual("2023-02-06T12:05:44Z",
+                         found[0]["cdx_timestamp_declared_utc"])
+        self.assertFalse(found[0]["research_ready"])
 
     def test_source_url_surt_normalizes_www_but_not_other_domains(self):
         self.assertEqual(
