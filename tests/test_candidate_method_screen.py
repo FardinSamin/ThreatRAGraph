@@ -35,7 +35,7 @@ class ProspectiveCaseScreenTests(unittest.TestCase):
         self.assertEqual(0, result["screened_source_versions_approved"])
         self.assertEqual(0, result["experimental_predictions"])
         self.assertTrue(result["independent_blinded_later_labeling_required"])
-        self.assertEqual(26, len(self.sources["sources"]))
+        self.assertEqual(28, len(self.sources["sources"]))
         self.assertFalse(any(s["status"] == "approved" for s in self.sources["sources"]))
 
     def test_registered_early_source_has_no_fabricated_approval_metadata(self):

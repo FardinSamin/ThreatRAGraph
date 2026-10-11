@@ -13,6 +13,7 @@ from pathlib import Path
 from src.threatragraph.evidence_graph import as_utc, validate_triple
 
 SCREEN_VERSION = "g1-v2-prospective-case-screen-v1"
+SCREEN_VERSION_V2 = "g1-v2-prospective-case-screen-v2"
 SCREEN_FIELDS = {
     "schema_version", "screen_id", "target_entity_id", "proposed_cutoff_at",
     "early_source_version_ids", "date_corroboration_source_version_ids",
@@ -26,6 +27,7 @@ FEATURE_FIELDS = {
     "subject_id", "predicate", "object_id", "source_version_id",
     "evidence_location_note", "evidence_byte_aligned", "semantic_reviewed",
 }
+SCREEN_FIELDS_V2 = SCREEN_FIELDS | {"background_peer_candidates"}
 MAX_SCREEN_BYTES = 256 * 1024
 MAX_MANIFEST_BYTES = 5 * 1024 * 1024
 
@@ -39,10 +41,14 @@ def _unique_ids(raw, name, maximum=30):
 
 
 def assess_screen(screen: dict, manifest: dict) -> dict:
-    if not isinstance(screen, dict) or set(screen) != SCREEN_FIELDS:
-        raise ValueError("Prospective case screen has unsupported or missing fields")
-    if screen["schema_version"] != SCREEN_VERSION:
+    if not isinstance(screen, dict):
+        raise ValueError("Prospective case screen must be a JSON object")
+    screen_schema = screen.get("schema_version")
+    if screen_schema not in (SCREEN_VERSION, SCREEN_VERSION_V2):
         raise ValueError("Unsupported prospective screen version")
+    fields = SCREEN_FIELDS if screen_schema == SCREEN_VERSION else SCREEN_FIELDS_V2
+    if set(screen) != fields:
+        raise ValueError("Prospective case screen has unsupported or missing fields")
     screen_id = screen["screen_id"]
     if not isinstance(screen_id, str) or not screen_id.startswith("screen:") or len(screen_id) > 150:
         raise ValueError("Bounded screen ID required")
@@ -130,8 +136,46 @@ def assess_screen(screen: dict, manifest: dict) -> dict:
                 feature["semantic_reviewed"] is not False):
             raise ValueError("Screen cannot assert reviewed/aligned extracted evidence")
 
+    peers = []
+    if screen_schema == SCREEN_VERSION_V2:
+        peers = screen["background_peer_candidates"]
+        if not isinstance(peers, list) or not 2 <= len(peers) <= 12:
+            raise ValueError("V2 requires two or more bounded named campaign peer prospects")
+        seen_peers = set()
+        supported_groups = set()
+        early_features = {
+            (f["predicate"], f["object_id"]) for f in feats
+        }
+        for peer in peers:
+            if not isinstance(peer, dict) or set(peer) != FEATURE_FIELDS:
+                raise ValueError("V2 peer candidates require exact supported evidence cue fields")
+            subject = peer["subject_id"]
+            sid = peer["source_version_id"]
+            if (not isinstance(subject, str)
+                    or not subject.startswith("campaign:")
+                    or subject == target or subject in seen_peers):
+                raise ValueError("Peers must be distinct non-target named campaigns")
+            seen_peers.add(subject)
+            if not isinstance(sid, str) or sid not in background:
+                raise ValueError("Peer evidence source must be declared background")
+            group = index[sid]["independence_group"]
+            if group in supported_groups:
+                raise ValueError("Peer source groups must be distinct candidate publishers")
+            supported_groups.add(group)
+            if peer["predicate"] != "USES":
+                raise ValueError("Peer evidence must be eligible USES relation")
+            validate_triple(subject, peer["predicate"], peer["object_id"])
+            if (peer["predicate"], peer["object_id"]) not in early_features:
+                raise ValueError("Peer must use exact same typed early target feature")
+            note = peer["evidence_location_note"]
+            if not isinstance(note, str) or not 8 <= len(note) <= 250:
+                raise ValueError("Bounded evidence location cue required for peer")
+            if (peer["evidence_byte_aligned"] is not False
+                    or peer["semantic_reviewed"] is not False):
+                raise ValueError("Peer cannot be predeclared as aligned or reviewed")
+
     return {
-        "schema_version": SCREEN_VERSION,
+        "schema_version": screen_schema,
         "screen_id": screen_id,
         "target_entity_id": target,
         "proposed_cutoff_at": screen["proposed_cutoff_at"],
@@ -139,6 +183,7 @@ def assess_screen(screen: dict, manifest: dict) -> dict:
         "g1_v2_subject_type_and_early_predicate_plausible": True,
         "provisional_early_feature_count": len(feats),
         "declared_background_publisher_groups": len(background_groups),
+        "unverified_explicit_same_type_peer_candidates": len(peers),
         "two_group_same_type_peer_claim_support_verified": False,
         "same_type_peer_verified": False,
         "original_source_bytes_and_dates_approved": False,
@@ -185,7 +230,7 @@ def _load(path, limit):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--screen", default="datasets/case_screenings/scarleteel.json")
+    parser.add_argument("--screen", default="datasets/case_screenings/scarleteel_peers_v2.json")
     parser.add_argument("--manifest", default="datasets/manifests/pilot.json")
     args = parser.parse_args(argv)
     try:

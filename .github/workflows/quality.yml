@@ -154,8 +154,10 @@ jobs:
         run: python -m scripts.project_compound_case --help
       - name: Prospective G1-v2 campaign screening CLI smoke (offline only)
         run: python -m scripts.screen_candidate_method --help
-      - name: SCARLETEEL candidate-only method screen (not research approval)
+      - name: SCARLETEEL campaign peer candidate-only screen (not research approval)
         run: python -m scripts.screen_candidate_method
+      - name: Prior SCARLETEEL v1 screening remains reproducible
+        run: python -m scripts.screen_candidate_method --screen datasets/case_screenings/scarleteel.json
       - name: G1 paired graph-similarity CLI smoke (offline only)
         run: python -m scripts.profile_g1 --help
       - name: Candidate byte capture CLI interface smoke (no downloads or writes)
