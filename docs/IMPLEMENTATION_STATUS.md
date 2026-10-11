@@ -13,6 +13,11 @@ This is a **code-and-test audit**, not a certification. Status labels:
 
 **Current reference:** the existing code through M4 and prior 149-test synthetic suite. Re-run tests on the current commit to establish an up-to-date count; test count alone cannot prove corpus validity or research effectiveness.
 
+**Draft-branch note (October 11, 2026):** PR #52 contains additional M6
+implementation and authored tests, but GitHub Actions runners are unavailable.
+These changes have **not passed an executed test suite** and remain unmerged;
+the published `main` validation status must not be inflated.
+
 ## Functional requirements FR-01–FR-36
 
 | SRS ID | Implementation status | Current concrete implementation/test evidence | Missing gate / next step |
@@ -44,8 +49,8 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | FR-25 | Partial / synthetic-tested | G1 matching feature + early/historical claim evidence paths `similarity_g1.py` | Verified original-byte provenance of real paths and indirect multi-hop historical graph routes absent |
 | FR-26 | Optional/deferred | Architecture only | Opt-in, budget-gated, citation-validated synthesis with contamination disclosure |
 | FR-27 | Partial | Draft source/case registries and validators | 4–6 frozen real historical cases and independent label partitions |
-| FR-28 | **Missing** | B0/G1 source view scaffold exists | Machine-verified paired early-input equivalence and runner |
-| FR-29 | Partial | Snapshot/source SHA-256 IDs and profiles | Immutable full experiment run/lock/model/config/annotation registry |
+| FR-28 | **Partial / draft, tests not executed** | Draft PR #52: `paired_profile_audit.py`, `paired_run_freeze.py`, offline CLI and 29 authored synthetic/adversarial tests for paired B0/G1 execution, early-output parity and source-view/lineage controls | Exact historical inputs, actual source-byte/claim parity, independently dated case, executed tests and verified end-to-end research run |
+| FR-29 | **Partial / draft, tests not executed** | Draft PR #52: deterministic `run_id` binds declared full Git SHA, dependency/source/case/review hashes, version/config, five canonical input digests, two profile IDs and paired parity receipt; optional exclusive-write hashed artifacts | Independently verified original bytes/metadata, immutable external registry/signatures, frozen annotation provenance, empirical run set and clean-room replay |
 | FR-30 | **Missing** | Evaluation design only | Held-out later label store and independent scorer |
 | FR-31 | **Missing** | No empirical run reports | Casewise and aggregate denominator-bearing metrics exports |
 | FR-32 | Partial | Source, archive, snapshot, graph and B0 CLIs | End-to-end ingest/extract/build/profile/evaluate/export orchestrator |
