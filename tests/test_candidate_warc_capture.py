@@ -125,6 +125,16 @@ class CandidateWarcIntegrityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "UTC"):
             validate_capture(index, raw, self.registry, SOURCE, cutoff="2023-02-30T00:00:00Z")
 
+    def test_capture_before_even_proposed_publication_day_refused(self):
+        for sid, timestamp in (
+            (SOURCE, "20221025170000"),
+            (CHIMAERA, "20210907150000"),
+            (SCARLETEEL, "20230227030000"),
+        ):
+            idx, raw = self._fixture(sid, timestamp)
+            with self.subTest(source=sid), self.assertRaisesRegex(ValueError, "precedes"):
+                validate_capture(idx, raw, self.registry, sid)
+
     def test_wrong_cdx_origin_or_archive_path_refused(self):
         idx, raw = self._fixture()
         for field, value in (
