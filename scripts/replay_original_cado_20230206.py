@@ -27,6 +27,17 @@ FIRST_OBSERVED_WARC = (
 FIRST_OBSERVED_OFFSET = "696857860"
 FIRST_OBSERVED_LENGTH = "22387"
 FIRST_OBSERVED_CDX_PAYLOAD_SHA1_B32 = "IIQQZYE7EHNZFM6CFTJLNT226VHY2D3P"
+# These exact original-byte digests were measured from the real Common Crawl
+# WARC replay in GitHub Actions run 38110956406 (not synthetic input).
+EXPECTED_WARC_MEMBER_SHA256 = "".join((
+    "0e2cdbd6", "b1c58f8a", "e6737c15", "70d00003",
+    "46d660d4", "c7047d89", "692d1854", "3755478d",
+))
+EXPECTED_ORIGINAL_HTML_SHA256 = "".join((
+    "b3482293", "f74524ef", "a323ffcf", "18e13819",
+    "2b2137f6", "ceda143d", "dc89e130", "2c88ef83",
+))
+EXPECTED_ORIGINAL_HTML_BYTE_COUNT = 92875
 
 
 def _require(value: bool, message: str):
@@ -174,8 +185,11 @@ def verify_original_cado(archive: str, headers: str, *, manifest: str, metadata:
     lexical_checks = verify_original_cado_html_identity(original_html)
     receipt["historical_html_visible_text_identity_tokens"] = lexical_checks
     receipt["historical_html_token_presence_is_not_semantic_review"] = True
-    _require(receipt["source_version_id"] == CADO_ID and receipt["captured_html_byte_count"] > 0,
-             "Original report body missing or source identity mismatch")
+    _require(receipt["source_version_id"] == CADO_ID
+             and receipt["captured_html_byte_count"] == EXPECTED_ORIGINAL_HTML_BYTE_COUNT
+             and receipt["captured_html_sha256"] == EXPECTED_ORIGINAL_HTML_SHA256
+             and receipt["warc_member_sha256"] == EXPECTED_WARC_MEMBER_SHA256,
+             "Complete archived original 2023 Cado webpage differs from pinned observed bytes")
     receipt["official_commoncrawl_range_http_206_verified"] = True
     receipt["original_cado_historic_url_matched"] = True
     receipt["full_original_article_identity_reviewed"] = False
