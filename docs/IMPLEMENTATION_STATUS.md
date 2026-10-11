@@ -37,7 +37,7 @@ tests remain authored but NOT EXECUTED.
 **Unmerged independent-sidecar integration PR #61:** Copies the non-workflow
 archival discovery code/tests/docs from PR #51, plus candidate-only portable
 graph exchange from #54 and historical alias diagnostics from #55, alongside
-read-only B0/G1 sidecar compatibility checks (14 authored tests, NOT executed).
+read-only B0/G1 sidecar compatibility checks (22 authored tests, NOT executed).
 No original primary source was approved, no labels were opened, no candidate
 alias entered model features, and PR #51's workflow edits were intentionally
 not included. All scientific verification gates remain outstanding.
@@ -63,7 +63,7 @@ not included. All scientific verification gates remain outstanding.
 | FR-15 | Partial | `assertion_kind` + polarity + review ledger; predicted claims prohibited | Separate prediction plane and state transition contract |
 | FR-16 | Partial | Source-allowlisted graph projection and neighborhood helper | General lineage/time/case query interface and access isolation |
 | FR-17 | Partial / synthetic-tested | `semantic_reviews.py`, candidate-only `ghsa_review_packets.py`, and new `compound_claims.py` support explicit versioned dual-field sourced-claim semantic review in opt-in separate SQLite tables | Authentic reviewers and truly approved real historical sources, independent adjudication and measured agreement |
-| FR-18 | **Partial / draft, tests not executed** | Independent PR #54 staged into draft integration PR #61: versioned content-hashed source-view/graph JSON bundle and exact CSV witness checking; 21 authored tests, plus 14 authored read-only integration checks | Real source rights and reviewer certification, executed tests and byte-stable import/export, explicit STIX-compliant mapping only if required; no automatic SQLite ingestion |
+| FR-18 | **Partial / draft, tests not executed** | Independent PR #54 staged into draft integration PR #61: versioned content-hashed source-view/graph JSON bundle and exact CSV witness checking; 21 authored tests, plus 22 authored read-only integration checks, with optional jointly verified B0/G1 canonical CSV witness hashes | Real source rights and reviewer certification, executed tests and byte-stable import/export, explicit STIX-compliant mapping only if required; no automatic SQLite ingestion |
 | FR-19 | Present/tested synthetic (only) | `freeze_case_snapshots.py` + `baseline_b0.py` | Real historical case and extract/review parity |
 | FR-20 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `tests/test_similarity_g1.py` | Equal-weight typed Jaccard overlap and evidence contributions exist; general structural families, independently authenticated as-of feature lineage and real historical corpus missing |
 | FR-21 | **Partial / synthetic-tested** | M3 source cutoffs and M5.2 exact-only claim-level feature lineage `feature_lineage.py`, blocking declared alias/taxonomy/Falco enrichment | Independent historical source-byte/reviewer authentication, actual as-of ATT&CK/Falco/alias reconstruction and derived-cache isolation absent |

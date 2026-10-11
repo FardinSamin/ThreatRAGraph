@@ -1,5 +1,6 @@
 """Synthetic-only cross-component sidecar handoff; not historical validation."""
 import copy
+import hashlib
 import json
 from contextlib import redirect_stdout
 from io import StringIO
@@ -10,7 +11,7 @@ import unittest
 from scripts.audit_independent_sidecars import main
 from src.threatragraph.alias_history import create_history
 from src.threatragraph.evidence_graph import fingerprint
-from src.threatragraph.portable_exchange import create_bundle
+from src.threatragraph.portable_exchange import create_bundle, export_claims_csv
 from src.threatragraph.sidecar_reconciliation import reconcile_sidecars
 
 
@@ -219,6 +220,105 @@ class SidecarReconciliationTests(unittest.TestCase):
         self.assertEqual(1, result["alias_names_inspected"])
         self.assertEqual(1, result["ambiguous_alias_names"])
         self.assertFalse(result["automatic_alias_rewrites"])
+
+    def test_both_exact_csv_witnesses_are_verified(self):
+        values = fixture()
+        csv_b0 = export_claims_csv(values[4])
+        csv_g1 = export_claims_csv(values[5])
+        result = reconcile_sidecars(
+            *values[:6], b0_csv=csv_b0, g1_csv=csv_g1
+        )
+        self.assertTrue(result["csv_witnesses_verified"])
+        self.assertEqual(
+            hashlib.sha256(csv_b0.encode("utf-8")).hexdigest(),
+            result["b0_csv_sha256"],
+        )
+        self.assertEqual(
+            hashlib.sha256(csv_g1.encode("utf-8")).hexdigest(),
+            result["g1_csv_sha256"],
+        )
+        self.assertFalse(result["research_ready"])
+
+    def test_no_csv_witnesses_never_claim_csv_validation(self):
+        result = reconcile_sidecars(*fixture()[:6])
+        self.assertFalse(result["csv_witnesses_verified"])
+        self.assertIsNone(result["b0_csv_sha256"])
+        self.assertIsNone(result["g1_csv_sha256"])
+
+    def test_one_sided_csv_witness_is_refused(self):
+        values = fixture()
+        csv = export_claims_csv(values[4])
+        with self.assertRaisesRegex(ValueError, "supplied together"):
+            reconcile_sidecars(*values[:6], b0_csv=csv)
+        with self.assertRaisesRegex(ValueError, "supplied together"):
+            reconcile_sidecars(*values[:6], g1_csv=csv)
+
+    def test_modified_b0_csv_claim_refused(self):
+        values = fixture()
+        csv0 = export_claims_csv(values[4]).replace("T1059", "T1105")
+        csv1 = export_claims_csv(values[5])
+        with self.assertRaisesRegex(ValueError, "differ from exact"):
+            reconcile_sidecars(*values[:6], b0_csv=csv0, g1_csv=csv1)
+
+    def test_modified_g1_csv_claim_refused(self):
+        values = fixture()
+        csv0 = export_claims_csv(values[4])
+        csv1 = export_claims_csv(values[5]).replace(
+            "historical-one", "future-version", 1
+        )
+        with self.assertRaisesRegex(ValueError, "differ from exact"):
+            reconcile_sidecars(*values[:6], b0_csv=csv0, g1_csv=csv1)
+
+    def test_noncanonical_blank_csv_line_refused(self):
+        values = fixture()
+        csv0 = export_claims_csv(values[4]) + "\n"
+        csv1 = export_claims_csv(values[5])
+        with self.assertRaisesRegex(ValueError, "canonical v1"):
+            reconcile_sidecars(*values[:6], b0_csv=csv0, g1_csv=csv1)
+
+    def test_cli_accepts_both_csv_witnesses_without_writing(self):
+        values = fixture()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fields = (
+                "b0-view", "b0-graph", "g1-view", "g1-graph",
+                "b0-bundle", "g1-bundle",
+            )
+            arguments = []
+            for field, value in zip(fields, values[:6]):
+                path = root / (field + ".json")
+                path.write_text(json.dumps(value), encoding="utf-8")
+                arguments += ["--" + field, str(path)]
+            for name, value in (
+                ("b0-csv", export_claims_csv(values[4])),
+                ("g1-csv", export_claims_csv(values[5])),
+            ):
+                path = root / (name + ".csv")
+                path.write_text(value, encoding="utf-8")
+                arguments += ["--" + name, str(path)]
+            text = StringIO()
+            with redirect_stdout(text):
+                status = main(arguments)
+            self.assertEqual(0, status)
+            result = json.loads(text.getvalue())
+            self.assertTrue(result["receipt"]["csv_witnesses_verified"])
+            self.assertFalse(result["receipt"]["research_ready"])
+
+    def test_cli_refuses_single_csv_path_before_opening_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = str(Path(directory) / "not-present.json")
+            argv = [
+                "--b0-view", missing, "--b0-graph", missing,
+                "--g1-view", missing, "--g1-graph", missing,
+                "--b0-bundle", missing, "--g1-bundle", missing,
+                "--b0-csv", missing,
+            ]
+            text = StringIO()
+            with redirect_stdout(text):
+                status = main(argv)
+            self.assertEqual(2, status)
+            self.assertEqual("ValueError",
+                             json.loads(text.getvalue())["reason_category"])
 
     def test_cli_read_only_candidate_report(self):
         with tempfile.TemporaryDirectory() as directory:

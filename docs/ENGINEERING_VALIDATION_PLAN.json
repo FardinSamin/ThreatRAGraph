@@ -225,11 +225,12 @@
       "test_paths": [
         "tests/test_sidecar_reconciliation.py"
       ],
-      "min_authored_test_methods": 14,
+      "min_authored_test_methods": 22,
       "test_command": "python -m unittest discover -s tests -p 'test_sidecar_reconciliation.py' -v",
       "manual_gates": [
         "Verify original source discovery remains unapproved and no costly workflow jobs are triggered",
         "Compare B0/G1 portable bundle byte hashes against the same frozen graph inputs",
+        "Verify that optional canonical CSV witnesses are both present or both absent and that the receipt records actual CSV verification honestly",
         "Do not feed candidate historical aliases to G1 feature lineage or evaluate labels",
         "Reconcile competing status-document changes and verify PR #60 workflow proposal separately"
       ]

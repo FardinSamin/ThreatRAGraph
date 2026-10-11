@@ -41,12 +41,19 @@ run during the funded/available validation phase.
 
 Prepare exact previously frozen early B0 and G1 view/graph JSON artifacts,
 plus two portable bundles created separately by the portable exchange
-tool. Then from the repository root:
+tool. Optionally, provide their exact canonical CSV exports **as a pair**.
+Then from the repository root:
 
-    python -m scripts.audit_independent_sidecars --b0-view PATH --b0-graph PATH --g1-view PATH --g1-graph PATH --b0-bundle PATH --g1-bundle PATH --alias-history OPTIONAL_PATH
+    python -m scripts.audit_independent_sidecars --b0-view PATH --b0-graph PATH --g1-view PATH --g1-graph PATH --b0-bundle PATH --g1-bundle PATH --b0-csv B0.csv --g1-csv G1.csv --alias-history OPTIONAL_PATH
 
 The final `--alias-history` may be omitted; when supplied it must match
-the B0 source view and chronology exactly. The command is read-only and
+the B0 source view and chronology exactly. Both `--b0-csv` and `--g1-csv`
+may be omitted for a JSON-only reconciliation, but specifying either one
+requires the other. Each witness is checked against its own sealed bundle,
+including identical rows and **exact canonical CSV bytes**. The receipt then
+contains `csv_witnesses_verified=true` and both CSV SHA-256 hashes.
+Without CSV files, it explicitly states `csv_witnesses_verified=false`
+and null CSV hashes; a JSON-only check is not a CSV verification. The command is read-only and
 fails closed on changed evidence, unexpected review modes, wrong-case alias
 records, mismatched early G1 sources or unsafe input JSON.
 
@@ -58,7 +65,7 @@ entity. Neither becomes a pipeline input or feature enrichment.
 ## Validation gates
 
 - 19 synthetic original-CDXJ tests, 21 exchange tests, 18 alias tests,
-  and 14 sidecar integration tests are **authored but not executed** in
+  and 22 sidecar integration tests are **authored but not executed** in
   this branch. Those counts are inventories, not pass rates.
 - `python -m scripts.preflight_validation_plan --scope all` is a
   static check only; do not claim passing tests. Real unit/CLI tests,
@@ -85,7 +92,17 @@ PR #55 now reports contradictory supported/rejected identity evidence as
 candidate (18 authored, unexecuted tests). The sidecar reconciler refuses
 unaligned, unsupported or background-contaminated source evidence and counts
 competing/rebutted alias mappings without converting them into features.
-Its 14 authored synthetic tests are unexecuted.
+Its 22 authored synthetic tests are unexecuted.
 
 No historical source rights, dates, semantic truth or reviewer identities
 were independently authenticated by these contract fixes.
+
+## Paired CSV witness refinement (unexecuted)
+
+The reconciler can now verify both canonical B0 and G1 CSV witnesses
+against their corresponding exact source-view/graph JSON bundles in the same
+read-only invocation. The two CSVs are optional as a **pair**, not
+independently; missing partners, altered claims, and equivalent but
+noncanonical CSV are refused. Eight additional authored tests exercise the
+paired library and CLI contracts. This is not proof of source copyright,
+publisher chronology, human semantic review, or research readiness.

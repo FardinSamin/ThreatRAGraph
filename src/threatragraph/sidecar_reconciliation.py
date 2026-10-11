@@ -9,14 +9,19 @@ from __future__ import annotations
 from .alias_history import validate_history
 from .contracts import validate_graph_projection
 from .evidence_graph import fingerprint
-from .portable_exchange import verify_bundle
+from .portable_exchange import verify_bundle, verify_claims_csv
 
 SIDE_CAR_VERSION = "offline-graph-sidecar-reconciliation-v1"
 
 
 def reconcile_sidecars(b0_view, b0_graph, g1_view, g1_graph,
-                       b0_bundle, g1_bundle, *, alias_history=None):
-    """Compare read-only sidecar metadata against exact frozen profile inputs."""
+                       b0_bundle, g1_bundle, *, alias_history=None,
+                       b0_csv=None, g1_csv=None):
+    """Compare source-bound sidecars, optionally checking both CSV witnesses."""
+    if (b0_csv is None) != (g1_csv is None):
+        raise ValueError("B0 and G1 CSV witnesses must be supplied together")
+    csv_present = b0_csv is not None
+    csv_hashes = {}
     validate_graph_projection(b0_graph, b0_view, reviewed=True)
     validate_graph_projection(g1_graph, g1_view, reviewed=True)
     if (b0_view["method"] != "B0_sparse_report_only"
@@ -70,6 +75,10 @@ def reconcile_sidecars(b0_view, b0_graph, g1_view, g1_graph,
                 or bundle["view_sha256"] != fingerprint(view)
                 or bundle["graph_sha256"] != fingerprint(graph)):
             raise ValueError("Portable " + method + " evidence sidecar drift")
+        if csv_present:
+            csv_text = b0_csv if method == "B0" else g1_csv
+            verified = verify_claims_csv(csv_text, bundle)
+            csv_hashes[method] = verified["csv_sha256"]
 
     alias_candidates = 0
     alias_conflicts = 0
@@ -108,6 +117,9 @@ def reconcile_sidecars(b0_view, b0_graph, g1_view, g1_graph,
         "g1_graph_sha256": fingerprint(g1_graph),
         "portable_b0_id": b0_bundle["bundle_id"],
         "portable_g1_id": g1_bundle["bundle_id"],
+        "csv_witnesses_verified": csv_present,
+        "b0_csv_sha256": csv_hashes.get("B0"),
+        "g1_csv_sha256": csv_hashes.get("G1"),
         "alias_history_id": alias_digest,
         "alias_names_inspected": alias_candidates,
         "ambiguous_alias_names": alias_conflicts,

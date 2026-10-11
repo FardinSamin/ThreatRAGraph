@@ -17,14 +17,20 @@ def main(argv=None):
                   "b0-bundle", "g1-bundle"):
         parser.add_argument("--" + field, required=True)
     parser.add_argument("--alias-history")
+    parser.add_argument("--b0-csv", help="Canonical B0 claim CSV witness")
+    parser.add_argument("--g1-csv", help="Canonical G1 claim CSV witness")
     args = parser.parse_args(argv)
     try:
+        if (args.b0_csv is None) != (args.g1_csv is None):
+            raise ValueError("Both B0 and G1 CSV witness files are required together")
         paths = [
             args.b0_view, args.b0_graph, args.g1_view, args.g1_graph,
             args.b0_bundle, args.g1_bundle,
         ]
         if args.alias_history:
             paths.append(args.alias_history)
+        if args.b0_csv is not None:
+            paths.extend((args.b0_csv, args.g1_csv))
         from pathlib import Path
         if len({Path(path).resolve(strict=True) for path in paths}) != len(paths):
             raise ValueError("Sidecar input files must be distinct")
@@ -35,6 +41,10 @@ def main(argv=None):
             parse_bundle_json(_read_text(args.g1_bundle)),
             alias_history=(_read_json(args.alias_history)
                            if args.alias_history else None),
+            b0_csv=(_read_text(args.b0_csv)
+                    if args.b0_csv is not None else None),
+            g1_csv=(_read_text(args.g1_csv)
+                    if args.g1_csv is not None else None),
         )
     except (OSError, ValueError, TypeError, KeyError, OverflowError,
             RecursionError, UnicodeError, json.JSONDecodeError) as exc:
