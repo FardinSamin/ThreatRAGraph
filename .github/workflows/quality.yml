@@ -302,6 +302,8 @@ jobs:
         run: |
           set -euo pipefail
           python -m scripts.probe_original_campaign_cdx \
+            --targets cado-original-2022 \
+            --collections CC-MAIN-2023-06 \
             > "$RUNNER_TEMP/p1e-historic-campaign-cdx-candidates.json"
           python - "$RUNNER_TEMP/p1e-historic-campaign-cdx-candidates.json" <<'PY'
           import json
