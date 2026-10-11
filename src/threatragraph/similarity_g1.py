@@ -127,9 +127,27 @@ def build_g1_profile(
 
     early_all = {(e["subject_id"], e["predicate"], e["object_id"])
                  for e in early_edges}
+    # Reuse B0's *conflict-resolved* feature decisions. A positive early claim
+    # contradicted by another reviewed negative must not seed G1 similarity.
+    accepted_early = {
+        (f["subject_id"], f["predicate"], f["object_id"])
+        for f in observed["facts"]
+    }
+    # A supported negative/uncertain historical report on a peer's relation
+    # defeats that peer edge as positive analogy or inferred target behavior.
+    disputed_background = {
+        (e["subject_id"], e["predicate"], e["object_id"])
+        for e in bg_edges
+        if (e["assertion_kind"] == "report_assertion"
+            and e["evidence_status"] == "aligned"
+            and e["semantic_review_status"] == "supported_by_excerpt"
+            and e["polarity"] in {"negative", "uncertain"})
+    }
     target_features = defaultdict(list)
     for e in early_edges:
-        if eligible(e) and e["subject_id"] == target and e["predicate"] in FEATURE_PREDICATES:
+        if (eligible(e) and e["subject_id"] == target
+                and e["predicate"] in FEATURE_PREDICATES
+                and (e["subject_id"], e["predicate"], e["object_id"]) in accepted_early):
             target_features[(e["predicate"], e["object_id"])].append(e)
 
     peer_type = target.split(":", 1)[0]
@@ -137,7 +155,8 @@ def build_g1_profile(
     for e in bg_edges:
         if (eligible(e) and e["subject_id"] != target
                 and e["subject_id"].split(":", 1)[0] == peer_type
-                and e["predicate"] in FEATURE_PREDICATES):
+                and e["predicate"] in FEATURE_PREDICATES
+                and (e["subject_id"], e["predicate"], e["object_id"]) not in disputed_background):
             peer_features[e["subject_id"]][(e["predicate"], e["object_id"])].append(e)
 
     counts = Counter(k for features in peer_features.values() for k in features)
