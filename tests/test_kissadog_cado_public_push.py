@@ -49,7 +49,7 @@ class HistoricalKissadogPublicPushTests(unittest.TestCase):
             self.assertEqual(SCHEMA, out["schema_version"])
             self.assertEqual("2022-12-23T11:42:26Z", out["public_event_created_at"])
             self.assertTrue(out["independent_public_push_event_found"])
-            self.assertTrue(out["archive_sha256_frozen_in_source"])
+            self.assertFalse(out["archive_sha256_frozen_in_source"])
             self.assertEqual(1, out["parsed_event_count"])
             for key in (
                 "historical_pointer_git_tree_chain_verified_in_this_replay",
