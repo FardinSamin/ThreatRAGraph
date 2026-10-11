@@ -154,6 +154,25 @@ class MitreOriginalStixWitnessTests(unittest.TestCase):
                 self.assertEqual(2, witness.main(["--original-file", str(p)]))
             self.assertEqual("original_mitre_stix_refused", json.loads(out.getvalue())["status"])
 
+    def test_real_mitre_original_source_is_metadata_only_and_never_approved(self):
+        registry = json.loads(
+            (Path(__file__).resolve().parents[1] / "datasets/manifests/pilot.json")
+            .read_text(encoding="utf-8")
+        )
+        rows = [s for s in registry["sources"]
+                if s["source_version_id"]
+                == "candidate:mitre-teamtnt-stix20-v12-1-original-20221108:unapproved"]
+        self.assertEqual(1, len(rows))
+        record = rows[0]
+        self.assertEqual("attack_stix", record["source_kind"])
+        self.assertEqual("candidate", record["status"])
+        self.assertEqual("unknown", record["date_confidence"])
+        self.assertEqual("unknown", record["redistribution"])
+        for field in ("published_at", "available_at", "sha256"):
+            self.assertIsNone(record[field])
+        self.assertEqual(29, len(registry["sources"]))
+        self.assertFalse(any(s["status"] == "approved" for s in registry["sources"]))
+
     def test_cli_symlink_refused(self):
         raw = _bytes(self.valid)
         with TemporaryDirectory() as d:
