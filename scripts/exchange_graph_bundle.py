@@ -3,10 +3,7 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
-import os
-from pathlib import Path
 import sys
 
 from scripts.freeze_case_snapshots import write_immutable_view
@@ -28,29 +25,12 @@ def _read_json(path):
 
 
 def _write_csv(content, output_dir):
-    root = Path(output_dir)
-    if root.is_symlink() or (root.exists() and not root.is_dir()):
-        raise ValueError("Unsafe exchange output directory")
-    root.mkdir(parents=True, exist_ok=True)
-    data = content.encode("utf-8")
-    digest = hashlib.sha256(data).hexdigest()
-    dest = root / (digest + ".csv")
-    if dest.is_symlink():
-        raise ValueError("Linked export output forbidden")
-    if dest.exists():
-        if not dest.is_file() or dest.read_bytes() != data:
-            raise ValueError("Existing export no longer matches exact bytes")
-        return digest, dest, False
-    try:
-        with dest.open("xb") as stream:
-            stream.write(data)
-            stream.flush()
-            os.fsync(stream.fileno())
-    except FileExistsError:
-        if dest.is_symlink() or not dest.is_file() or dest.read_bytes() != data:
-            raise ValueError("Concurrent CSV export is different")
-        return digest, dest, False
-    return digest, dest, True
+    """Atomically publish canonical CSV by digest, without rewriting bytes."""
+    from src.threatragraph.immutable_artifacts import write_immutable_bytes
+
+    if type(content) is not str:
+        raise ValueError("Canonical CSV export text required")
+    return write_immutable_bytes(content.encode("utf-8"), output_dir, ".csv")
 
 
 def main(argv=None):

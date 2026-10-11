@@ -78,9 +78,17 @@ The actual output filenames are canonical byte SHA-256 hashes with .json and
 sources, unsupported ontology triples, malformed review states, changed claim
 IDs and mismatched input digests are refused.
 
-Writes are immutable **per artifact**, not an atomic multi-file transaction:
-a failure after writing JSON may leave an intact content-addressed JSON
-artifact; a retry reuses identical bytes or refuses conflicting content.
+Writes are now atomically published **per artifact**: complete bytes are
+fsynced to a private same-directory stage file before a no-replace hardlink
+publishes the digest filename. A normal error cleans up staging data,
+an existing complete artifact is reused byte-for-byte, and mismatched,
+symlinked or persistently hardlinked digest destinations are refused.
+An abrupt kill can leave .stage-*.partial files, but those are never
+mistaken for complete hash-addressed outputs. No automatic orphan cleanup
+is performed. Multi-file transactions are still **not atomic**: a failure
+after JSON may leave an intact, independently reusable JSON artifact, and
+a retry will either reuse that exact data or refuse tampering. The batch
+receipt is written last, but is not an external study attestation.
 
 ## Next tasks
 
@@ -113,3 +121,20 @@ shared with the alias and integration CLIs when branches are reconciled.
 Neither module proves publisher rights, dates, original-source authenticity,
 or trustworthy independent review. File I/O behavior under hostile concurrent
 filesystem mutation requires actual Linux/Windows testing before merge.
+
+## Atomic immutable output publication — authored, not tested
+
+Shared JSON snapshot and portable CSV writers now use
+`src/threatragraph/immutable_artifacts.py`, with 16 authored
+synthetic/failure-injection tests. POSIX opens output directory ancestors
+through no-follow directory descriptors; the Windows fallback checks
+symlinks and junctions without claiming adversarial race isolation.
+Staged content is fsynced before publication by a same-directory
+exclusive hardlink; previously present content is only reused if its exact
+bytes match and it has no persistent extra hardlinks. Concurrent
+identical writes should result in one new file and safe retries.
+
+These 16 tests have **not been executed**, including on Windows; the
+filesystem-specific guarantees require live cross-platform verification.
+Partial *multi-file* runs are not rolled back. No source history,
+rights, gold labels, or scientific readiness is established by this change.

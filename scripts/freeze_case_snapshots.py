@@ -10,7 +10,6 @@ locally archived source bytes, with no network calls or cloud costs.
 import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 import sys
 
@@ -103,35 +102,10 @@ def all_views(source_manifest, case_manifest):
 
 
 def write_immutable_view(view, output_root):
-    """Create a content-addressed JSON file without overwriting past results."""
-    output_root = Path(output_root).expanduser()
-    if output_root.is_symlink():
-        raise ValueError("Output directory must not be a symlink")
-    if output_root.exists() and not output_root.is_dir():
-        raise ValueError("Output root exists but is not a directory")
+    """Atomically publish canonical JSON by digest, with no replacement."""
+    from src.threatragraph.immutable_artifacts import write_immutable_bytes
 
-    data = canonical_bytes(view)
-    digest = hashlib.sha256(data).hexdigest()
-    output_root.mkdir(parents=True, exist_ok=True)
-    dest = output_root / (digest + ".json")
-    if dest.is_symlink():
-        raise ValueError("Refusing symlinked snapshot output")
-    if dest.exists():
-        if not dest.is_file() or dest.read_bytes() != data:
-            raise ValueError("Existing snapshot artifact differs from expected bytes")
-        return digest, dest, False
-    # Exclusive creation ensures a file already there is never overwritten.
-    try:
-        with dest.open("xb") as stream:
-            stream.write(data)
-            stream.flush()
-            os.fsync(stream.fileno())
-    except FileExistsError:
-        if dest.is_symlink() or not dest.is_file() or dest.read_bytes() != data:
-            raise ValueError("Concurrent snapshot artifact differs")
-        return digest, dest, False
-
-    return digest, dest, True
+    return write_immutable_bytes(canonical_bytes(view), output_root, ".json")
 
 
 def main(argv=None):
