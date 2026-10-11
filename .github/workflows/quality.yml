@@ -312,7 +312,11 @@ jobs:
           print("pre_cutoff_candidate_index_records=", result["candidate_record_count"])
           for row in result["candidate_metadata_rows"]:
               print("index_candidate:", row["target"], row["candidate_status"],
-                    row["collection"], row["cdx_timestamp_declared_utc"])
+                    row["collection"], row["cdx_timestamp_declared_utc"],
+                    "url=", row["observed_url"],
+                    "filename=", row["archive_filename"],
+                    "offset=", row["archive_offset"], "length=", row["archive_length"],
+                    "digest=", row["archive_payload_digest"])
           for q in result["query_receipts"]:
               print("cdx_query:", q["target"], q["collection"], q["query_status"])
           assert result["research_ready"] is False
