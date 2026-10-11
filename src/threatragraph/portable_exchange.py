@@ -11,6 +11,7 @@ import csv
 import hashlib
 import io
 import json
+import unicodedata
 
 from .contracts import validate_graph_projection, validate_source_view
 from .evidence_graph import fingerprint, require_sha
@@ -140,11 +141,21 @@ def _claim_rows(bundle):
         row["semantic_review_status"] = (
             item["semantic_review_status"] if bundle["reviewed"] else ""
         )
-        # Quoting does not prevent some spreadsheets from executing formula
-        # cells. Refuse dangerous prefixes without modifying evidence text.
+        # CSV quoting does NOT prevent spreadsheet formula execution.
+        # A Unicode BOM or zero-width format character can precede =, +,
+        # -, @ without being removed by str.lstrip(). Reject leading
+        # format controls, formula prefixes, and embedded CR/LF/control
+        # characters rather than modifying source evidence silently.
         for cell in row.values():
-            if (type(cell) is not str
-                    or cell.lstrip().startswith(("=", "+", "-", "@"))):
+            if type(cell) is not str or any(
+                ord(character) < 32 or ord(character) == 127
+                for character in cell
+            ):
+                raise ValueError("Unsafe or non-text CSV evidence value")
+            prefix = cell.lstrip()
+            while prefix and unicodedata.category(prefix[0]) == "Cf":
+                prefix = prefix[1:].lstrip()
+            if prefix.startswith(("=", "+", "-", "@")):
                 raise ValueError("Unsafe or non-text CSV evidence value")
         records.append(row)
     return records

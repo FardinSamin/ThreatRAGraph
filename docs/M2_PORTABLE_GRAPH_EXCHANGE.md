@@ -1,6 +1,6 @@
 # M2.8 — Versioned portable graph exchange (offline candidate-only)
 
-**Status:** Draft FR-18 partial implementation; 17 authored synthetic and
+**Status:** Draft FR-18 partial implementation; 19 authored synthetic and
 adversarial tests, not executed/CI-validated. Based directly on stable
 main, independent of unfinished PR #51, #52 and #53. No approved historical
 source versions, label sets or real B0/G1 study results were created.
@@ -41,8 +41,11 @@ A successful receipt has research_ready=false and original_source_bytes_verified
 and reviewer_identities_verified both false. A self-hash detects inadvertent
 changes; it is **not a publisher signature or independent proof of approval**.
 
-CSV formula-like fields (=, +, -, @ prefixes after whitespace) are rejected
-instead of being silently rewritten into unsafe spreadsheet formulas.
+CSV formula-like fields (=, +, -, @) are rejected, including when preceded
+by invisible Unicode formatting characters (such as BOM and zero-width
+spaces). Embedded control characters and line breaks in exported fields
+are refused instead of being silently rewritten into unsafe spreadsheet
+formulas.
 Import/export operate on bounded local data: 8 MiB maximum per interchange
 file, at most 10,000 graph claims.
 

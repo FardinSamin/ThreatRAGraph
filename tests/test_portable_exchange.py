@@ -166,6 +166,22 @@ class PortableGraphExchangeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unsafe"):
             export_claims_csv(candidate)
 
+    def test_invisible_unicode_prefix_cannot_hide_spreadsheet_formula(self):
+        for invisible in ("\ufeff", "\u200b", "\u2060", "\u200f"):
+            with self.subTest(prefix=repr(invisible)):
+                view, graph = fixture()
+                graph["edges"][0]["extractor_version"] = invisible + "=1+1"
+                candidate = create_bundle(view, graph, reviewed=True)
+                with self.assertRaisesRegex(ValueError, "Unsafe"):
+                    export_claims_csv(candidate)
+
+    def test_csv_evidence_cell_cannot_embed_control_line_breaks(self):
+        view, graph = fixture()
+        graph["edges"][0]["extractor_version"] = "fixture-v1\r=1+1"
+        candidate = create_bundle(view, graph, reviewed=True)
+        with self.assertRaisesRegex(ValueError, "Unsafe"):
+            export_claims_csv(candidate)
+
     def test_empty_graph_has_only_csv_header(self):
         value = bundle(edge_count=0)
         content = export_claims_csv(value)
