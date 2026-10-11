@@ -244,6 +244,45 @@ class PortableGraphExchangeTests(unittest.TestCase):
             self.assertEqual(0, status)
             self.assertTrue(json.loads(verify_output.getvalue())["csv_verified"])
 
+    def test_export_rejects_nonfinite_nested_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "view.json"
+            q = Path(tmp) / "graph.json"
+            p.write_text('{"x":{"future":NaN}}', encoding="utf-8")
+            q.write_text("{}", encoding="utf-8")
+            output = StringIO()
+            with redirect_stdout(output):
+                status = main(["--mode", "export", "--view", str(p),
+                               "--graph", str(q)])
+            self.assertEqual(2, status)
+            self.assertEqual("ValueError",
+                             json.loads(output.getvalue())["reason_category"])
+
+    def test_export_refuses_reused_view_and_graph_inode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "input.json"
+            p.write_text("{}", encoding="utf-8")
+            out = StringIO()
+            with redirect_stdout(out):
+                result = main(["--mode", "export", "--view", str(p),
+                               "--graph", str(p)])
+            self.assertEqual(2, result)
+            self.assertFalse(json.loads(out.getvalue())["research_ready"])
+
+    def test_verify_refuses_symlinked_parent_bundle_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            original = root / "true"
+            original.mkdir()
+            (original / "bundle.json").write_text("{}", encoding="utf-8")
+            link = root / "linked"
+            try:
+                link.symlink_to(original, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("Directory symlinks unavailable")
+            with self.assertRaisesRegex(ValueError, "Symlink"):
+                _read_text(link / "bundle.json")
+
     def test_import_refuses_symlinked_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             original = Path(tmp) / "original.json"

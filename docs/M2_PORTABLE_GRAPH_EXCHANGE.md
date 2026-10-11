@@ -1,6 +1,6 @@
 # M2.8 — Versioned portable graph exchange (offline candidate-only)
 
-**Status:** Draft FR-18 partial implementation; 21 authored synthetic and
+**Status:** Draft FR-18 partial implementation; 24 authored synthetic and
 adversarial tests, not executed/CI-validated. Based directly on stable
 main, independent of unfinished PR #51, #52 and #53. No approved historical
 source versions, label sets or real B0/G1 study results were created.
@@ -97,3 +97,19 @@ artifact; a retry reuses identical bytes or refuses conflicting content.
 
 The status ledger must describe FR-18 as **partial/draft/unverified** until
 the code has been executed and independently inspected.
+
+## Shared offline local-file reader hardening (draft)
+
+The exchange CLI now uses a bounded local-file helper that rejects nested
+nonfinite/duplicate JSON fields, invalid UTF-8, symlinked input-parent
+components, unsafe nonregular files, duplicate input inodes and files that
+change during reading. On POSIX, descriptor-relative no-follow traversal
+also protects against parent-symlink replacement races; Windows provides
+best-effort component/junction checks, not a full adversarial filesystem
+sandbox. Input reading preserves exact line-ending bytes. This helper is
+shared with the alias and integration CLIs when branches are reconciled.
+
+**24 exchange tests plus 15 shared-reader tests are authored, not executed.**
+Neither module proves publisher rights, dates, original-source authenticity,
+or trustworthy independent review. File I/O behavior under hostile concurrent
+filesystem mutation requires actual Linux/Windows testing before merge.

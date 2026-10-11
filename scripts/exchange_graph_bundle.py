@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 
 from scripts.freeze_case_snapshots import write_immutable_view
+from src.threatragraph.local_file_inputs import read_local_json, read_local_text, assert_distinct_input_files
 from src.threatragraph.portable_exchange import (
     create_bundle, export_claims_csv, parse_bundle_json, verify_bundle,
     verify_claims_csv,
@@ -18,29 +19,12 @@ from src.threatragraph.portable_exchange import (
 MAX_INPUT = 8 * 1024 * 1024
 
 
-def _unique_fields(pairs):
-    obj = {}
-    for key, value in pairs:
-        if key in obj:
-            raise ValueError("Duplicate input JSON key")
-        obj[key] = value
-    return obj
-
-
 def _read_text(path):
-    file = Path(path)
-    if file.is_symlink() or not file.is_file():
-        raise ValueError("Local regular non-symlink file required")
-    if not 0 < file.stat().st_size <= MAX_INPUT:
-        raise ValueError("Empty or oversized exchange input")
-    return file.read_text(encoding="utf-8")
+    return read_local_text(path, max_bytes=MAX_INPUT)
 
 
 def _read_json(path):
-    record = json.loads(_read_text(path), object_pairs_hook=_unique_fields)
-    if not isinstance(record, dict):
-        raise ValueError("JSON root must be an object")
-    return record
+    return read_local_json(path, max_bytes=MAX_INPUT)
 
 
 def _write_csv(content, output_dir):
@@ -84,6 +68,7 @@ def main(argv=None):
         if args.mode == "export":
             if not args.view or not args.graph or args.bundle or args.csv:
                 raise ValueError("Export requires only view and graph JSON")
+            assert_distinct_input_files([args.view, args.graph])
             bundle = create_bundle(
                 _read_json(args.view), _read_json(args.graph),
                 reviewed=args.reviewed,
@@ -108,6 +93,8 @@ def main(argv=None):
             if (not args.bundle or args.view or args.graph
                     or args.reviewed or args.write):
                 raise ValueError("Verification requires a bundle, optional CSV")
+            if args.csv:
+                assert_distinct_input_files([args.bundle, args.csv])
             bundle = parse_bundle_json(_read_text(args.bundle))
             receipt = (verify_claims_csv(_read_text(args.csv), bundle)
                        if args.csv else verify_bundle(bundle))
