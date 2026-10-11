@@ -18,7 +18,7 @@ Research question: can **historically available** graph-structural similarity pr
 | Area | Evidence in repository | Status | Not yet established |
 |---|---|---|---|
 | SRS, SDD, security defaults and CI | `docs/SRS.md`, `docs/SDD.md`, `.github/workflows/quality.yml` | Draft + CI present | Faculty signoff, clean Windows setup and comprehensive CI security checks |
-| M1 source registry / chronology | `datasets/manifests/pilot.json`, `scripts/validate_research_manifests.py` | 20 **candidate** entries, including one original 1,525-byte signed runc Git tag fetched and SHA-256 hashed by CI | **0 approved** real source versions, exact archived bytes and verified public-availability times |
+| M1 source registry / chronology | `datasets/manifests/pilot.json`, `scripts/validate_research_manifests.py` | 21 **candidate** entries, including a signed original runc Git tag verified against the release-era keyring and an original GHSA JSON tied to a retained pre-cutoff public push event | **0 approved** real source versions, exact archived bytes and verified public-availability times |
 | M1 case design | `datasets/cases/pilot.json`, `docs/research/M1_CASE_CANDIDATES.md` | Candidate research shortlist | **0 selected/approved** real historical case manifests; no frozen reference labels |
 | M1 archive audit | `scripts/audit_source_artifacts.py` | Synthetic-tested SHA-256 integrity checking | Approved real archives and evidence of licensing/public availability |
 | M2 parser / evidence foundation | `src/threatragraph/normalized_sources.py`, `pdf_sources.py`, `evidence_alignment.py` | Synthetic-tested UTF-8, JSON, visible HTML, Falco YAML and selectable PDF evidence locators | Full automatic free-text relation extraction, quality measurement, OCR, complete Falco semantic interpretation |
@@ -28,7 +28,7 @@ Research question: can **historically available** graph-structural similarity pr
 | M5 G1 | [Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) | **Partially implemented** v2 typed Jaccard ranker with mandatory, self-declared claim-level exact-only as-of lineage, B0/G1 parity, separate provisional paths, abstention (synthetic tests only) | Genuine vetted corpus, derived as-of aliases/taxonomy/features and independent case-level efficacy; see [M5 algorithm limits](M5_G1_SIMILARITY.md) |
 | M6/M7 | Design documentation | Planned | Gold-label evaluator, paired scores, ablations, paper/poster |
 
-Prior CI has exercised **149 synthetic tests** at the M4 milestone; passing synthetic tests are **software evidence**, not historical research validation. Re-check the current branch and active test count before publishing a new claim.
+PR #36 CI ran **270 synthetic-focused tests on Ubuntu and Windows** (three Windows symlink skips), with security checks and genuine original-tag verification. Passing tests are **software evidence**, not historical research validation; verify the latest head for any new result.
 
 **P0.1 corrective implementation:** The graph runner and B0 baseline now return `research_ready: false` even after successful strict structural checks. An explicit `readiness` disclosure reports `validation_mode`, `structural_checks_passed` and `independent_study_approval=not_verified`. This **does not** approve data or complete P0; a separately reviewed, auditable study-approval gate remains pending (see [P0 readiness contract](P0_READINESS_CONTRACT.md)).
 
@@ -95,7 +95,7 @@ flowchart TD
 **Target:** One **clearly marked development-only** real-world mini-case first; grow to 25–40 approved versions and 4–6 independent case studies only when the protocol works.
 
 **Do**
-- Pre-register case inclusion/exclusion criteria *before* looking at whether G1 can predict the later answer. Shortlist candidates independently of method performance; record rejected cases.
+- Pre-register case inclusion/exclusion criteria *before* looking at whether G1 can predict the later answer. Shortlist candidates independently of method performance; record rejected cases. **Gate target/method compatibility first:** existing CVE/vulnerability case units are unsupported by G1 v2; see [P1a case–method eligibility](research/P1A_CASE_METHOD_ELIGIBILITY.md). Do not relabel CVEs as malware or accept trivial component overlap.
 - For each source, capture canonical URL, publisher/type, stable version ID, permissible exact archived bytes, SHA-256, licensing/retention constraints, `published_at`, independently supported earliest `available_at` (UTC), acquisition date, confidence and independence/syndication group.
 - Use actual archived revision (vendor version history, date-stamped release or defensible archival evidence); a web page's present-day publication label, content hash, today's last-modified header or filename **does not prove prior public availability**.
 - Document primary early 1–2 reports, historical cutoff, background sources known then, and independent later references for each case. Maintain reference annotations separately and blinded from the profiler.
