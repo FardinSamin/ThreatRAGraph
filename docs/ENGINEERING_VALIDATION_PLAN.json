@@ -123,6 +123,28 @@
       ]
     },
     {
+      "id": "preflight",
+      "scope": "m6",
+      "pr_number": 59,
+      "head_branch": "feature/m6-static-engineering-preflight",
+      "base_branch": "feature/m6-offline-batch-replay",
+      "requires": [
+        "replay"
+      ],
+      "source_paths": [
+        "scripts/preflight_validation_plan.py"
+      ],
+      "test_paths": [
+        "tests/test_preflight_validation_plan.py"
+      ],
+      "min_authored_test_methods": 15,
+      "test_command": "python -m unittest discover -s tests -p 'test_preflight_validation_plan.py' -v",
+      "manual_gates": [
+        "Check exact-head PR ancestry and all branch base revisions independently",
+        "Do not mistake AST/import inspection for test execution"
+      ]
+    },
+    {
       "id": "archive",
       "scope": "independent",
       "pr_number": 51,
@@ -182,6 +204,34 @@
       "manual_gates": [
         "Audit real as-of source chronology and typed alias ambiguities",
         "No candidate alias may automatically enrich G1 feature lineage"
+      ]
+    },
+    {
+      "id": "sidecar_integration",
+      "scope": "independent",
+      "pr_number": 61,
+      "head_branch": "feature/integration-research-sidecars",
+      "base_branch": "feature/m6-static-engineering-preflight",
+      "requires": [
+        "archive",
+        "portable",
+        "aliases",
+        "preflight"
+      ],
+      "source_paths": [
+        "src/threatragraph/sidecar_reconciliation.py",
+        "scripts/audit_independent_sidecars.py"
+      ],
+      "test_paths": [
+        "tests/test_sidecar_reconciliation.py"
+      ],
+      "min_authored_test_methods": 9,
+      "test_command": "python -m unittest discover -s tests -p 'test_sidecar_reconciliation.py' -v",
+      "manual_gates": [
+        "Verify original source discovery remains unapproved and no costly workflow jobs are triggered",
+        "Compare B0/G1 portable bundle byte hashes against the same frozen graph inputs",
+        "Do not feed candidate historical aliases to G1 feature lineage or evaluate labels",
+        "Reconcile competing status-document changes and verify PR #60 workflow proposal separately"
       ]
     }
   ]
