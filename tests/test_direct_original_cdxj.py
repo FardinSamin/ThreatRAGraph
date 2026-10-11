@@ -185,6 +185,43 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
                                   url, "CC-MAIN-2023-06")
         )
 
+    def test_original_cdxj_timestamp_mismatch_refuses_false_chronology(self):
+        url = TARGETS["cado-original-2022"][0]
+        line = _cdx_line(url)
+        tampered = line.replace(
+            b" 20230206120544 {", b" 20230206120545 {", 1
+        )
+        with self.assertRaisesRegex(ValueError, "timestamps disagree"):
+            module._parse_cdxj(
+                gzip.compress(tampered, mtime=0),
+                "cado-original-2022", url, "CC-MAIN-2023-06"
+            )
+
+    def test_original_cdxj_duplicate_json_fields_are_refused(self):
+        url = TARGETS["cado-original-2022"][0]
+        original = json.dumps(_row(url), sort_keys=True)
+        duplicate = original[:-1] + ', "timestamp": "20230206120544"}'
+        line = (module._url_key(url) + " 20230206120544 " +
+                duplicate + "\n").encode("utf-8")
+        with self.assertRaisesRegex(ValueError, "Invalid original CDXJ JSON"):
+            module._parse_cdxj(
+                gzip.compress(line, mtime=0),
+                "cado-original-2022", url, "CC-MAIN-2023-06"
+            )
+
+    def test_real_source_index_line_fingerprint_is_deterministic(self):
+        import hashlib
+        url = TARGETS["cado-original-2022"][0]
+        line = _cdx_line(url).rstrip(b"\n")
+        receipt = module._parse_cdxj(
+            gzip.compress(line + b"\n", mtime=0),
+            "cado-original-2022", url, "CC-MAIN-2023-06"
+        )
+        self.assertEqual(
+            hashlib.sha256(line).hexdigest(),
+            receipt[0]["observed_index_record_sha256"]
+        )
+
     def test_non_200_and_after_cutoff_are_not_candidates(self):
         url = TARGETS["cado-original-2022"][0]
         after = _cdx_line(url, "20230302000000")

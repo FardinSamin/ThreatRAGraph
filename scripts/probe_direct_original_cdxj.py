@@ -17,7 +17,8 @@ import re
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
-from scripts.probe_original_campaign_cdx import COLLECTIONS, TARGETS, classify_row
+from scripts.probe_original_campaign_cdx import (COLLECTIONS, TARGETS, _no_duplicates,
+                                                 classify_row)
 
 VERSION = "original-cdxj-direct-cluster-lookup-v1"
 BASE = "https://data.commoncrawl.org/cc-index/collections"
@@ -232,32 +233,44 @@ def _read_gzip_chunk(chunk):
 
 
 def _parse_cdxj(chunk, target, alias, collection):
-    # Each CDXJ record consists of SURT, timestamp, JSON; parse only bounded lines
-    # and include no captured webpage content in the receipt.
+    """Parse original CDXJ line metadata, never article contents.
+
+    Keep the recorded source URL authoritative; inconsistent target-record
+    timestamps or duplicate JSON fields fail closed rather than producing
+    plausible-looking historical chronology receipts.
+    """
     found = []
     for raw in _read_gzip_chunk(chunk).splitlines():
-        if not raw or len(raw) > 16384:
+        if not raw:
             continue
-        # Older CDXJ writers can preserve www in SURT even when a browser
-        # lookup would normalize it. Authoritative eligibility is the exact
-        # archived JSON URL value, not an inferred/reconstructed SURT prefix.
-        _, sep, rest = raw.partition(b" ")
-        if not sep:
-            continue
-        _, sp, data = rest.partition(b" ")
-        if not sp:
-            continue
+        _require(len(raw) <= 16384, "Oversized original CDXJ record")
+        # Historical www SURT representations may vary; do not equate the
+        # physical SURT prefix with the stored original publisher URL.
+        surt, sep, rest = raw.partition(b" ")
+        _require(bool(sep and surt), "Invalid original CDXJ SURT field")
+        timestamp, separator, data = rest.partition(b" ")
+        _require(bool(separator and len(timestamp) == 14
+                      and timestamp.isascii() and timestamp.isdigit()),
+                 "Invalid original CDXJ timestamp field")
         try:
-            row = json.loads(data.decode("utf-8"))
-            if not isinstance(row, dict) or row.get("url") != alias:
-                continue
-            info = classify_row(row, target=target, requested_url=alias,
-                                collection=collection)
-        except (ValueError, UnicodeError, TypeError, RecursionError):
+            row = json.loads(
+                data.decode("utf-8"), object_pairs_hook=_no_duplicates
+            )
+        except (ValueError, UnicodeError, TypeError, RecursionError) as exc:
+            raise ValueError("Invalid original CDXJ JSON record") from exc
+        _require(isinstance(row, dict), "Non-object original CDXJ record")
+        if row.get("url") != alias:
             continue
+        # An index-line timestamp inconsistent with its JSON record must not
+        # be treated as an independently corroborating date observation.
+        _require(row.get("timestamp") == timestamp.decode("ascii"),
+                 "Original CDXJ line and JSON capture timestamps disagree")
+        info = classify_row(
+            row, target=target, requested_url=alias, collection=collection
+        )
+        info["observed_index_record_sha256"] = hashlib.sha256(raw).hexdigest()
         found.append(info)
     return found
-
 
 def probe_direct(targets, collections, reader=None):
     reader = reader or _RangeReader()

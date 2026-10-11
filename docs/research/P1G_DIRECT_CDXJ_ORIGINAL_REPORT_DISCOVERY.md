@@ -40,6 +40,18 @@ control. This is an engineering correction and synthetic validation, **not
 verification of the live historical index**. Do not merge until current-head
 CI starts and the real positive control and all twelve jobs pass.
 
+## P1g index-record chronology hardening (candidate-only)
+
+The bounded CDXJ reader now checks that the indexed-line capture timestamp
+matches the embedded JSON timestamp, refuses duplicate JSON fields and
+oversized/malformed index lines, and hashes each observed original CDXJ
+metadata record. Regression tests cover inconsistent dates, duplicate-key
+spoofing and deterministic record fingerprints. The digest is a **record
+identity receipt**, not an independent publication-time certificate.
+Replaying the exact Common Crawl index bytes and matching the previously
+authenticated original Cado WARC record remains a mandatory unfulfilled
+live verification step.
+
 ## Current CI runner constraint
 
 Following multiple successful archived index read runs, [a subsequent workflow run](https://github.com/FardinSamin/ThreatRAGraph/actions/runs/38112454293) and its retry failed **before any job step started**: each job returned an empty step list and runner logs were unavailable (`BlobNotFound`). These are **job orchestration/start failures**, not executed unit-test, WARC-identity, security or index-lookup failures. GitHub [documents Actions job diagnostic steps](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs); the platform status page may show operational even when a particular account's runners cannot start.
