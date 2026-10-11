@@ -10,7 +10,7 @@
 
 Screen real container/Kubernetes security disclosures for the eventual 4–6-case sparse-report experiment. The list below **does not choose final time cutoffs**, label any ground truth, or assert that a current webpage is historically faithful to its stated publication date.
 
-All 29 source candidates in the draft JSON registry are marked **candidate**, with null available_at, null SHA-256 and unverified historical versions. A publication date shown on a webpage is *not* a verified, exact availability timestamp. Source copies/archives and independent chronology must be reviewed before approval.
+All 30 source candidates in the draft JSON registry are marked **candidate**, with null available_at, null SHA-256 and unverified historical versions. A publication date shown on a webpage is *not* a verified, exact availability timestamp. Source copies/archives and independent chronology must be reviewed before approval.
 
 The proposed comparison is **B0** (first one or two public sources only) versus **G1** (B0 plus independently historical background graph), evaluated against later factual descriptions without exposing those descriptions during inference.
 
@@ -100,6 +100,8 @@ The proposed comparison is **B0** (first one or two public sources only) versus 
 
 **P1b follow-up:** [Chimaera and Kiss-a-dog same-type campaign prospects](P1B_SCARLETEEL_CAMPAIGN_PEERS.md) both have a reported `USES tool:xmrig` feature in separate original researcher articles from 2021/2022. They remain **unverified source versions**, and G1 needs **two independent groups per candidate peer's matching-and-proposed relation evidence**, not two peer subjects each with one source group.
 
+**P1c update:** [Cado's separate Kiss-a-dog Redis honeypot investigation and contemporaneous 2022 source pointer](P1C_KISSADOG_SAME_PEER_CHAIN.md) prospectively supports both **XMRig** as the shared early feature and **XHide** as a separate possible Kiss-a-dog relation, with CrowdStrike forming the *other original research group for the same historical peer*. This is a plausible **per-peer G1 two-group path shape only**, not approved independent semantic evidence, original source bytes or a real new SCARLETEEL outcome.
+
 **Status:** **Plausible method type and one tentative early feature, but NOT G1-eligible or selected.** Full auditable decision: [P1b SCARLETEEL screen](P1B_SCARLETEEL_CAMPAIGN_SCREEN.md) and [candidate-only machine-readable screen](../../datasets/case_screenings/scarleteel.json). Five SCARLETEEL/TeamTNT-related URLs are registered as **unapproved candidate** sources; the historical case manifest remains empty.
 
 ## Selection and exclusion decisions still required
@@ -121,7 +123,7 @@ The proposed comparison is **B0** (first one or two public sources only) versus 
 - Review dates of specific later reports independently, then approve only eligible source versions.
 - Require [target/method eligibility](P1A_CASE_METHOD_ELIGIBILITY.md) and early/reference novelty review **before** approving a G1-v2 evaluation case; never relabel CVEs to bypass unsupported ontology types.
 - Add selected cases to datasets/cases/pilot.json **after** each reference and cutoff pass the validator and the reviewer accepts its case-unit/method fit.
-- Expand the corpus with versioned ATT&CK/STIX, Falco rules, Kubernetes documentation and other diverse historical CTI; 29 candidate entries are **not** the planned 25–40 approved source corpus.
+- Expand the corpus with versioned ATT&CK/STIX, Falco rules, Kubernetes documentation and other diverse historical CTI; 30 candidate entries are **not** the planned 25–40 approved source corpus.
 - Run strict validation and faculty methodological review before an actual experiment.
 
 **No experiments, predictions, extraction quality scores or model comparisons have been run.**
