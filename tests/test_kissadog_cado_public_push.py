@@ -178,6 +178,7 @@ class HistoricalKissadogPublicPushTests(unittest.TestCase):
         with patch.object(witness, "ARCHIVE_SHA256", hashlib.sha256(raw).hexdigest()), \
              patch.object(witness, "EVENT_LINE_SHA256", hashlib.sha256(line).hexdigest()), \
              patch.object(witness, "PUBLIC_EVENT_ID", original["id"]), \
+             patch.object(witness, "PUBLIC_EVENT_AT", original["created_at"]), \
              patch.object(witness, "ARCHIVE_BYTES", len(raw)):
             def run(path):
                 report = verify_archive(path, require_original=True)
