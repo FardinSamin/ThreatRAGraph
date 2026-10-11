@@ -199,6 +199,46 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+  original-2022-kissadog-cado-reference:
+    name: Original December 2022 Cado article pointer Git bytes
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Fetch two exact 2022 Securonix Git pointer objects without executing files
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --show-error --silent --location \
+            --retry 2 --max-time 30 --max-filesize 16384 \
+            --output "$RUNNER_TEMP/cado-old-link-2022.txt" \
+            "https://raw.githubusercontent.com/Securonix/AutonomousThreatSweeper/79b944c177a8640fb8f5396515daf2c249a43b15/New_Variant_of_Kiss_a_Dog_Cryptojacking_Campaign/References.txt"
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --show-error --silent --location \
+            --retry 2 --max-time 30 --max-filesize 16384 \
+            --output "$RUNNER_TEMP/cado-derived-iocs-2022.md" \
+            "https://raw.githubusercontent.com/Securonix/AutonomousThreatSweeper/79b944c177a8640fb8f5396515daf2c249a43b15/New_Variant_of_Kiss_a_Dog_Cryptojacking_Campaign/README.md"
+      - name: Verify exact Git object identities and Cado URL, derivative reference only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.verify_kissadog_cado_pointer \
+            --reference-file "$RUNNER_TEMP/cado-old-link-2022.txt" \
+            --ioc-file "$RUNNER_TEMP/cado-derived-iocs-2022.md" \
+            > "$RUNNER_TEMP/kissadog-cado-derivative-pointer.json"
+          cat "$RUNNER_TEMP/kissadog-cado-derivative-pointer.json"
+      - name: Retain original-pointer hash-only receipt, not third-party source
+        uses: actions/upload-artifact@v4
+        with:
+          name: kissadog-cado-2022-derivative-citation-receipt
+          path: ${{ runner.temp }}/kissadog-cado-derivative-pointer.json
+          retention-days: 14
+          if-no-files-found: error
+
   preflight-and-tests:
     strategy:
       fail-fast: false
@@ -244,6 +284,12 @@ jobs:
         run: python -m scripts.verify_historical_chimaera_bibliography --help
       - name: Original 2022 MITRE TeamTNT STIX replay CLI smoke (offline only)
         run: python -m scripts.verify_original_mitre_teamtnt --help
+      - name: Original Dec 2022 Cado article pointer Git replay CLI smoke
+        run: python -m scripts.verify_kissadog_cado_pointer --help
+      - name: SCARLETEEL candidate-only same-peer Kiss-a-dog path check
+        run: python -m scripts.screen_same_peer_candidate_path
+      - name: Same-peer candidate path CLI smoke
+        run: python -m scripts.screen_same_peer_candidate_path --help
       - name: Strict prospective original-report Common Crawl WARC intake CLI smoke (offline only)
         run: python -m scripts.verify_candidate_warc_capture --help
       - name: G1 paired graph-similarity CLI smoke (offline only)

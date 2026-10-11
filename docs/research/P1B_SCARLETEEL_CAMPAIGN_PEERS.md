@@ -46,6 +46,10 @@ Furthermore, the updated prospects remain zero-supported in the actual evidence 
 
 The [P1b Common Crawl CDX/WARC verifier](P1B_COMMONCRAWL_PRIMARY_WARC_INTAKE.md) now checks an investigator-supplied original HTML WARC member's size, URL, declared pre-cutoff time and exact CDX/WARC/HTTP content digests. The archive services were inaccessible here, so **no actual primary HTML capture has been obtained** and no case/source was approved. In particular, a Sysdig first-publication February 28 report needs an *extremely narrow* archive window before the March 1 UTC cutoff; a later March/April crawl is **not eligible early content**.
 
+## P1c advance: same named peer, two original investigators
+
+[CrowdStrike and Cado now form a candidate two-group path on the same **Kiss-a-dog campaign**](P1C_KISSADOG_SAME_PEER_CHAIN.md): both independently describe XMRig, and Cado's own Redis honeypot work additionally describes XHide. A contemporaneous December 2022 Securonix Git IOC index contains the older Cado URL, but is **derived**, not a third independent investigation. The *original Cado article bytes and public-by date* remain unverified; the tentative inference `campaign:SCARLETEEL USES tool:xhide` has **not** been executed or scored, and no later labels were consulted.
+
 ## Reproducible next empirical gate
 
 1. Independently recover original **February 2023 Sysdig** bytes with externally supportable earliest public-by UTC timing, plus **2021 Chimaera and 2022 Kiss-a-dog** versions. Only after source licenses, dates, exact hash and reviewer approval can they change status.
@@ -54,4 +58,4 @@ The [P1b Common Crawl CDX/WARC verifier](P1B_COMMONCRAWL_PRIMARY_WARC_INTAKE.md)
 4. Freeze exact source IDs, cutoffs, methods, peer feature/claim families and abstentions **before** independent later reference annotations or results are consulted. Prior search-summary exposure necessitates blind external labeler; if not feasible exclude this case.
 5. Request investigator/faculty screening signoff. Only then consider the first **development** experiment, followed separately by the full 25–40 source/4–6 case pilot.
 
-**Disposition:** important positive *case search* advance; no research outcome. **29 candidate sources, zero approved source versions, zero selected cases and zero B0/G1 empirical comparisons.**
+**Disposition:** important positive *case search* advance; no research outcome. **30 candidate sources, zero approved source versions, zero selected cases and zero B0/G1 empirical comparisons.**
