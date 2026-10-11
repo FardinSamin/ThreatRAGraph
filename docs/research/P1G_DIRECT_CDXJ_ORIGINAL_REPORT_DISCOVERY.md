@@ -52,6 +52,17 @@ Replaying the exact Common Crawl index bytes and matching the previously
 authenticated original Cado WARC record remains a mandatory unfulfilled
 live verification step.
 
+## Exact positive-control WARC identity hardening
+
+The mandatory Cado positive control now checks the **complete original archive
+record identity** pinned by P1e: publisher URL, capture timestamp, HTTP 200,
+HTML MIME, original WARC **filename**, compressed record offset/length,
+payload digest and pre-cutoff candidate classification. An index entry
+borrowing the same numeric offset and digest but pointing to a different WARC
+file, or claiming a non-200/non-HTML response, cannot validate the lookup.
+Synthetic adversarial regressions exercise each field; neither source rights
+nor the first 2022 publication timestamp are independently certified here.
+
 ## Current CI runner constraint
 
 Following multiple successful archived index read runs, [a subsequent workflow run](https://github.com/FardinSamin/ThreatRAGraph/actions/runs/38112454293) and its retry failed **before any job step started**: each job returned an empty step list and runner logs were unavailable (`BlobNotFound`). These are **job orchestration/start failures**, not executed unit-test, WARC-identity, security or index-lookup failures. GitHub [documents Actions job diagnostic steps](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs); the platform status page may show operational even when a particular account's runners cannot start.

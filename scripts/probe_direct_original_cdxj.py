@@ -272,6 +272,33 @@ def _parse_cdxj(chunk, target, alias, collection):
         found.append(info)
     return found
 
+# Established from PR #49: authentic Cado February 2023 WARC record.
+# This identifies a capture, not original publication, rights or claim approval.
+KNOWN_CADO_ARCHIVE_FILENAME = (
+    "crawl-data/CC-MAIN-2023-06/segments/1674764500339.37/warc/"
+    "CC-MAIN-20230206113934-20230206143934-00755.warc.gz"
+)
+
+
+def _known_cado_positive_control(row):
+    """Require the exact genuine archive record, not just an offset/digest."""
+    return (
+        row.get("target") == "cado-original-2022"
+        and row.get("collection") == "CC-MAIN-2023-06"
+        and row.get("observed_url") == TARGETS["cado-original-2022"][0]
+        and row.get("cdx_timestamp_declared_utc") == "2023-02-06T12:05:44Z"
+        and row.get("cdx_status") == "200"
+        and row.get("cdx_mime") == "text/html"
+        and row.get("candidate_status") ==
+            "prospective_pre_cutoff_html_record_not_yet_warc_verified"
+        and row.get("archive_filename") == KNOWN_CADO_ARCHIVE_FILENAME
+        and row.get("archive_offset") == "696857860"
+        and row.get("archive_length") == "22387"
+        and row.get("archive_payload_digest") ==
+            "IIQQZYE7EHNZFM6CFTJLNT226VHY2D3P"
+    )
+
+
 def probe_direct(targets, collections, reader=None):
     reader = reader or _RangeReader()
     _require(0 < len(targets) <= 4 and 0 < len(collections) <= 3
@@ -385,14 +412,7 @@ def probe_direct(targets, collections, reader=None):
             for r in records
         ),
         "known_cado_20230206_positive_control_matched": any(
-            r.get("target") == "cado-original-2022"
-            and r.get("collection") == "CC-MAIN-2023-06"
-            and r.get("observed_url") == TARGETS["cado-original-2022"][0]
-            and r.get("cdx_timestamp_declared_utc") == "2023-02-06T12:05:44Z"
-            and r.get("archive_offset") == "696857860"
-            and r.get("archive_length") == "22387"
-            and r.get("archive_payload_digest") == "IIQQZYE7EHNZFM6CFTJLNT226VHY2D3P"
-            for r in records
+            _known_cado_positive_control(r) for r in records
         ),
         "archive_article_bytes_acquired": False,
         "archive_timestamp_independently_authenticated": False,

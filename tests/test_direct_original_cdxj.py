@@ -166,6 +166,54 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
             )
 
 
+    def test_known_cado_positive_requires_exact_original_warc_record(self):
+        """Numeric offsets and a digest alone cannot authenticate a capture."""
+        url = TARGETS["cado-original-2022"][0]
+        source = module._parse_cdxj(
+            gzip.compress(_cdx_line(url), mtime=0),
+            "cado-original-2022", url, "CC-MAIN-2023-06"
+        )[0]
+        self.assertTrue(module._known_cado_positive_control(source))
+        substitutions = (
+            ("archive_filename", "crawl-data/CC-MAIN-2023-06/other.warc.gz"),
+            ("archive_offset", "696857861"),
+            ("archive_length", "22388"),
+            ("archive_payload_digest", "OTHERDIGEST"),
+            ("cdx_status", "404"),
+            ("cdx_mime", "application/json"),
+            ("candidate_status", "non_original_200_html_record"),
+            ("cdx_timestamp_declared_utc", "2023-02-06T12:05:45Z"),
+            ("observed_url", "https://www.cadosecurity.com/unrelated"),
+        )
+        for key, value in substitutions:
+            with self.subTest(field=key):
+                mutated = dict(source)
+                mutated[key] = value
+                self.assertFalse(module._known_cado_positive_control(mutated))
+
+    def test_known_cado_control_rejects_http_404_even_same_warc_locator(self):
+        """Preserve source eligibility, not just digest/time coincidence."""
+        url = TARGETS["cado-original-2022"][0]
+        fake = _FakeOriginalArchive()
+        raw = _row(url)
+        raw["status"] = "404"
+        key = module._url_key(url)
+        indexed = (key + " 20230206120544 " +
+                   json.dumps(raw, sort_keys=True) + "\n").encode("utf-8")
+        compressed = gzip.compress(indexed, mtime=0)
+        fake.files["cdx-00000.gz"] = compressed
+        fake.files["cluster.idx"] = (
+            f"{key} 20230206120544\tcdx-00000.gz\t0\t"
+            f"{len(compressed)}\t1\n"
+        ).encode("ascii")
+        result = module.probe_direct(
+            ["cado-original-2022"], ["CC-MAIN-2023-06"],
+            reader=fake.reader()
+        )
+        self.assertFalse(result["known_cado_20230206_positive_control_matched"])
+        self.assertEqual(0, result["matching_pre_cutoff_candidate_count"])
+        self.assertFalse(result["research_ready"])
+
     def test_source_url_surt_normalizes_www_but_not_other_domains(self):
         self.assertEqual(
             "com,crowdstrike)/blog/new-kiss-a-dog",
