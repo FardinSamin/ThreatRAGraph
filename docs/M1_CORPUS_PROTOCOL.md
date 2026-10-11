@@ -12,7 +12,7 @@ The supplied URFS proposal targets around **25–40 public sources** and **4–6
 
 ## 2. How to validate
 
-The case registry is still **empty**, while the source registry holds **28 unapproved candidate source versions**. The [case shortlist](research/M1_CASE_CANDIDATES.md) and [original-advisory witness](research/P1A_ORIGINAL_ADVISORY_WITNESS.md) record selection and provenance work. Candidate tag/advisory bytes have measured hashes, and the advisory has a proposed public-by bound; approved digest/date fields remain unset pending independent review. Draft structural validation does not approve this evidence.
+The case registry is still **empty**, while the source registry holds **29 unapproved candidate source versions**. The [case shortlist](research/M1_CASE_CANDIDATES.md) and [original-advisory witness](research/P1A_ORIGINAL_ADVISORY_WITNESS.md) record selection and provenance work. Candidate tag/advisory bytes have measured hashes, and the advisory has a proposed public-by bound; approved digest/date fields remain unset pending independent review. Draft structural validation does not approve this evidence.
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
