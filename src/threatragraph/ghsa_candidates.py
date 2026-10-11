@@ -101,7 +101,8 @@ def extract_ghsa_candidates(raw: bytes, *, source_version_id: str,
         if package.get("ecosystem") != "Go":
             raise ValueError("This initial adapter accepts only explicit Go packages")
         name = package.get("name")
-        if (not isinstance(name, str) or not _GO_PACKAGE.fullmatch(name)\n                or any(part in {\"\", \".\", \"..\"} for part in name.split(\"/\"))):
+        if (not isinstance(name, str) or not _GO_PACKAGE.fullmatch(name)
+                or any(part in {"", ".", ".."} for part in name.split("/"))):
             raise ValueError("Invalid or unnormalized Go package identifier")
         obj = "software-product:go/" + name
         validate_triple(target, "AFFECTS", obj)
