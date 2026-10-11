@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "engineering_validation_plan_v1",
+  "stages": [
+    {
+      "id": "paired",
+      "scope": "m6",
+      "pr_number": 52,
+      "head_branch": "feature/m6-offline-paired-profile-audit",
+      "base_branch": "main",
+      "requires": [],
+      "source_paths": [
+        "src/threatragraph/paired_profile_audit.py",
+        "src/threatragraph/paired_run_freeze.py",
+        "scripts/audit_paired_profiles.py",
+        "scripts/freeze_paired_run.py"
+      ],
+      "test_paths": [
+        "tests/test_paired_profile_audit.py",
+        "tests/test_paired_run_freeze.py"
+      ],
+      "min_authored_test_methods": 29,
+      "test_command": "python -m unittest discover -s tests -p 'test_paired*.py' -v",
+      "manual_gates": [
+        "Confirm historical cutoff and early source fingerprint parity",
+        "Run unit and security suite on exact branch head",
+        "Verify profile freeze precedes all held-out access"
+      ]
+    },
+    {
+      "id": "evaluation",
+      "scope": "m6",
+      "pr_number": 53,
+      "head_branch": "feature/m6-heldout-reference-scorer",
+      "base_branch": "feature/m6-offline-paired-profile-audit",
+      "requires": [
+        "paired"
+      ],
+      "source_paths": [
+        "src/threatragraph/heldout_evaluation.py",
+        "scripts/evaluate_frozen_paired_run.py",
+        "scripts/aggregate_candidate_evaluations.py"
+      ],
+      "test_paths": [
+        "tests/test_heldout_evaluation.py"
+      ],
+      "min_authored_test_methods": 27,
+      "test_command": "python -m unittest discover -s tests -p 'test_heldout_evaluation.py' -v",
+      "manual_gates": [
+        "Check gold labels never imported by profilers",
+        "Check no-label and not-assessable denominator logic",
+        "Independently review reference annotations and credentials"
+      ]
+    },
+    {
+      "id": "single_case",
+      "scope": "m6",
+      "pr_number": 56,
+      "head_branch": "feature/m6-offline-case-orchestrator",
+      "base_branch": "feature/m6-heldout-reference-scorer",
+      "requires": [
+        "evaluation"
+      ],
+      "source_paths": [
+        "scripts/run_offline_case_pipeline.py"
+      ],
+      "test_paths": [
+        "tests/test_offline_case_pipeline.py"
+      ],
+      "min_authored_test_methods": 16,
+      "test_command": "python -m unittest discover -s tests -p 'test_offline_case_pipeline.py' -v",
+      "manual_gates": [
+        "Verify archive original bytes, evidence excerpts and source rights",
+        "Replay an actual two-source synthetic case locally",
+        "Independently inspect as-of feature lineage and declared review hashes"
+      ]
+    },
+    {
+      "id": "multi_case",
+      "scope": "m6",
+      "pr_number": 57,
+      "head_branch": "feature/m6-offline-multicase-batch",
+      "base_branch": "feature/m6-offline-case-orchestrator",
+      "requires": [
+        "single_case"
+      ],
+      "source_paths": [
+        "scripts/run_offline_case_batch.py"
+      ],
+      "test_paths": [
+        "tests/test_offline_case_batch.py"
+      ],
+      "min_authored_test_methods": 17,
+      "test_command": "python -m unittest discover -s tests -p 'test_offline_case_batch.py' -v",
+      "manual_gates": [
+        "Run multi-case real-byte-backed synthetic fixture, not only stubs",
+        "Verify independent case paths and fail-closed partial writes",
+        "Confirm batch contains no reference-label inputs"
+      ]
+    },
+    {
+      "id": "replay",
+      "scope": "m6",
+      "pr_number": 58,
+      "head_branch": "feature/m6-offline-batch-replay",
+      "base_branch": "feature/m6-offline-multicase-batch",
+      "requires": [
+        "multi_case"
+      ],
+      "source_paths": [
+        "src/threatragraph/batch_replay.py",
+        "scripts/verify_offline_batch_replay.py"
+      ],
+      "test_paths": [
+        "tests/test_batch_replay.py"
+      ],
+      "min_authored_test_methods": 12,
+      "test_command": "python -m unittest discover -s tests -p 'test_batch_replay.py' -v",
+      "manual_gates": [
+        "Verify exact byte hashes, case pointers and source/profiler parity",
+        "Audit complete-source recomputation separately from structural replay",
+        "Arrange external pre-label freeze timestamp/signature"
+      ]
+    },
+    {
+      "id": "archive",
+      "scope": "independent",
+      "pr_number": 51,
+      "head_branch": "research/p1g-direct-cdxj-original-reports",
+      "base_branch": "main",
+      "requires": [],
+      "source_paths": [
+        "scripts/probe_direct_original_cdxj.py"
+      ],
+      "test_paths": [
+        "tests/test_direct_original_cdxj.py"
+      ],
+      "min_authored_test_methods": 19,
+      "test_command": "python -m unittest discover -s tests -p 'test_direct_original_cdxj.py' -v",
+      "manual_gates": [
+        "Replay genuine historical Cado positive control from original bytes",
+        "Review rights, cutoff date and original-source independence"
+      ]
+    },
+    {
+      "id": "portable",
+      "scope": "independent",
+      "pr_number": 54,
+      "head_branch": "feature/m2-portable-graph-exchange",
+      "base_branch": "main",
+      "requires": [],
+      "source_paths": [
+        "src/threatragraph/portable_exchange.py",
+        "scripts/exchange_graph_bundle.py"
+      ],
+      "test_paths": [
+        "tests/test_portable_exchange.py"
+      ],
+      "min_authored_test_methods": 17,
+      "test_command": "python -m unittest discover -s tests -p 'test_portable_exchange.py' -v",
+      "manual_gates": [
+        "Verify CSV/JSON round-trip, duplicate keys and spreadsheet formula refusal",
+        "Confirm exports contain no third-party source bodies or gold labels"
+      ]
+    },
+    {
+      "id": "aliases",
+      "scope": "independent",
+      "pr_number": 55,
+      "head_branch": "feature/m3-asof-alias-candidates",
+      "base_branch": "main",
+      "requires": [],
+      "source_paths": [
+        "src/threatragraph/alias_history.py",
+        "scripts/audit_alias_history.py"
+      ],
+      "test_paths": [
+        "tests/test_alias_history.py"
+      ],
+      "min_authored_test_methods": 17,
+      "test_command": "python -m unittest discover -s tests -p 'test_alias_history.py' -v",
+      "manual_gates": [
+        "Audit real as-of source chronology and typed alias ambiguities",
+        "No candidate alias may automatically enrich G1 feature lineage"
+      ]
+    }
+  ]
+}
