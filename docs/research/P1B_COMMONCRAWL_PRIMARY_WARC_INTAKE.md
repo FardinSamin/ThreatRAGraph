@@ -10,6 +10,8 @@ Sources: [Common Crawl's official CDXJ index guide](https://commoncrawl.org/cdxj
 
 It recognizes only three **already registered** unapproved original-research URLs: Sysdig SCARLETEEL (Feb 2023 original), Alien Labs Chimaera (2021 original) and CrowdStrike Kiss-a-dog (2022 original). It refuses an arbitrary target, a later SCARLETEEL report, an approved/fabricated manifest record or a changing source URL. It enforces the proposed **2023-03-01T00:00:00Z** research cutoff on the **self-reported CDX/WARC observation**, not on a date from today's website.
 
+The verifier also rejects any claimed archive capture **before the publisher-reported release calendar date** for that report (Chimaera September 8 2021, Kiss-a-dog October 26 2022, SCARLETEEL February 28 2023). These dates are *screening-only plausibility lower bounds*, not independently certified original publication dates. A later-looking capture can still be modified or falsely dated.
+
 The verifier requires:
 
 1. Bounded official-style Common Crawl CDX WARC path, canonical publisher URL and nonnegative byte offset; exact 200 / HTML CDX metadata and bounded compressed length (**4 MiB max**).
@@ -50,7 +52,7 @@ For the other two, replace `--source-version-id` with `candidate:kissadog-crowds
 
 ## Recorded current result, limitations and next go/no-go
 
-- This checkpoint adds **17 adversarial synthetic parser tests** and offline CLI/manifest smoke checks. Green tests prove only implementation properties, **not a genuine primary archive acquisition**.
+- This checkpoint adds **18 adversarial synthetic parser tests** and offline CLI/manifest smoke checks. Green tests prove only implementation properties, **not a genuine primary archive acquisition**.
 - Public Common Crawl and Internet Archive archive lookup endpoints were not accessible here (web lookup rejected; direct container DNS unavailable). We therefore did **not** recover original 2021 Alien Labs, 2022 CrowdStrike or Feb 2023 Sysdig HTML bytes. The current 2021/2022 bibliography references remain valid *secondary* reference evidence and are not silently converted into article witnesses.
 - If a valid primary pre-cutoff WARC is acquired, hash/provenance and exact permissible article bytes can be independently reviewed, followed by article-specific rights review and byte-aligned semantic candidate claims. G1 still needs the per-peer **two independent supporting publisher groups**, actually novel relation evidence, and independent blind later labels. Don't change G1-v2's thresholds to force a result.
 - If the precise early SCARLETEEL public-by/cutoff requirement cannot be met, **screen it out** or propose a methodologically explicit *prospective redesign before labels are examined*; never backdate a later crawler capture.
