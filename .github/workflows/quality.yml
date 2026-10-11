@@ -8,6 +8,15 @@ on:
 permissions:
   contents: read
 
+# Private repository Actions consume the account's metered runner quota.
+# Cancel stale runs on earlier branch/PR heads rather than spending minutes
+# redoing 11+ costly independent archive and OS-test jobs on obsolete commits.
+# Push refs and pull_request refs stay separate, so both final-head merge
+# gates are still required and independently observable.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   security-and-quality:
     name: Security, supply chain and Python lint
