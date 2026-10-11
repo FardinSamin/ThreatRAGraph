@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
   "dataset_version": "0.1.0-candidate",
-  "description": "26 candidate source versions, including the pinned runc signed tag and original GHSA JSON linked to an independently retained public push event. Measured provenance receipts are separate from source rights, historical eligibility and investigator approval. Zero approved source versions or selected cases.",
+  "description": "28 candidates source versions, including the pinned runc signed tag and original GHSA JSON linked to an independently retained public push event. Measured provenance receipts are separate from source rights, historical eligibility and investigator approval. Zero approved source versions or selected cases.",
   "sources": [
     {
       "source_id": "src:crio-crowdstrike",
@@ -445,6 +445,40 @@
       "sha256": null,
       "redistribution": "unknown",
       "selection_rationale": "Potential later reference ONLY. Same publisher/research lineage as original; not independent corroboration. Do not read or load body/claims into early/background, or use synopsis to choose prediction labels."
+    },
+    {
+      "source_id": "src:chimaera-levelblue-2021",
+      "source_version_id": "candidate:chimaera-alienlabs-20210908:unfrozen",
+      "source_kind": "cti_report",
+      "title": "TeamTNT with new campaign aka Chimaera (named same-type campaign, XMRig)",
+      "publisher": "AT&T Alien Labs (article currently hosted by LevelBlue)",
+      "url": "https://www.levelblue.com/blogs/spiderlabs-blog/teamtnt-with-new-campaign-aka-chimaera",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "Original research article currently displays September 8, 2021 and explicitly names Chimaera campaign plus XMRig in its Windows/Kubernetes payload section. Changed hosting/branding (AT&T -> LevelBlue) means today's webpage is NOT an attested 2021 source version; independent snapshot required.",
+      "independence_group": "alien-labs-chimaera-original-research",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "P1b prospective same-type campaign:Chimaera USES tool:xmrig background analogy to SCARLETEEL; candidate only, requires exactly dated original bytes and independent reviewed claims; not TeamTNT actor alias"
+    },
+    {
+      "source_id": "src:kissadog-crowdstrike-2022",
+      "source_version_id": "candidate:kissadog-crowdstrike-20221026:unfrozen",
+      "source_kind": "cti_report",
+      "title": "CrowdStrike Identifies New Kiss-a-Dog Cryptojacking Campaign Targeting Docker and Kubernetes",
+      "publisher": "CrowdStrike Threat Research",
+      "url": "https://www.crowdstrike.com/en-us/blog/new-kiss-a-dog-cryptojacking-campaign-targets-docker-and-kubernetes/",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "CrowdStrike research currently displays October 26, 2022 and calls Kiss-a-dog a campaign; section 'Use of Dog Pools and Disguised Xmrig' explicitly identifies XMRig. An independent December 9 2022 Cloud Security Alliance republication credits CrowdStrike but is a derivative, NOT a second research publisher or original-byte timestamp.",
+      "independence_group": "crowdstrike-kissadog-original-research",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "P1b prospective same-type campaign:Kiss-a-dog USES tool:xmrig background analogy to SCARLETEEL; candidate only, requires exact pre-cutoff archived bytes and independently reviewed claim"
     }
   ]
 }
