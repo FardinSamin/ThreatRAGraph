@@ -163,7 +163,7 @@ class PairedRunFreezeTests(unittest.TestCase):
 
     def test_version_control_characters_are_refused(self):
         data = fixture()
-        data[5]["extractor_version"] = "v1\\nsource-injection"
+        data[5]["extractor_version"] = "v1\nsource-injection"
         with self.assertRaisesRegex(ValueError, "bounded research version"):
             run(data)
 
