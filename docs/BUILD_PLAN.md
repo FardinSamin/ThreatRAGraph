@@ -18,7 +18,7 @@ Research question: can **historically available** graph-structural similarity pr
 | Area | Evidence in repository | Status | Not yet established |
 |---|---|---|---|
 | SRS, SDD, security defaults and CI | `docs/SRS.md`, `docs/SDD.md`, `.github/workflows/quality.yml` | Draft + CI present | Faculty signoff, clean Windows setup and comprehensive CI security checks |
-| M1 source registry / chronology | `datasets/manifests/pilot.json`, `scripts/validate_research_manifests.py` | 19 **candidate** URLs and validators | **0 approved** real source versions, exact archived bytes and verified public-availability times |
+| M1 source registry / chronology | `datasets/manifests/pilot.json`, `scripts/validate_research_manifests.py` | 20 **candidate** entries, including one original 1,525-byte signed runc Git tag fetched and SHA-256 hashed by CI | **0 approved** real source versions, exact archived bytes and verified public-availability times |
 | M1 case design | `datasets/cases/pilot.json`, `docs/research/M1_CASE_CANDIDATES.md` | Candidate research shortlist | **0 selected/approved** real historical case manifests; no frozen reference labels |
 | M1 archive audit | `scripts/audit_source_artifacts.py` | Synthetic-tested SHA-256 integrity checking | Approved real archives and evidence of licensing/public availability |
 | M2 parser / evidence foundation | `src/threatragraph/normalized_sources.py`, `pdf_sources.py`, `evidence_alignment.py` | Synthetic-tested UTF-8, JSON, visible HTML, Falco YAML and selectable PDF evidence locators | Full automatic free-text relation extraction, quality measurement, OCR, complete Falco semantic interpretation |
@@ -211,6 +211,7 @@ flowchart TD
 
 **[PR-B / Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24) — One historical development case (P1a):**
 - **Signed-release provenance subtask:** an offline [runc release/ref/tag witness verifier](research/P1A_RUNC_RELEASE_WITNESS.md) can cross-check GitHub's PGP verification claim, annotated-tag target and public release timestamp; this does **not** independently certify 2024 original web bytes, permissions or a research-ready source.
+- **Byte acquisition achieved, not case approved:** [pinned runc tag raw bytes obtained in GitHub CI](research/P1A_PINNED_TAG_ACQUISITION.md) (1,525 bytes; SHA-256 receipt retained 14 days). Signature trust, exact historic public release availability, reuse rights and researcher-approved cases remain blocked; there are 0 approved source-version manifest entries.
 - select one candidate with verifiable original and follow-up reporting dates **before reviewing prediction outcome**;
 - collect permitted exact archived versions outside Git, source rights and hash/date evidence;
 - freeze initial 1–2 report split and background/later reference separation; manually review in GitHub using metadata only;

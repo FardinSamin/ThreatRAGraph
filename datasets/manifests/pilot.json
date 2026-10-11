@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
   "dataset_version": "0.1.0-candidate",
-  "description": "Candidate public URLs only (19 records); two public dated oss-security maintainer disclosures added to the Leaky Vessels source screen. No archived source byte version or actual research case is approved; no listed observed date is a verified available_at timestamp.",
+  "description": "20 candidate-only public sources, including one separately pinned original runc signed Git tag (2026-10-10 evidence-acquisition development). Exact tag object bytes are retrievable in an isolated Git object store; original source rights, independently verified first-public chronology and researcher approval remain PENDING. Zero approved research case/source versions.",
   "sources": [
     {
       "source_id": "src:crio-crowdstrike",
@@ -326,6 +326,23 @@
       "sha256": null,
       "redistribution": "unknown",
       "selection_rationale": "Alternative pre-cutoff original historical advisory about a distinct runc vulnerability; same maintainer provenance as 2024 runc release prevents counting as independent background without redesigned grouping"
+    },
+    {
+      "source_id": "src:runc-signed-release-tag",
+      "source_version_id": "candidate:runc-signed-release-tag:unfrozen",
+      "source_kind": "cve_advisory",
+      "title": "Pinned signed Git annotated release tag for runc v1.1.12 and CVE-2024-21626",
+      "publisher": "opencontainers/runc maintainers",
+      "url": "https://api.github.com/repos/opencontainers/runc/git/tags/20381324e21b5b232fea74d448b5975d85d34d25",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "Exact Git tag object OID 20381324e21b5b232fea74d448b5975d85d34d25 points at commit 51d5e94601ceffbbd85688df1c928ecccbfa4685 (official public GitHub tag API). Official GitHub v1.1.12 release record currently reports public published_at=2024-01-31T20:06:08Z; the earlier tagger timestamp is not proof of public availability. Original Git object bytes can be acquired and independently hashed with scripts/acquire_runc_git_tag.py but first-public-availability of those exact bytes, trusted PGP key and archival/reuse decision remain pending.",
+      "independence_group": "runc-maintainer-releases",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "Immutable content-addressed primary publisher advisory tag containing original CVE disclosure text, distinct from mutable release HTML; same publisher and not an independent extra early source"
     }
   ]
 }
