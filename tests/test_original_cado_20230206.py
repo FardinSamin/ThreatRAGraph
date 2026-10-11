@@ -84,6 +84,59 @@ class OriginalCadoIndexedWarcTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             verify_original_cado_html_identity(html)
 
+    def test_historic_page_evidence_blocks_are_hash_only_and_unapproved(self):
+        from scripts.replay_original_cado_20230206 import candidate_review_fingerprints
+        source = (
+            b"<html><body><h2>Kiss-a-Dog updated Redis variant</h2>"
+            b"<p>Redis honeypot observations include XMRig binaries.</p>"
+            b"<p>Researcher inspected the XHide miner process hider.</p>"
+            b"</body></html>"
+        )
+        report = candidate_review_fingerprints(source)
+        self.assertEqual(3, report["matched_candidate_block_count"])
+        self.assertEqual(3, report["indexed_visible_blocks"])
+        self.assertEqual(
+            report["original_html_sha256"], __import__("hashlib").sha256(source).hexdigest()
+        )
+        for cue in report["evidence_block_hashes_and_structural_positions_only"]:
+            self.assertIsInstance(cue["source_block_index"], int)
+            self.assertEqual(64, len(cue["normalized_block_text_sha256"]))
+            self.assertNotIn("text", cue)
+            self.assertNotIn("body", cue)
+            self.assertFalse(any("Researcher" in str(v) for v in cue.values()))
+        for key in (
+            "literal_source_text_exported", "claim_semantics_reviewer_verified",
+            "same_campaign_variant_scope_verified", "source_rights_approved",
+            "g1_evaluation_eligible", "research_ready",
+        ):
+            self.assertFalse(report[key])
+
+    def test_html_script_only_or_title_only_evidence_is_not_accepted(self):
+        from scripts.replay_original_cado_20230206 import candidate_review_fingerprints
+        for fake in (
+            b"<html><script>XMRig XHide</script><p>harmless announcement</p></html>",
+            b"<html><title>XMRig XHide</title><p>unrelated post</p></html>",
+            b"<html><p>XMRig was used</p><template>XHide</template></html>",
+        ):
+            with self.subTest(source=fake[:38]), self.assertRaisesRegex(
+                ValueError, "XMRig/XHide"
+            ):
+                candidate_review_fingerprints(fake)
+
+    def test_original_html_review_anchor_is_reproducible_and_tamper_sensitive(self):
+        from scripts.replay_original_cado_20230206 import candidate_review_fingerprints
+        src = b"<html><p>Kiss-a-Dog Redis XMRig and XHide</p></html>"
+        a = candidate_review_fingerprints(src)
+        b = candidate_review_fingerprints(src)
+        self.assertEqual(a, b)
+        changed = candidate_review_fingerprints(
+            b"<html><p>Kiss-a-Dog Redis XMRig and XHide.</p></html>"
+        )
+        self.assertNotEqual(
+            a["evidence_block_hashes_and_structural_positions_only"][0]["normalized_block_text_sha256"],
+            changed["evidence_block_hashes_and_structural_positions_only"][0]["normalized_block_text_sha256"],
+        )
+
     def test_duplicate_headers_and_oversized_header_fail(self):
         with self.assertRaisesRegex(ValueError, "Duplicated"):
             verify_range_headers(
