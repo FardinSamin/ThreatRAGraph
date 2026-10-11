@@ -1,6 +1,5 @@
 """Only synthetic public GitHub event fixtures; never a claimed historical witness."""
 from contextlib import redirect_stdout
-import copy
 import gzip
 import hashlib
 import io
@@ -10,7 +9,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from scripts.verify_kissadog_cado_public_push import (
-    CUTOFF, COMMIT, REPO, REPO_ID, SCHEMA, event_matches,
+    COMMIT, REPO, REPO_ID, SCHEMA, event_matches,
     main, verify_archive,
 )
 
