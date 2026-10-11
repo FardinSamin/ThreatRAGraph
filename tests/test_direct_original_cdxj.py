@@ -107,12 +107,13 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
         index_lines = []
         offset = 0
         for i in range(12):
-            key = f"com,cadosecurity)/filler-{i:03d}"
-            payload = gzip.compress((key + " 20230206120544 {}\\n").encode(),
+            key = ("com,cadosecurity)/aaa" if i == 0
+                   else f"com,cadosecurity)/zzz-{i:03d}")
+            payload = gzip.compress((key + " 20230206120544 {}\n").encode(),
                                     mtime=0)
             index_lines.append(
-                f"{key} 20230206120544\\t{gzip_name}\\t{offset}\\t"
-                f"{len(payload)}\\t1\\n"
+                f"{key} 20230206120544\t{gzip_name}\t{offset}\t"
+                f"{len(payload)}\t1\n"
             )
             fake.files[gzip_name] = fake.files.get(gzip_name, b"") + payload
             offset += len(payload)
@@ -121,8 +122,8 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
             raw.replace(canonical.encode(), alternate.encode(), 1), mtime=0
         )
         index_lines.append(
-            f"{alternate} 20230206120544\\t{gzip_name}\\t{offset}\\t"
-            f"{len(payload)}\\t1\\n"
+            f"{alternate} 20230206120544\t{gzip_name}\t{offset}\t"
+            f"{len(payload)}\t1\n"
         )
         fake.files[gzip_name] += payload
         fake.files["cluster.idx"] = "".join(index_lines).encode("ascii")
@@ -142,26 +143,25 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
         self.assertEqual(2, len(original_query["index_surt_variant_diagnostics"]))
         self.assertEqual(1, original_query["matched_rows"])
 
-    def test_variant_lookup_incomplete_is_not_an_archive_absence(self):
-        fake = _FakeOriginalArchive()
-        canonical = module._url_key(TARGETS["cado-original-2022"][0])
-        original_reader = fake.reader()
-        class BrokenPreservedWww:
+    def test_index_access_failure_is_never_reported_as_capture_absence(self):
+        class UnavailableArchive:
             def size(self, url):
-                return original_reader.size(url)
-            def read(self, url, offset, length, total=None):
-                return original_reader.read(url, offset, length, total)
-        # A missing alternate host range in a tiny fabricated index must be
-        # reported conservatively, not interpreted as an archive-negative.
-        self.assertEqual(2, len(module._index_surt_variants(
-            TARGETS["cado-original-2022"][0]
-        )))
-        self.assertTrue(canonical.startswith("com,cadosecurity)"))
+                raise OSError("index temporarily unavailable")
+
         result = module.probe_direct(
             ["cado-original-2022"], ["CC-MAIN-2023-06"],
-            reader=BrokenPreservedWww()
+            reader=UnavailableArchive()
         )
+        self.assertFalse(result["known_cado_20230206_positive_control_matched"])
         self.assertFalse(result["source_version_approved"])
+        for query in result["query_receipts"]:
+            self.assertEqual(
+                "direct_index_partial_coverage_unvalidated", query["status"]
+            )
+            self.assertFalse(query["all_declared_surt_variants_probed"])
+            self.assertEqual(
+                2, len(query["index_surt_variant_diagnostics"])
+            )
 
 
     def test_source_url_surt_normalizes_www_but_not_other_domains(self):
