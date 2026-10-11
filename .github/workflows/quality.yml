@@ -258,12 +258,24 @@ jobs:
             --retry 2 --max-time 150 --max-filesize 167772160 \
             --output "$RUNNER_TEMP/2022-12-23-11.json.gz" \
             "https://data.gharchive.org/2022-12-23-11.json.gz"
-      - name: Scan complete archive for exact public GitHub Securonix commit push
+      - name: Fetch only historical Securonix Git commit/tree/blob objects (never run code)
+        shell: bash
+        env:
+          GIT_TERMINAL_PROMPT: '0'
+        run: |
+          set -euo pipefail
+          git init --bare "$RUNNER_TEMP/kissadog-pointer-original.git"
+          git -C "$RUNNER_TEMP/kissadog-pointer-original.git" fetch --no-tags --depth=1 \
+            https://github.com/Securonix/AutonomousThreatSweeper.git \
+            '+79b944c177a8640fb8f5396515daf2c249a43b15:refs/heads/historical'
+      - name: Verify original hourly archive, matching event and full Git object tree/file paths
         shell: bash
         run: |
           set -euo pipefail
           python -m scripts.verify_kissadog_cado_public_push \
             --archive "$RUNNER_TEMP/2022-12-23-11.json.gz" \
+            --require-original \
+            --git-repo "$RUNNER_TEMP/kissadog-pointer-original.git" \
             > "$RUNNER_TEMP/2022-cado-pointer-public-push.json"
           cat "$RUNNER_TEMP/2022-cado-pointer-public-push.json"
       - name: Retain metadata-only event receipt, never the public event archive
