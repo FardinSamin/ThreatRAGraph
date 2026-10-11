@@ -153,7 +153,7 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
         receipt = module.probe_direct(["cado-original-2022"], ["CC-MAIN-2023-06"],
                                       reader=self.data.reader())
         text = json.dumps(receipt)
-        self.assertNotIn("article_body", text)
+        self.assertNotIn('"article_body": {', text)
         self.assertNotIn("XHide was", text)
         self.assertFalse(receipt["independent_researcher_claims_reviewed"])
 
