@@ -82,6 +82,41 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+  original-ghsa-compound-witness:
+    name: Original pinned GHSA dual-field candidate receipt
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Fetch only exact original January 2024 GHSA JSON (never execute)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 --fail --show-error --silent --location \
+            --retry 2 --max-time 30 --max-filesize 2097152 \
+            --output "$RUNNER_TEMP/original-ghsa.json" \
+            "https://raw.githubusercontent.com/github/advisory-database/02a8b9a4f9d305f0e028ef58f0dcf28f55bf10ae/advisories/github-reviewed/2024/01/GHSA-xr7r-f8xq-vfvv/GHSA-xr7r-f8xq-vfvv.json"
+      - name: Verify pinned source SHA-256 and both structured field hashes, candidate-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.replay_original_ghsa_candidate \
+            --input-file "$RUNNER_TEMP/original-ghsa.json" \
+            > "$RUNNER_TEMP/original-ghsa-candidate-receipt.json"
+          cat "$RUNNER_TEMP/original-ghsa-candidate-receipt.json"
+      - name: Retain only safe hash and field-locator receipt (no source body)
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-ghsa-compound-candidate-receipt
+          path: ${{ runner.temp }}/original-ghsa-candidate-receipt.json
+          retention-days: 14
+          if-no-files-found: error
+
   preflight-and-tests:
     strategy:
       fail-fast: false
@@ -113,6 +148,8 @@ jobs:
         run: python -m scripts.extract_ghsa_candidates --help
       - name: GHSA compound candidate review CLI smoke (offline only)
         run: python -m scripts.review_ghsa_candidate --help
+      - name: Original pinned GHSA replay CLI smoke (offline only)
+        run: python -m scripts.replay_original_ghsa_candidate --help
       - name: G1 paired graph-similarity CLI smoke (offline only)
         run: python -m scripts.profile_g1 --help
       - name: Candidate byte capture CLI interface smoke (no downloads or writes)

@@ -32,6 +32,7 @@
 - [P1a actual pinned upstream tag acquisition](docs/research/P1A_PINNED_TAG_ACQUISITION.md) — GitHub CI fetches the original signed Git object and measures byte-level SHA-256; **candidate-only, no case/source approval**.
 - [P1a release-era GnuPG signer verification](docs/research/P1A_RUNC_SIGNER_VERIFICATION.md) — authentic PGP signature verified with a historically pinned runc keyring in isolated CI; exact first-public date and reviewer approval still pending.
 - [P1a original advisory public-event witness](docs/research/P1A_ORIGINAL_ADVISORY_WITNESS.md) — original advisory bytes tied to an independently retained pre-cutoff public commit, with repeatable offline verification and pending investigator approval.
+- [P1a real original GHSA extraction replay](docs/research/P1A_GHSA_LIVE_REPLAY.md) — CI retrieves exact hash-pinned original advisory bytes, checks CVE/package fields and emits a hash-only candidate receipt; no study approval.
 - [P1a case–method eligibility gate](docs/research/P1A_CASE_METHOD_ELIGIBILITY.md) — explains why CVE/vulnerability targets cannot be evaluated by G1 v2 and requires a reviewed case-unit decision before results.
 - [Private candidate byte capture](docs/research/P1A_LEAKY_VESSELS_CASE.md#safe-manual-source-byte-preservation-private-not-approval) — bounded offline original-byte archiving and unapproved receipts; not proof of historical content or rights.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
