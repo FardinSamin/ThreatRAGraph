@@ -67,7 +67,7 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
         )
         self.assertEqual(2, receipt["matching_pre_cutoff_candidate_count"])
         self.assertEqual(2, len(receipt["candidate_metadata_rows"]))
-        self.assertEqual(3, len(receipt["query_receipts"]) + 0)
+        self.assertEqual(4, len(receipt["query_receipts"]))
         self.assertFalse(receipt["archive_article_bytes_acquired"])
         self.assertFalse(receipt["research_ready"])
         self.assertFalse(receipt["source_version_approved"])
