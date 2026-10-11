@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
   "dataset_version": "0.1.0-candidate",
-  "description": "29 candidates source versions, including the pinned runc signed tag and original GHSA JSON linked to an independently retained public push event. Measured provenance receipts are separate from source rights, historical eligibility and investigator approval. Zero approved source versions or selected cases.",
+  "description": "30 candidates source versions, including the pinned runc signed tag and original GHSA JSON linked to an independently retained public push event. Measured provenance receipts are separate from source rights, historical eligibility and investigator approval. Zero approved source versions or selected cases.",
   "sources": [
     {
       "source_id": "src:crio-crowdstrike",
@@ -496,6 +496,23 @@
       "sha256": null,
       "redistribution": "unknown",
       "selection_rationale": "P1b original publisher-controlled versioned ATT&CK STIX background and historical metadata-drift witness. Typed intrusion-set:TeamTNT, not campaign:Chimaera. Source status remains unapproved until chronology, rights and expert review; not a G1-v2 campaign feature or second independent Chimaera evidence group."
+    },
+    {
+      "source_id": "src:kissadog-cado-2022",
+      "source_version_id": "candidate:kissadog-cado-202212:unfrozen",
+      "source_kind": "cti_report",
+      "title": "Kiss-a-Dog Discovered Utilizing a 20-Year-Old Process Hider",
+      "publisher": "Cado Security Labs",
+      "url": "https://www.cadosecurity.com/blog/kiss-a-dog-discovered-utilizing-a-20-year-old-process-hider",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "Cado's original investigation describes its own Redis honeypot sample and XMRig/XHide process camouflage (not a mere CrowdStrike syndication), but present original page is migrated/redirected to Darktrace; current search-indexed copy is NOT authenticated 2022 HTML. Securonix/AutonomousThreatSweeper Git commit 79b944c177a8640fb8f5396515daf2c249a43b15 (declared 2022-12-23T11:42:26Z) includes original cadosecurity.com/kiss-a-dog-discovered-utilizing-a-20-year-old-process-hider/ URL and Cado report's seven SHA-256 IOCs. Its Git commit date is not independently attested public PushEvent time, and Securonix is a derivative index, NOT a second Cado investigation. December 25 2022 This Week in 4n6 references Cado article but current page might be modified. Full original Cado 2022 bytes and exact historical available_at remain unknown.",
+      "independence_group": "cado-security-labs-kissadog-honeypot-original",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "P1c genuine independently investigated same historical Kiss-a-dog campaign peer in Cado own Redis honeypot; candidate shared campaign USES tool:xmrig plus prospective distinct USES tool:xhide relation. Neither claim byte-aligned or reviewer-verified, variant scope unresolved. May provide second source group along with CrowdStrike for one per-peer G1 path after independent approvals; not presently eligible."
     }
   ]
 }
