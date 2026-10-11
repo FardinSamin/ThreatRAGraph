@@ -7,6 +7,7 @@ from io import StringIO
 from pathlib import Path
 import unittest
 
+from scripts.aggregate_candidate_evaluations import main as aggregate_main
 from scripts.evaluate_frozen_paired_run import _load, main
 from src.threatragraph.evidence_graph import fingerprint
 from src.threatragraph.heldout_evaluation import (
@@ -270,6 +271,44 @@ class HeldoutCandidateScoringTests(unittest.TestCase):
             file.write_text('{"case_id":"a","case_id":"b"}', encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "Duplicate JSON"):
                 _load(str(file))
+
+    def test_aggregate_cli_preview_hides_original_reference_contents(self):
+        report = score_frozen_pair(*fixture())
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "case.json"
+            p.write_text(json.dumps(report), encoding="utf-8")
+            out = StringIO()
+            with redirect_stdout(out):
+                status = aggregate_main(["--evaluations", str(p)])
+            self.assertEqual(0, status)
+            data = json.loads(out.getvalue())
+            self.assertEqual("candidate_aggregate_preview", data["status"])
+            self.assertEqual(1, data["case_count"])
+            self.assertFalse(data["research_ready"])
+            self.assertNotIn("reviewer-a", out.getvalue())
+
+    def test_aggregate_cli_refuses_duplicate_paths(self):
+        report = score_frozen_pair(*fixture())
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "case.json"
+            p.write_text(json.dumps(report), encoding="utf-8")
+            out = StringIO()
+            with redirect_stdout(out):
+                status = aggregate_main(["--evaluations", str(p), str(p)])
+            self.assertEqual(2, status)
+            self.assertIn("candidate_aggregate_refused", out.getvalue())
+
+    def test_aggregate_cli_refuses_tampered_report(self):
+        report = score_frozen_pair(*fixture())
+        report["methods"]["G1_novel_proposals"]["supported_count"] = 500
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "case.json"
+            p.write_text(json.dumps(report), encoding="utf-8")
+            out = StringIO()
+            with redirect_stdout(out):
+                status = aggregate_main(["--evaluations", str(p)])
+            self.assertEqual(2, status)
+            self.assertIn("candidate_aggregate_refused", out.getvalue())
 
     def test_cli_rejects_bad_profiles_before_parsing_gold(self):
         with tempfile.TemporaryDirectory() as tmp:

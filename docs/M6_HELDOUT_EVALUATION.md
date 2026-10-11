@@ -1,6 +1,6 @@
 # M6.2 — Separate candidate held-out evaluation scorer
 
-**Status:** Draft code and 22 synthetic/adversarial tests authored; none has
+**Status:** Draft code and 25 synthetic/adversarial tests authored; none has
 been executed in CI or verified against a genuine historical study case.
 This requires parent draft PR #52. No empirical B0/G1 results or source
 approval have been produced.
@@ -98,6 +98,21 @@ Rank scores are uncalibrated Jaccard heuristics, not probabilities.
 The pure aggregate_candidate_evaluations helper reports descriptive micro
 assessable precision across unique candidate case reports; no inferential
 significance, calibration, or real-case effect size is claimed.
+
+## Aggregate CLI — scored candidate reports only
+
+The offline aggregate command reads distinct, already-scored case reports,
+not source articles or raw held-out label documents:
+
+    python -m scripts.aggregate_candidate_evaluations \
+      --evaluations artifacts/heldout_evaluation/case1.json \
+                    artifacts/heldout_evaluation/case2.json
+
+It verifies each report's content fingerprint, refuses duplicate case IDs
+or duplicate file paths, and emits separate micro assessable-precision
+denominators. Preview is read-only; the optional --write mode creates
+hash-addressed aggregate JSON. No significance tests or real results are
+claimed by this candidate-only engineering code.
 
 ## Remaining scientific and engineering gates
 
