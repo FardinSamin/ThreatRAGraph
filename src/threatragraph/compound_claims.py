@@ -8,7 +8,6 @@ No candidate review from the unapproved sidecar is automatically imported.
 from __future__ import annotations
 
 import json
-import sqlite3
 
 from .evidence_graph import EvidenceGraph, as_utc, fingerprint, require_sha
 from .ghsa_review_packets import build_packet
