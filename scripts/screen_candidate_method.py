@@ -50,7 +50,7 @@ def assess_screen(screen: dict, manifest: dict) -> dict:
     if not isinstance(target, str) or not target.startswith("campaign:"):
         raise ValueError("This first prospect is for an authentic named campaign target")
     # Typed ontology checks below establish only a potential method fit.
-    cutoff = as_utc(screen["proposed_cutoff_at"])
+    as_utc(screen["proposed_cutoff_at"])
     if screen["case_approved"] is not False or screen["research_ready"] is not False:
         raise ValueError("Prospective screening must never assert approval or readiness")
     if (screen["same_type_background_peers_verified"] is not False or
