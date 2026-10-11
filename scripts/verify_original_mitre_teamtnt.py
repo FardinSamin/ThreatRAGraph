@@ -31,7 +31,7 @@ def verify_original(raw: bytes) -> dict:
     if not isinstance(raw, bytes) or not 0 < len(raw) <= LIMIT:
         raise ValueError("Bounded original Git blob bytes required")
     actual_oid = hashlib.sha1(
-        b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw,
+        b"blob " + str(len(raw)).encode("ascii") + bytes((0,)) + raw,
         usedforsecurity=False,
     ).hexdigest()
     if actual_oid != BLOB:
