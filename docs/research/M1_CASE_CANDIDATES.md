@@ -90,6 +90,16 @@ The proposed comparison is **B0** (first one or two public sources only) versus 
 
 **Status:** **Promising**, especially for a deliberately sparse vendor-advisory baseline.
 
+## Candidate F — SCARLETEEL cloud intrusion **campaign** (separate G1-v2 prospect)
+
+**Natural source-grounded unit:** `campaign:SCARLETEEL`, not a vulnerability or unverified actor/malware alias. [Sysdig's original incident account](https://www.sysdig.com/blog/cloud-breach-terraform-data-theft) displays **February 28, 2023** and describes an operation launched from an exposed Kubernetes workload into AWS. Its discussion of an XMRig executable gives a plausible tentative `campaign:SCARLETEEL USES tool:xmrig` candidate in G1's supported feature family. **No original Feb 2023 source-byte version, field-alignment or manual semantic review is yet verified.**
+
+[Contemporaneous BleepingComputer coverage](https://www.bleepingcomputer.com/news/security/scarleteel-hackers-use-advanced-cloud-skills-to-steal-source-code-data/) bears the same calendar date but credits Sysdig and therefore **must share the same research lineage** rather than count as an independent early report. [Intezer's September 2020 TeamTNT report](https://intezer.com/blog/attackers-abusing-legitimate-cloud-monitoring-tools-to-conduct-cyber-attacks) and [Trend Micro's July 2021 TeamTNT report](https://www.trendmicro.com/vinfo/fr/security/news/cybercrime-and-digital-threats/teamtnt-activities-probed) are historical background leads from separate research publishers. **They do not yet establish exact matching same-type campaign peers**: TeamTNT is an actor in the Intezer original. [Sysdig's July 2023 follow-up](https://www.sysdig.com/blog/scarleteel-2-0) is a possible **later** reference from the same publisher, not independent corroboration.
+
+**Research caution:** A prospective March 1, 2023, 00:00 UTC cutoff is not yet approved or byte-timestamped. Only search-result summaries, not later source bodies, were seen during discovery; that exposure is disclosed and future outcome review must be independently blinded. Neither two-group same-type support nor a genuinely novel later evaluable relation is established.
+
+**Status:** **Plausible method type and one tentative early feature, but NOT G1-eligible or selected.** Full auditable decision: [P1b SCARLETEEL screen](P1B_SCARLETEEL_CAMPAIGN_SCREEN.md) and [candidate-only machine-readable screen](../../datasets/case_screenings/scarleteel.json). Five SCARLETEEL/TeamTNT-related URLs are registered as **unapproved candidate** sources; the historical case manifest remains empty.
+
 ## Selection and exclusion decisions still required
 
 1. **Chronology:** Preserve independently dated copies of the exact public versions. A private disclosure date is not public availability.
