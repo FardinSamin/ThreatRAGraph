@@ -27,13 +27,13 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | FR-08 | Partial | Size/format/hash validation and refusal tests | Robust per-item quarantine and continue-on-error batch ingest |
 | FR-09 | **Partial / synthetic-tested subset** | New `src/threatragraph/ghsa_candidates.py` + offline CLI extract explicit schema-1.4 CVE-to-Go-package `AFFECTS` review candidates with two exact structured field hashes; no ledger insertion | General CTI/STIX/free-text extraction, multi-field ledger proof, independent review and measured quality |
 | FR-10 | Partial | `normalized_sources.py`, `test_normalized_sources.py` | Actual Falco rule entity/field extraction and relationship mapping |
-| FR-11 | Present/tested synthetic (subset) | `evidence_graph.py` + `evidence_alignment.py`, `test_evidence_alignment.py` | Audited extraction origin across complete real pipeline |
+| FR-11 | Present/tested synthetic (subset) | `evidence_graph.py` + `evidence_alignment.py`; new `ghsa_review_packets.py` verifies two structured scalar locator hashes against pinned bytes | Versioned multi-field scored-claim provenance and audited extraction origin in real approved pipeline |
 | FR-12 | Present/tested synthetic (limited ontology) | `evidence_graph.py`, `test_evidence_graph.py` | Full type coverage, schema evolution/migrations |
 | FR-13 | **Missing** | Typed IDs enforced, but no time-aware alias resolution engine | Historized canonicalization and collision decisions |
 | FR-14 | Partial | SQLite sourced claim tables and graph JSON projection | Full logical entity/evidence storage and export round-trip |
 | FR-15 | Partial | `assertion_kind` + polarity + review ledger; predicted claims prohibited | Separate prediction plane and state transition contract |
 | FR-16 | Partial | Source-allowlisted graph projection and neighborhood helper | General lineage/time/case query interface and access isolation |
-| FR-17 | Partial | `semantic_reviews.py` decisions, adverse tests | Review queue, independent adjudication and conflict resolution protocol |
+| FR-17 | Partial | `semantic_reviews.py` and candidate-only `ghsa_review_packets.py` support separate append-only self-declared compound-field review records on synthetics | Authenticated reviewers, actual approved multi-field sourced claims, independent adjudication and measured agreement |
 | FR-18 | **Missing** | JSON outputs exist | Versioned interoperable JSON/CSV export-import (STIX only valid types) |
 | FR-19 | Present/tested synthetic (only) | `freeze_case_snapshots.py` + `baseline_b0.py` | Real historical case and extract/review parity |
 | FR-20 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `tests/test_similarity_g1.py` | Equal-weight typed Jaccard overlap and evidence contributions exist; general structural families, independently authenticated as-of feature lineage and real historical corpus missing |
