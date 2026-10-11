@@ -257,7 +257,7 @@ class CompoundGHSATests(unittest.TestCase):
             out = io.StringIO()
             with redirect_stdout(out):
                 self.assertEqual(2, main([
-                    *args[:3], "--expected-sha256", "0" * 64,
+                    *args[:4], "--expected-sha256", "0" * 64,
                     "--candidate-id", p["candidate_id"],
                 ]))
             self.assertEqual("compound_review_refused",
