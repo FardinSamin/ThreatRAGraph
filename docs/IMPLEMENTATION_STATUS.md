@@ -13,6 +13,8 @@ This is a **code-and-test audit**, not a certification. Status labels:
 
 **Current reference:** the existing code through M4 and prior 149-test synthetic suite. Re-run tests on the current commit to establish an up-to-date count; test count alone cannot prove corpus validity or research effectiveness.
 
+**Dependent unmerged draft branch note:** PR #53 builds on PR #52 and adds candidate-only evaluation scaffolding. Both drafts remain unexecuted/unapproved while Actions quota is exhausted.
+
 **Draft-branch note (October 11, 2026):** PR #52 contains additional M6
 implementation and authored tests, but GitHub Actions runners are unavailable.
 These changes have **not passed an executed test suite** and remain unmerged;
@@ -51,8 +53,8 @@ the published `main` validation status must not be inflated.
 | FR-27 | Partial | Draft source/case registries and validators | 4–6 frozen real historical cases and independent label partitions |
 | FR-28 | **Partial / draft, tests not executed** | Draft PR #52: `paired_profile_audit.py`, `paired_run_freeze.py`, offline CLI and 29 authored synthetic/adversarial tests for paired B0/G1 execution, early-output parity and source-view/lineage controls | Exact historical inputs, actual source-byte/claim parity, independently dated case, executed tests and verified end-to-end research run |
 | FR-29 | **Partial / draft, tests not executed** | Draft PR #52: deterministic `run_id` binds declared full Git SHA, dependency/source/case/review hashes, version/config, five canonical input digests, two profile IDs and paired parity receipt; optional exclusive-write hashed artifacts | Independently verified original bytes/metadata, immutable external registry/signatures, frozen annotation provenance, empirical run set and clean-room replay |
-| FR-30 | **Missing** | Evaluation design only | Held-out later label store and independent scorer |
-| FR-31 | **Missing** | No empirical run reports | Casewise and aggregate denominator-bearing metrics exports |
+| FR-30 | **Partial / draft, tests not executed** | Dependent draft PR #53: `heldout_evaluation.py` and isolated local scorer CLI validate separately hashed later reference partitions, explicit supported/contradicted/not-assessable/duplicate/out-of-scope decisions, reviewer and cutoff metadata, run-lock and exact output parity; 22 authored synthetic/adversarial tests | Authenticate later original source bytes/dates and reviewer identities, independently frozen predictions and reviewed real gold labels; validate scorer on actual cases |
+| FR-31 | **Partial / draft, tests not executed** | Dependent draft PR #53: candidate casewise relation ledger, assessable precision, not-assessable counts, positively labeled subset coverage and descriptive micro aggregate, deterministic hash IDs | Complete validated real case denominator set, extractor scores, independent case-level outcome review, leakage proof, uncertainty and final research reporting |
 | FR-32 | Partial | Source, archive, snapshot, graph and B0 CLIs | End-to-end ingest/extract/build/profile/evaluate/export orchestrator |
 | FR-33 | Optional/deferred | No authenticated read API | Add only if required by researcher workflow |
 | FR-34 | Optional/deferred | No dashboard | Defer to verified study, or implement minimal audit browser |
