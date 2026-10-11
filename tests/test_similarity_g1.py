@@ -187,6 +187,36 @@ class G1SimilarityTests(unittest.TestCase):
             res = profile((b0, bg0, g1, gg))
             self.assertEqual([], res["predictions"], polarity)
 
+    def test_early_contradicted_similarity_feature_cannot_seed_a_prediction(self):
+        b0, bg0, g1, gg = fixtures()
+        contradictory = edge(6, "early", "malware:new", "USES",
+                             "attack-technique:T1059", polarity="negative")
+        b0g = graph(b0, bg0["edges"] + [contradictory])
+        g1g = graph(g1, gg["edges"] + [copy.deepcopy(contradictory)])
+        result = profile((b0, b0g, g1, g1g))
+        self.assertEqual([], result["observed_early_facts"])
+        self.assertEqual([], result["predictions"])
+        self.assertEqual("no_reviewed_early_target_features",
+                         result["abstention"]["reason"])
+
+    def test_disputed_historical_candidate_relation_cannot_be_predicted(self):
+        b0, bg0, g1, gg = fixtures()
+        dispute = edge(7, "back-one", "malware:older", "HAS_BEHAVIOR",
+                       "attack-behavior:exec-sequence", polarity="negative")
+        g1g = graph(g1, gg["edges"] + [dispute])
+        result = profile((b0, bg0, g1, g1g))
+        self.assertEqual([], result["predictions"])
+        self.assertTrue(result["abstention"]["abstained"])
+
+    def test_disputed_historical_match_feature_cannot_drive_overlap(self):
+        b0, bg0, g1, gg = fixtures()
+        dispute = edge(8, "back-two", "malware:older", "USES",
+                       "attack-technique:T1059", polarity="uncertain")
+        g1g = graph(g1, gg["edges"] + [dispute])
+        result = profile((b0, bg0, g1, g1g))
+        self.assertEqual([], result["predictions"])
+        self.assertTrue(result["abstention"]["abstained"])
+
     def test_future_g1_label_and_source_claim_are_rejected(self):
         b0, bg0, g1, gg = fixtures()
         gg["outcome_labels"] = {"future": True}
