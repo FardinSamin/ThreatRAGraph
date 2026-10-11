@@ -22,8 +22,8 @@ from scripts.probe_original_campaign_cdx import COLLECTIONS, TARGETS, classify_r
 VERSION = "original-cdxj-direct-cluster-lookup-v1"
 BASE = "https://data.commoncrawl.org/cc-index/collections"
 MAX_CLUSTER_SIZE = 256 * 1024 * 1024
-MAX_RANGE = 160 * 1024
-MAX_CDX_MEMBER = 512 * 1024
+MAX_RANGE = 768 * 1024
+MAX_CDX_MEMBER = 700 * 1024
 MAX_INFLATED = 16 * 1024 * 1024
 MAX_BINARY_PROBES = 28
 MAX_LOCATOR_BLOCKS = 5
