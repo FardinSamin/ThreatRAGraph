@@ -13,9 +13,10 @@ from collections import Counter, defaultdict
 from .baseline_b0 import build_b0_profile
 from .contracts import validate_graph_projection
 from .evidence_graph import fingerprint, require_id, validate_triple
+from .feature_lineage import validate_asof_lineage
 from .readiness import readiness_disclosure
 
-METHOD = "g1-historical-typed-jaccard-v1"
+METHOD = "g1-historical-typed-jaccard-v2-lineage"
 G1_VIEW_METHOD = "G1_early_plus_historical_background"
 B0_VIEW_METHOD = "B0_sparse_report_only"
 # No actor attribution, runtime-observed execution, CVE exploitation, or Falco
@@ -54,7 +55,8 @@ def _sorted_support(edges, groups):
 
 def build_g1_profile(
     b0_view: dict, b0_graph: dict, g1_view: dict, g1_graph: dict,
-    *, top_k: int = 5, min_overlap: int = 1, min_background_groups: int = 2,
+    *, feature_lineage: dict, top_k: int = 5, min_overlap: int = 1,
+    min_background_groups: int = 2,
     max_peers_per_feature: int = 10, development_only: bool = False,
 ) -> dict:
     """Rank historically eligible analogies; abstain on weak corroboration.
@@ -71,6 +73,7 @@ def build_g1_profile(
         raise ValueError("Invalid bounded G1 configuration")
     validate_graph_projection(b0_graph, b0_view, reviewed=True)
     validate_graph_projection(g1_graph, g1_view, reviewed=True)
+    lineage_report = validate_asof_lineage(feature_lineage, g1_view, g1_graph)
     if b0_view["method"] != B0_VIEW_METHOD or g1_view["method"] != G1_VIEW_METHOD:
         raise ValueError("Sealed B0 and G1 source views required")
     for key in ("dataset_id", "dataset_version", "case_id", "target_entity_id", "cutoff_at"):
@@ -254,6 +257,8 @@ def build_g1_profile(
         "b0_profile_id": observed["profile_id"],
         "b0_source_view_sha256": b0_graph["source_view_sha256"],
         "g1_source_view_sha256": g1_graph["source_view_sha256"],
+        "feature_lineage_sha256": lineage_report["lineage_sha256"],
+        "feature_lineage_contract": lineage_report,
         "early_source_version_ids": sorted(b0_sources),
         "observed_early_facts": observed["facts"],
         "predictions": predictions,
@@ -275,8 +280,9 @@ def build_g1_profile(
         "readiness": readiness_disclosure(development_only=development_only),
         "research_ready": False,
         "limitations": (
-            "Synthetic-tested graph analogy only. No as-of alias/ontology proof, "
-            "source-archive verification or independent review authentication. "
+            "Synthetic-tested exact-only as-of lineage is asserted by supplied "
+            "metadata, not independently authenticated or verified against original "
+            "archive bytes, source-native identifiers or external reviewer identity. "
             "Rank score is not a probability, future outcome or observed attack."
         ),
     }

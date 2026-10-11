@@ -1,6 +1,6 @@
-# M5 — Explainable G1 historical graph similarity (v1)
+# M5 — Explainable G1 historical graph similarity (v2: exact-only lineage)
 
-**Implementation:** `src/threatragraph/similarity_g1.py`, `scripts/profile_g1.py`, `tests/test_similarity_g1.py`.
+**Implementation:** `src/threatragraph/similarity_g1.py`, `src/threatragraph/feature_lineage.py`, `scripts/profile_g1.py`, `tests/test_similarity_g1.py`, `tests/test_feature_lineage.py`.
 **Tracking:** [M5 Issue #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) · [SRS](SRS.md) FR-20–25 · [SDD](SDD.md) §8.
 **Status:** Versioned **synthetic-tested research algorithm**, not evaluated on an independently approved historical corpus.
 
@@ -12,7 +12,7 @@
 
 ## Conservative v1 method
 
-1. Accept **only four sealed, locally supplied JSON artifacts**: `B0` source view, `B0` reviewed graph, `G1` source view and `G1` reviewed graph. No full case registry, held-out reference/gold labels, web retrieval, LLM, cloud services, embeddings or API calls.
+1. Accept **five sealed, locally supplied JSON artifacts**, including the mandatory G1 exact-only as-of feature-lineage record, instead of only four: `B0` source view, `B0` reviewed graph, `G1` source view and `G1` reviewed graph. No full case registry, held-out reference/gold labels, web retrieval, LLM, cloud services, embeddings or API calls.
 2. Require exact B0/G1 early input equivalence. Reject later/future source roles, any post-cutoff source, background claim that directly mentions the target, and any background publisher **independence group shared with an early source**.
 3. Only **positive, aligned, semantically supported `report_assertion`** claims participate in similarity. `rule_semantics` (Falco rule logic) **cannot become evidence of actual incident behavior**; negative and uncertain early claims prevent that relation from being proposed. **G1 reuses B0's conflict-resolved early feature set**, and conflicting negative/uncertain historical claims suppress both corresponding peer-matching features and proposed target relations.
 4. Match historically known **same-type peer subjects** to the target using exact typed outgoing features (`USES` and `HAS_BEHAVIOR`). No aliases are inferred. Remove features attached to more than `max_peers_per_feature` eligible background peer entities to avoid popularity-only matches.
@@ -26,28 +26,29 @@
 ## Offline CLI
 
 ~~~powershell
-python -m scripts.profile_g1 --b0-view .\data\private\b0-view.json --b0-graph .\data\private\b0-graph.json --g1-view .\data\private\g1-view.json --g1-graph .\data\private\g1-graph.json --top-k 5 --min-background-groups 2
+python -m scripts.profile_g1 --b0-view .\data\private\b0-view.json --b0-graph .\data\private\b0-graph.json --g1-view .\data\private\g1-view.json --g1-graph .\data\private\g1-graph.json --feature-lineage .\data\private\g1-asof-lineage.json --top-k 5 --min-background-groups 2
 ~~~
 
-The four inputs must originate from an audited M1/M2/M3 preparation pipeline; a forged JSON file can *self-declare* prior semantic review and release dates. The G1 CLI cannot independently authenticate source bytes or reviewers. Its output always contains `research_ready=false` and the `research-readiness-v1` disclosure. If a required input or contract fails, the CLI prints a small `status=refused` response, not raw source evidence.
+The five inputs must originate from an audited M1/M2/M3 preparation pipeline; a forged JSON file can *self-declare* prior semantic review and release dates. The G1 CLI cannot independently authenticate source bytes or reviewers. Its output always contains `research_ready=false` and the `research-readiness-v1` disclosure. If a required input or contract fails, the CLI prints a small `status=refused` response, not raw source evidence.
 
 ### Output fields
 
 | Field | Semantics |
 |---|---|
-| `method_version=g1-historical-typed-jaccard-v1` | Frozen algorithm label for reproducibility |
+| `method_version=g1-historical-typed-jaccard-v2-lineage` | Frozen algorithm label for reproducibility |
 | `b0_profile_id` | Content-derived hash of the unchanged B0 report-only result |
 | `observed_early_facts` | Exactly B0's eligible early source assertions; not external truth |
 | `predictions[]` | Separate provisional new target relations, historical analogy score, peer/matching features and source-claim provenance paths |
 | `abstention` | Whether candidate inference was refused for insufficient support |
 | `configuration` | Frozen top-k, feature overlap, group threshold and popularity cap |
 | `readiness` | Structural validation only; independent source/dating/real research approval NOT established |
+| `feature_lineage_sha256` / `feature_lineage_contract` | Mandatory per-claim source/date binding; no independent original-byte authentication |
 | `profile_id` | Deterministic content digest of the complete G1 result |
 
 ### Non-goals / remaining research gates
 
 - **No genuine historical pilot yet:** 19 source URLs are candidates, **0 approved real versions and 0 case manifests**; there are **0 real B0/G1 results**.
-- **No claim-level historical alias/ontology/feature index reconstruction:** source-level cutoff isn't sufficient; implement and test these before empirical scoring.
+- **M5.2 now checks declared exact-only per-claim source/date lineage**, refusing aliases and external taxonomy/rule enrichment. Actual historic identifier and original-byte authentication, real taxonomy versions and cache replay remain **unverified**. See [M5.2 contract](M5_ASOF_FEATURE_LINEAGE.md).
 - **No independent gold-label store, outcome scorer, feature ablation, calibrated ranking probabilities, historical publication proof or human reviewer authentication.** All remain pending in P1–P5.
 - **No synonym merging, graph embeddings, LLM inference, NetworkX requirement, cloud backend or operational detection product.**
 - **Two group support is a deliberately conservative heuristic**, not a statistically validated threshold. Predeclare/study sensitivity only on development cases, not post hoc held-out outcomes.

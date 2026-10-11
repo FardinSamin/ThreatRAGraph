@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Offline, isolated M5 G1 profile; no gold labels, network or source registry.
 
-All four input JSON files must be sealed, reviewed source/case snapshots
+All four input JSON files plus mandatory separately reviewed feature-lineage JSON must be sealed source/case snapshots
 produced upstream; this script validates *structure* and B0/G1 early parity,
 not independent historical publisher date or source authenticity.
 """
@@ -27,6 +27,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     for opt in ("b0-view", "b0-graph", "g1-view", "g1-graph"):
         parser.add_argument("--" + opt, required=True, help="Sealed, pre-reviewed " + opt)
+    parser.add_argument("--feature-lineage", required=True,
+                        help="Separately reviewed exact-only per-claim as-of provenance JSON")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--min-overlap", type=int, default=1)
     parser.add_argument("--min-background-groups", type=int, default=2)
@@ -37,6 +39,7 @@ def main(argv=None):
         output = build_g1_profile(
             load_json(args.b0_view), load_json(args.b0_graph),
             load_json(args.g1_view), load_json(args.g1_graph),
+            feature_lineage=load_json(args.feature_lineage),
             top_k=args.top_k, min_overlap=args.min_overlap,
             min_background_groups=args.min_background_groups,
             max_peers_per_feature=args.max_peers_per_feature,

@@ -11,6 +11,10 @@ import unittest
 from scripts.profile_g1 import main
 from src.threatragraph.evidence_graph import fingerprint
 from src.threatragraph.similarity_g1 import build_g1_profile
+from src.threatragraph.feature_lineage import (
+    ARTIFACT_KIND, CONTRACT_VERSION, EXTRACTION, IDENTITY_POLICY,
+    graph_claim_set_sha256,
+)
 
 
 def h(value):
@@ -77,9 +81,45 @@ def fixtures():
     return b0, graph(b0, [target]), g1, graph(g1, [copy.deepcopy(target), overlap, candidate])
 
 
+def feature_lineage(g1_view, g1_graph):
+    """Synthetic claims about exact-only source vocabulary, never real attestations."""
+    sources = {entry["source_version_id"]: entry for entry in g1_view["sources"]}
+    # Unknown IDs remain invalid at the G1 graph boundary, not in test setup.
+    sources = {**{"heldout": {"sha256": h("invalid-heldout"),
+                              "available_at": "2024-01-01T00:00:00Z"}}, **sources}
+    return {
+        "schema_version": CONTRACT_VERSION,
+        "artifact_kind": ARTIFACT_KIND,
+        "case_id": g1_view["case_id"],
+        "cutoff_at": g1_view["cutoff_at"],
+        "g1_source_view_sha256": fingerprint(g1_view),
+        "g1_graph_sha256": graph_claim_set_sha256(g1_graph),
+        "identity_policy": IDENTITY_POLICY,
+        "claim_lineage": [
+            {
+                "claim_id": edge["claim_id"],
+                "source_version_id": edge["source_version_id"],
+                "source_sha256": sources[edge["source_version_id"]]["sha256"],
+                "source_available_at": sources[edge["source_version_id"]]["available_at"],
+                "claim_evidence_sha256": edge["evidence_sha256"],
+                "subject_id": edge["subject_id"],
+                "predicate": edge["predicate"],
+                "object_id": edge["object_id"],
+                "feature_known_at": sources[edge["source_version_id"]]["available_at"],
+                "derivation": EXTRACTION,
+            }
+            for edge in sorted(g1_graph["edges"], key=lambda edge: edge["claim_id"])
+        ],
+        "limitations": "SYNTHETIC self-declarations only, not approved real historical source evidence",
+    }
+
+
 def profile(params=None, **kw):
     args = tuple(copy.deepcopy(x) for x in (fixtures() if params is None else params))
-    return build_g1_profile(*args, **kw)
+    lineage = kw.pop("feature_lineage", None)
+    if lineage is None:
+        lineage = feature_lineage(args[2], args[3])
+    return build_g1_profile(*args, feature_lineage=lineage, **kw)
 
 
 class G1SimilarityTests(unittest.TestCase):
@@ -267,11 +307,15 @@ class G1SimilarityTests(unittest.TestCase):
             base = Path(tmp)
             for name, value in zip(("b0v", "b0g", "g1v", "g1g"), (b0, bg0, g1, gg)):
                 (base / (name + ".json")).write_text(json.dumps(value), encoding="utf-8")
+            (base / "lineage.json").write_text(
+                json.dumps(feature_lineage(g1, gg)), encoding="utf-8"
+            )
             argv = [
                 "--b0-view", str(base / "b0v.json"),
                 "--b0-graph", str(base / "b0g.json"),
                 "--g1-view", str(base / "g1v.json"),
-                "--g1-graph", str(base / "g1g.json")
+                "--g1-graph", str(base / "g1g.json"),
+                "--feature-lineage", str(base / "lineage.json")
             ]
             out = io.StringIO()
             with redirect_stdout(out):

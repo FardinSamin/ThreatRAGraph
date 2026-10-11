@@ -36,8 +36,8 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | FR-17 | Partial | `semantic_reviews.py` decisions, adverse tests | Review queue, independent adjudication and conflict resolution protocol |
 | FR-18 | **Missing** | JSON outputs exist | Versioned interoperable JSON/CSV export-import (STIX only valid types) |
 | FR-19 | Present/tested synthetic (only) | `freeze_case_snapshots.py` + `baseline_b0.py` | Real historical case and extract/review parity |
-| FR-20 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `tests/test_similarity_g1.py` | Equal-weight typed Jaccard overlap and evidence contributions exist; general structural families, validated as-of feature lineage and real historical corpus missing |
-| FR-21 | Partial | M1/M3 source-level cutoffs and provenance exclusions | Historized alias/taxonomy/feature/index exclusion + future controls |
+| FR-20 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `tests/test_similarity_g1.py` | Equal-weight typed Jaccard overlap and evidence contributions exist; general structural families, independently authenticated as-of feature lineage and real historical corpus missing |
+| FR-21 | **Partial / synthetic-tested** | M3 source cutoffs and M5.2 exact-only claim-level feature lineage `feature_lineage.py`, blocking declared alias/taxonomy/Falco enrichment | Independent historical source-byte/reviewer authentication, actual as-of ATT&CK/Falco/alias reconstruction and derived-cache isolation absent |
 | FR-22 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `scripts/profile_g1.py` | Separate provisional inferred triples, uncalibrated rank, historical claim paths and abstention; no externally authenticated source provenance, research-approved evaluation or calibration |
 | FR-23 | Partial / synthetic-tested | B0 abstention `baseline_b0.py`, G1 independent-source abstention `similarity_g1.py` | Empirical calibration/ablation and uncertainty metrics missing |
 | FR-24 | Present/tested synthetic (only) | `scripts/profile_b0.py`, `tests/test_b0_baseline.py` | Real paired-run common extraction/output comparison |
@@ -83,9 +83,9 @@ This is a **code-and-test audit**, not a certification. Status labels:
 1. **A local archive hash is not a publication timestamp.** Real source/date evidence is still missing.
 2. **A matching quotation is not a correct CTI triple.** Semantic review is self-declared and synthetic-tested, not independent scientific validation.
 3. **An extractor interface in the SDD is not an implemented extractor.** `pdf_sources.py`, `normalized_sources.py` and `evidence_alignment.py` mostly parse and verify, not classify all malware relations.
-4. **Source allowlisting is not full historical reconstruction.** Future aliases, ATT&CK/Falco revisions and prior computed graph features are unsolved.
+4. **Source allowlisting and self-declared M5.2 claim lineage are not full historical reconstruction.** Future aliases, authentic past ATT&CK/Falco revisions, actual source-native identifier proof and prior computed graph features remain unsolved.
 5. **P0.1 fix: structural validation now emits `research_ready=false`, even for strict synthetic fixtures.** Its explicit `readiness` disclosure does not authenticate original publication chronology, independent reviewers, or real case approval. A future separate empirical run acceptance protocol is still required.
-6. **B0's `predictions=[]` is intentional.** No new inference is implemented; G1 is outstanding.
+6. **B0's `predictions=[]` is intentional.** G1 v2 makes provisional synthetic-tested inferences subject to mandatory self-declared as-of lineage; no real historical effectiveness has been measured.
 7. **149 synthetic tests do not imply 149 historical research successes.** There are currently zero real case comparisons.
 
 **How to maintain:** When a PR changes any row, link the exact new module and test(s), change the status conservatively and update [BUILD_PLAN](BUILD_PLAN.md) and the affected SRS/SDD sections. Never close full FR/EV/AC items solely from documentation or fixture tests.
