@@ -1,5 +1,7 @@
 # P1d — Independently archived public GitHub push of Cado Kiss-a-dog *pointer* (2022)
 
+**P1e follow-up:** An actual first-party original Cado HTML version was subsequently recovered from [Common Crawl 2023-02-06](P1E_CADO_FEB2023_REAL_PRIMARY_WARC.md). It is **92,875 bytes** and a separate capture from the December 2022 derivative *reference push*. Both original-content and earlier-reference clocks remain differently scoped; the later discovery does not retroactively approve rights, date or semantic claims.
+
 **Evidence acquisition:** October 10, 2026 EDT; independent public GitHub event at **December 23, 2022 11:42:28 UTC**. **This is a genuinely recovered third-party archived public PushEvent and original Securonix Git object chain**, not the original 2022 Cado article body, a confirmed original publication timestamp, or an approved source. 
 
 ## What changed since P1c
