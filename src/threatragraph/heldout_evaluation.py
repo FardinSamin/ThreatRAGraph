@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from .evidence_graph import as_utc, fingerprint, require_sha, validate_triple
 from .paired_profile_audit import audit_paired_profiles
+from .paired_run_freeze import RUN_LOCK_VERSION, _metadata
 
 REFERENCE_VERSION = "heldout-reference-partition-v1"
 SCORER_VERSION = "independent-paired-label-scorer-v1"
@@ -25,6 +26,20 @@ _SOURCE_FIELDS = frozenset({
 _LABEL_FIELDS = frozenset({
     "subject_id", "predicate", "object_id", "decision", "source_version_ids",
     "reviewer_ids", "rationale",
+})
+_RUN_FIELDS = frozenset({
+    "schema_version", "artifact_kind", "lock_version", "case_id",
+    "dataset_id", "dataset_version", "target_entity_id", "cutoff_at",
+    "declared_provenance", "development_only", "g1_algorithm_config",
+    "input_artifact_sha256", "b0_profile_id", "g1_profile_id",
+    "paired_audit_id", "early_source_version_ids", "observed_fact_count",
+    "provisional_prediction_count", "gold_labels_read",
+    "predictions_sealed_before_gold_access",
+    "historical_dates_and_rights_independently_verified",
+    "reviewer_identities_independently_verified",
+    "source_manifest_bytes_verified_by_this_module",
+    "empirical_evaluation", "independent_study_approval",
+    "research_ready", "run_id",
 })
 MAX_LABELS = 10000
 MAX_REFERENCE_SOURCES = 1000
@@ -133,11 +148,18 @@ def validate_frozen_pair(b0, g1, audit, lock):
     expected = audit_paired_profiles(b0, g1)
     if audit != expected:
         raise ValueError("Sealed paired audit is missing or altered")
-    if not isinstance(lock, dict):
-        raise ValueError("Frozen run-lock object required")
+    if not isinstance(lock, dict) or set(lock) != _RUN_FIELDS:
+        raise ValueError("Frozen run-lock must have exact fields; no gold or extra data")
+    _metadata(lock["declared_provenance"])
+    if type(lock["development_only"]) is not bool:
+        raise ValueError("Frozen development-only flag must be boolean")
+    if (lock["historical_dates_and_rights_independently_verified"] is not False
+            or lock["reviewer_identities_independently_verified"] is not False
+            or lock["source_manifest_bytes_verified_by_this_module"] is not False):
+        raise ValueError("Engineering lock must not claim independent authentication")
     if (lock.get("schema_version") != "1.0"
             or lock.get("artifact_kind") != "paired_run_engineering_lock"
-            or lock.get("lock_version") != "paired-run-engineering-lock-v1"):
+            or lock.get("lock_version") != RUN_LOCK_VERSION):
         raise ValueError("Unsupported frozen engineering run")
     if lock.get("run_id") != "run:" + fingerprint(
             {k: v for k, v in lock.items() if k != "run_id"}):

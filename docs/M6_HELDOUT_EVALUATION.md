@@ -7,6 +7,11 @@ approval have been produced.
 
 ## Research isolation
 
+The evaluator also requires the **exact versioned run-lock field set** and
+upstream reproducibility-metadata contract, refusing unexpected keys even
+when a caller recomputes the lock content hash. This closes a route for
+smuggling reference labels into the frozen manifest itself.
+
 The new scorer lives in a separate module and separate offline command.
 B0, G1, their sourced graphs, and the upstream pairing code NEVER import
 the held-out evaluator. The CLI first reads and validates existing frozen

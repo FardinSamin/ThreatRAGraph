@@ -65,7 +65,10 @@ def fixture():
         "early_source_version_ids": ["source-early"],
         "observed_early_facts": [copy.deepcopy(early)],
         "predictions": [proposal],
-        "configuration": {"top_k": 5},
+        "configuration": {
+            "top_k": 5, "min_overlap": 1, "min_background_groups": 2,
+            "max_peers_per_feature": 10,
+        },
         "abstention": {"abstained": False, "reason": None},
         "research_ready": False,
     }, "profile_id", "profile:")
@@ -81,7 +84,25 @@ def fixture():
         "paired_audit_id": audit["audit_id"],
         "early_source_version_ids": ["source-early"],
         "observed_fact_count": 1, "provisional_prediction_count": 1,
-        "g1_algorithm_config": {"top_k": 5},
+        "development_only": False,
+        "declared_provenance": {
+            "git_commit_sha": "a" * 40,
+            "dependency_lock_sha256": "b" * 64,
+            "source_manifest_sha256": "c" * 64,
+            "case_manifest_sha256": "d" * 64,
+            "review_set_sha256": "e" * 64,
+            "ontology_version": "v1",
+            "extractor_version": "synthetic-v1",
+            "ruleset_version": "no-rules-v1",
+            "random_seed": None,
+        },
+        "g1_algorithm_config": {
+            "top_k": 5, "min_overlap": 1, "min_background_groups": 2,
+            "max_peers_per_feature": 10,
+        },
+        "historical_dates_and_rights_independently_verified": False,
+        "reviewer_identities_independently_verified": False,
+        "source_manifest_bytes_verified_by_this_module": False,
         "input_artifact_sha256": {k: "f" * 64 for k in
                                    ("b0_view", "b0_graph", "g1_view",
                                     "g1_graph", "feature_lineage")},
@@ -217,6 +238,22 @@ class HeldoutCandidateScoringTests(unittest.TestCase):
         ref["adjudications"][0]["decision"] = "true_without_review"
         with self.assertRaisesRegex(ValueError, "Unsupported held-out"):
             repack(ref)
+
+    def test_rehashed_run_lock_cannot_smuggle_gold_fields(self):
+        a, b, c, d, ref = fixture()
+        d["gold_labels"] = ref
+        d.pop("run_id")
+        sign(d, "run_id", "run:")
+        with self.assertRaisesRegex(ValueError, "exact fields"):
+            score_frozen_pair(a, b, c, d, ref)
+
+    def test_rehashed_provenance_cannot_smuggle_outcome_labels(self):
+        a, b, c, d, ref = fixture()
+        d["declared_provenance"]["outcome_labels"] = ["future-answer"]
+        d.pop("run_id")
+        sign(d, "run_id", "run:")
+        with self.assertRaisesRegex(ValueError, "reproducibility fields"):
+            score_frozen_pair(a, b, c, d, ref)
 
     def test_run_lock_fingerprint_tampering_refused(self):
         a, b, c, d, ref = fixture()
