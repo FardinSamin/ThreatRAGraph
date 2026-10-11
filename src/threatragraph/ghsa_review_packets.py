@@ -98,7 +98,7 @@ def validate_attestation(packet: dict, review: dict) -> dict:
     for key in ("packet_id", "candidate_id", "source_version_id", "source_sha256"):
         if review[key] != packet[key]:
             raise ValueError("Reviewer record is not bound to verified source packet")
-    if review["decision"] not in DECISIONS or not isinstance(review["decision"], str):
+    if not isinstance(review["decision"], str) or review["decision"] not in DECISIONS:
         raise ValueError("Invalid compound evidence decision")
     reviewer = review["reviewer_id"]
     if not isinstance(reviewer, str) or not REVIEWER_ID.fullmatch(reviewer):
