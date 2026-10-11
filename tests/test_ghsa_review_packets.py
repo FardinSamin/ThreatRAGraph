@@ -207,6 +207,13 @@ class CompoundGHSATests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Incompatible"):
                 CompoundCandidateReviewLedger(db)
 
+    def test_candidate_reviews_cannot_share_scientific_ledger_database(self):
+        for scientific_table in ("sourced_claims", "semantic_reviews", "source_versions"):
+            with self.subTest(table=scientific_table), closing(sqlite3.connect(":memory:")) as db:
+                db.execute("CREATE TABLE " + scientific_table + " (id TEXT)")
+                with self.assertRaisesRegex(ValueError, "must be separate"):
+                    CompoundCandidateReviewLedger(db)
+
     def test_cli_preview_and_append_only_review_database(self):
         raw = raw_json()
         p = packet(raw)
