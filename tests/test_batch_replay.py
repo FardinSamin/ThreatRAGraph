@@ -155,6 +155,33 @@ def sample_outputs(case):
     }
 
 
+def reseal_case_links(outputs):
+    """Deliberately simulate a fully rehashed but internally inconsistent export."""
+    from src.threatragraph.paired_profile_audit import audit_paired_profiles
+    b0, g1 = outputs["b0_profile"], outputs["g1_profile"]
+    b0.pop("profile_id", None)
+    b0["profile_id"] = "profile:" + fingerprint(b0)
+    g1["b0_profile_id"] = b0["profile_id"]
+    g1["observed_early_facts"] = copy.deepcopy(b0["facts"])
+    g1.pop("profile_id", None)
+    g1["profile_id"] = "profile:" + fingerprint(g1)
+    outputs["paired_audit"] = audit_paired_profiles(b0, g1)
+    lock = outputs["run_lock"]
+    lock["b0_profile_id"] = b0["profile_id"]
+    lock["g1_profile_id"] = g1["profile_id"]
+    lock["paired_audit_id"] = outputs["paired_audit"]["audit_id"]
+    lock.pop("run_id", None)
+    lock["run_id"] = "run:" + fingerprint(lock)
+    receipt = outputs["pipeline_receipt"]
+    receipt["b0_profile_id"] = b0["profile_id"]
+    receipt["g1_profile_id"] = g1["profile_id"]
+    receipt["paired_audit_id"] = outputs["paired_audit"]["audit_id"]
+    receipt["run_id"] = lock["run_id"]
+    receipt.pop("pipeline_id", None)
+    receipt["pipeline_id"] = "pipeline:" + fingerprint(receipt)
+    return outputs
+
+
 class FrozenBatchReplayTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -183,10 +210,54 @@ class FrozenBatchReplayTests(unittest.TestCase):
         self.assertEqual(2, report["case_count"])
         self.assertEqual(19, report["artifact_count"])
         self.assertTrue(report["canonical_hashes_checked"])
+        self.assertTrue(report["b0_deterministically_recomputed"])
+        self.assertTrue(report["g1_historical_citations_checked"])
+        self.assertFalse(report["g1_ranking_recomputed"])
         self.assertFalse(report["raw_archive_bytes_reread"])
         self.assertFalse(report["heldout_labels_accessed"])
         self.assertFalse(report["research_ready"])
         self.assertEqual(report, replay_batch(self.root, self.batch_sha))
+
+    def store_rehashed(self, outputs):
+        cid = outputs["pipeline_receipt"]["case_id"]
+        plan = {"dataset_id": "synthetic", "dataset_version": "v1",
+                "cases": [{"case_id": cid}]}
+        summary = _receipt([outputs], plan)
+        for key in ARTIFACT_NAMES:
+            write_immutable_view(outputs[key], self.root)
+        digest, _, _ = write_immutable_view(summary, self.root)
+        return digest
+
+    def test_rehashed_b0_evidence_hash_cannot_forge_observed_fact(self):
+        outputs = sample_outputs("case-rehashed-b0")
+        facts = outputs["b0_profile"]["facts"]
+        self.assertTrue(facts)
+        facts[0]["evidence_sha256s"] = ["0" * 64]
+        reseal_case_links(outputs)
+        receipt_sha = self.store_rehashed(outputs)
+        with self.assertRaisesRegex(ValueError, "deterministic source graph"):
+            replay_batch(self.root, receipt_sha)
+
+    def test_rehashed_g1_proposed_relation_citation_must_exist_in_graph(self):
+        outputs = sample_outputs("case-rehashed-g1-citation")
+        predictions = outputs["g1_profile"]["predictions"]
+        self.assertTrue(predictions)
+        predictions[0]["proposed_relation_historical_support"][0][
+            "evidence_sha256"] = "0" * 64
+        reseal_case_links(outputs)
+        receipt_sha = self.store_rehashed(outputs)
+        with self.assertRaisesRegex(ValueError, "G1 support citation differs"):
+            replay_batch(self.root, receipt_sha)
+
+    def test_rehashed_g1_matching_feature_citation_must_exist_in_graph(self):
+        outputs = sample_outputs("case-rehashed-feature-citation")
+        prediction = outputs["g1_profile"]["predictions"][0]
+        prediction["matching_features"][0]["historical_support"][0][
+            "evidence_sha256"] = "0" * 64
+        reseal_case_links(outputs)
+        receipt_sha = self.store_rehashed(outputs)
+        with self.assertRaisesRegex(ValueError, "G1 support citation differs"):
+            replay_batch(self.root, receipt_sha)
 
     def test_changed_stored_profile_bytes_refused(self):
         path = self.saved[("case-a", "g1_profile")]

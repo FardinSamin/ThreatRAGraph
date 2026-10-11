@@ -114,7 +114,7 @@
       "test_paths": [
         "tests/test_batch_replay.py"
       ],
-      "min_authored_test_methods": 12,
+      "min_authored_test_methods": 15,
       "test_command": "python -m unittest discover -s tests -p 'test_batch_replay.py' -v",
       "manual_gates": [
         "Verify exact byte hashes, case pointers and source/profiler parity",

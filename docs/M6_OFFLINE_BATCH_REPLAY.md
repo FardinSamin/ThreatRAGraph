@@ -1,6 +1,6 @@
 # M6.5 — Offline integrity replay of frozen unscored multi-case batches
 
-**Status:** Engineering-only draft. Twelve synthetic/adversarial unit tests
+**Status:** Engineering-only draft. Fifteen synthetic/adversarial unit tests
 authored, not yet executed. Depends on unmerged PR #57 (and #56/#53/#52).
 No actual historical case has been evaluated and research_ready remains false.
 
@@ -44,11 +44,24 @@ opens raw reports, source archives or future reference labels.
 - Verify run-lock schema, declared provenance syntax, exact five input
   hashes, G1 exact-only feature-lineage report digest/flags, B0/G1 profile
   hashes, algorithm settings, observed/predicted counts and no-label flags.
+- Deterministically regenerate the saved B0 baseline directly from the
+  stored early view/graph and exact development flag; refuse inconsistent
+  observed facts even when every digest and run ID has been recomputed.
+- Bind G1 proposed-relation and matching-feature source paths to *exact*
+  eligible, supported, positive, byte-aligned claims in the persisted early
+  and background graphs. Reject forged witnesses and unsupported publisher
+  groups. G1 similarity ranking is NOT recomputed without original lineage.
 - Verify the pipeline receipt's source/case/review/dependency declared hashes,
   graph SHA-256, run/audit/profile IDs, raw claim/review counts and research
   limitations; bind every result back to the per-case batch record.
 
 ## Important scientific limitations
+
+B0 recomputation and G1 citation-to-graph checks add genuine structural
+verification, but do **not** authenticate source truth or recompute the full
+G1 similarity ranking. The output exposes separate flags for those checks.
+Tests for rehashed fabricated B0 facts and false G1 support paths are authored
+but remain unexecuted.
 
 The original feature-lineage file, source manifests, archival source bodies,
 reviews, dependency bytes and batch-plan file are NOT reread by this
@@ -70,7 +83,7 @@ separate independent review before legitimate empirical evaluation.
 
 ## Test and integration gates
 
-- Author-only test coverage: 12 methods, including two real synthetic paired
+- Author-only test coverage: 15 methods, including two real synthetic paired
   profiler outputs, byte-stable readback, tampered canonical/sha hashes,
   missing files, symlinks, label smuggling, cross-case substitution and
   malformed JSON. **Tests have not been executed.**

@@ -15,6 +15,7 @@ import re
 
 from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256
 from scripts.run_offline_case_batch import ARTIFACT_NAMES, MAX_CASES, VERSION
+from src.threatragraph.baseline_b0 import build_b0_profile
 from src.threatragraph.contracts import validate_graph_projection
 from src.threatragraph.evidence_graph import fingerprint, require_sha
 from src.threatragraph.paired_profile_audit import audit_paired_profiles
@@ -123,6 +124,88 @@ def _self_sealed(obj, prefix, key, kind):
         raise ValueError("Tampered or malformed " + kind + " identity")
 
 
+def _check_support_path(records, edge_index, groups, *,
+                        expected_subject, expected_relation):
+    """Bind each declared G1 evidence citation to exact stored sourced edges."""
+    if not isinstance(records, list) or not records:
+        raise ValueError("Empty or malformed G1 historical support path")
+    for support in records:
+        if not isinstance(support, dict) or set(support) != {
+                "claim_id", "source_version_id", "independence_group",
+                "evidence_sha256", "evidence_locator"}:
+            raise ValueError("Unexpected G1 historical support fields")
+        edge = edge_index.get(support["claim_id"])
+        if edge is None or (
+                edge["subject_id"] != expected_subject
+                or (edge["predicate"], edge["object_id"]) != expected_relation
+                or edge["assertion_kind"] != "report_assertion"
+                or edge["polarity"] != "positive"
+                or edge["evidence_status"] != "aligned"
+                or edge["semantic_review_status"] != "supported_by_excerpt"):
+            raise ValueError("G1 support not backed by an eligible graph claim")
+        expected = {
+            "claim_id": edge["claim_id"],
+            "source_version_id": edge["source_version_id"],
+            "independence_group": groups[edge["source_version_id"]],
+            "evidence_sha256": edge["evidence_sha256"],
+            "evidence_locator": edge["evidence_locator"],
+        }
+        if support != expected:
+            raise ValueError("G1 support citation differs from exact graph evidence")
+
+
+def _check_g1_support(g1, b0v, g1v, b0g, g1g):
+    """Verify reported support paths; does not recompute G1 ranking."""
+    target = b0v["target_entity_id"]
+    early_versions = {source["source_version_id"] for source in b0v["sources"]}
+    all_groups = {s["source_version_id"]: s["independence_group"]
+                  for s in g1v["sources"]}
+    early_claims = {edge["claim_id"]: edge for edge in b0g["edges"]}
+    historical_claims = {
+        edge["claim_id"]: edge for edge in g1g["edges"]
+        if edge["source_version_id"] not in early_versions
+    }
+    possible_groups = {
+        all_groups[edge["source_version_id"]]
+        for edge in historical_claims.values()
+    }
+    for proposal in g1["predictions"]:
+        peer = proposal.get("analog_peer_id")
+        if (type(peer) is not str or peer == target
+                or peer.split(":", 1)[0] != target.split(":", 1)[0]):
+            raise ValueError("G1 analogy peer has unsupported identity")
+        relation = (proposal["predicate"], proposal["object_id"])
+        _check_support_path(
+            proposal["proposed_relation_historical_support"],
+            historical_claims, all_groups,
+            expected_subject=peer, expected_relation=relation,
+        )
+        matching = proposal.get("matching_features")
+        if not isinstance(matching, list) or not matching:
+            raise ValueError("G1 matching feature paths must be nonempty")
+        for feature in matching:
+            if not isinstance(feature, dict) or set(feature) != {
+                    "feature", "early_support", "historical_support"}:
+                raise ValueError("G1 matching feature structure differs")
+            detail = feature["feature"]
+            if not isinstance(detail, dict) or set(detail) != {
+                    "predicate", "object_id"}:
+                raise ValueError("G1 matching feature relation differs")
+            relation_feature = (detail["predicate"], detail["object_id"])
+            _check_support_path(
+                feature["early_support"], early_claims, all_groups,
+                expected_subject=target, expected_relation=relation_feature,
+            )
+            _check_support_path(
+                feature["historical_support"], historical_claims, all_groups,
+                expected_subject=peer, expected_relation=relation_feature,
+            )
+        declared_groups = proposal.get("historical_independence_groups")
+        if (not isinstance(declared_groups, list)
+                or not set(declared_groups) <= possible_groups):
+            raise ValueError("G1 declares unsupported historical publisher group")
+
+
 def _check_case(item, artifacts, batch):
     case_id = item["case_id"]
     b0v, g1v = artifacts["b0_view"], artifacts["g1_view"]
@@ -225,6 +308,10 @@ def _check_case(item, artifacts, batch):
         if name != "feature_lineage" and hashes[name] != fingerprint(
                 artifacts[name]):
             raise ValueError("Run-lock source/graph digest mismatch")
+    if b0 != build_b0_profile(
+            b0v, b0g, development_only=lock["development_only"]):
+        raise ValueError("Saved B0 facts differ from deterministic source graph")
+    _check_g1_support(g1, b0v, g1v, b0g, g1g)
     if g1["feature_lineage_sha256"] != hashes["feature_lineage"]:
         raise ValueError("Lineage hash differs between G1 and run lock")
     lineage_report = g1.get("feature_lineage_contract")
@@ -348,6 +435,9 @@ def replay_batch(root, receipt_digest):
         "case_results": statuses,
         "canonical_hashes_checked": True,
         "cross_case_linkage_checked": True,
+        "b0_deterministically_recomputed": True,
+        "g1_historical_citations_checked": True,
+        "g1_ranking_recomputed": False,
         "raw_archive_bytes_reread": False,
         "feature_lineage_original_bytes_reread": False,
         "batch_plan_bytes_reread": False,
