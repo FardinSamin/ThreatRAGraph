@@ -13,6 +13,11 @@ This is a **code-and-test audit**, not a certification. Status labels:
 
 **Current reference:** the existing code through M4 and prior 149-test synthetic suite. Re-run tests on the current commit to establish an up-to-date count; test count alone cannot prove corpus validity or research effectiveness.
 
+**Draft-branch note (October 11, 2026):** The portable exchange draft
+adds FR-18 engineering scaffolding and authored tests, but no tests were
+run on this branch and no real source has been approved. The present state
+of the default main branch must not be represented as including this draft.
+
 ## Functional requirements FR-01–FR-36
 
 | SRS ID | Implementation status | Current concrete implementation/test evidence | Missing gate / next step |
@@ -34,7 +39,7 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | FR-15 | Partial | `assertion_kind` + polarity + review ledger; predicted claims prohibited | Separate prediction plane and state transition contract |
 | FR-16 | Partial | Source-allowlisted graph projection and neighborhood helper | General lineage/time/case query interface and access isolation |
 | FR-17 | Partial / synthetic-tested | `semantic_reviews.py`, candidate-only `ghsa_review_packets.py`, and new `compound_claims.py` support explicit versioned dual-field sourced-claim semantic review in opt-in separate SQLite tables | Authentic reviewers and truly approved real historical sources, independent adjudication and measured agreement |
-| FR-18 | **Missing** | JSON outputs exist | Versioned interoperable JSON/CSV export-import (STIX only valid types) |
+| FR-18 | **Partial / draft, tests not executed** | Draft PR (portable graph exchange): versioned content-addressed JSON bundle and CSV sourced-claim export/import verification, exact source-view/graph/evidence/cutoff contracts, tamper and future-label refusals, 17 authored synthetic/adversarial tests | Execute and review tests, real source/license/citation approval, controlled SQLite ingest/import workflow where justified, independent semantic review, optional conformant STIX mapping |
 | FR-19 | Present/tested synthetic (only) | `freeze_case_snapshots.py` + `baseline_b0.py` | Real historical case and extract/review parity |
 | FR-20 | **Partial / synthetic-tested** | `src/threatragraph/similarity_g1.py`, `tests/test_similarity_g1.py` | Equal-weight typed Jaccard overlap and evidence contributions exist; general structural families, independently authenticated as-of feature lineage and real historical corpus missing |
 | FR-21 | **Partial / synthetic-tested** | M3 source cutoffs and M5.2 exact-only claim-level feature lineage `feature_lineage.py`, blocking declared alias/taxonomy/Falco enrichment | Independent historical source-byte/reviewer authentication, actual as-of ATT&CK/Falco/alias reconstruction and derived-cache isolation absent |
