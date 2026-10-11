@@ -1,5 +1,5 @@
 """Adversarial multi-field GHSA review-packet contract and isolation tests."""
-from contextlib import redirect_stdout
+from contextlib import closing, redirect_stdout
 import copy
 import hashlib
 import io
@@ -161,7 +161,7 @@ class CompoundGHSATests(unittest.TestCase):
     def test_append_only_review_is_idempotent_and_conflicts_refused(self):
         data = raw_json()
         p = packet(data)
-        with sqlite3.connect(":memory:") as db:
+        with closing(sqlite3.connect(":memory:")) as db:
             led = CompoundCandidateReviewLedger(db)
             kw = dict(source_version_id="candidate:fixture",
                       expected_sha256=sha(data), candidate_id=p["candidate_id"])
@@ -192,7 +192,7 @@ class CompoundGHSATests(unittest.TestCase):
     def test_uncertain_record_remains_uncertain(self):
         data = raw_json()
         p = packet(data)
-        with sqlite3.connect(":memory:") as db:
+        with closing(sqlite3.connect(":memory:")) as db:
             result = CompoundCandidateReviewLedger(db).record(
                 data, source_version_id="candidate:fixture",
                 expected_sha256=sha(data), candidate_id=p["candidate_id"],
@@ -202,7 +202,7 @@ class CompoundGHSATests(unittest.TestCase):
             self.assertFalse(result["source_approved"])
 
     def test_wrong_existing_review_table_schema_fails_closed(self):
-        with sqlite3.connect(":memory:") as db:
+        with closing(sqlite3.connect(":memory:")) as db:
             db.execute("CREATE TABLE ghsa_candidate_reviews (packet_id TEXT PRIMARY KEY)")
             with self.assertRaisesRegex(ValueError, "Incompatible"):
                 CompoundCandidateReviewLedger(db)
@@ -234,7 +234,7 @@ class CompoundGHSATests(unittest.TestCase):
             result = json.loads(out.getvalue())
             self.assertEqual("candidate_review_recorded_not_approved", result["status"])
             self.assertTrue(database.exists())
-            with sqlite3.connect(database) as db:
+            with closing(sqlite3.connect(database)) as db:
                 self.assertEqual(1, db.execute(
                     "SELECT COUNT(*) FROM ghsa_candidate_reviews"
                 ).fetchone()[0])
