@@ -67,6 +67,10 @@ The above capture is an implementation capability; **no archived source bytes ha
 
 The [new pinned upstream Git tag acquisition](P1A_PINNED_TAG_ACQUISITION.md) **successfully fetched the real original 1,525-byte signed runc v1.1.12 tag** in GitHub Actions and computed a reproducible SHA-256 receipt. The original tag contains the CVE-2024-21626 advisory message; it is materially different from present-day mutable release HTML. We added it as a distinct, **same-publisher/unapproved** 20th source candidate. This is actual byte provenance, **not historical first-public-date certification or an approved experiment**. The tag bytes were not committed to this public repository, and the case manifest remains empty.
 
+## Release-era PGP signer verification (October 2026)
+
+The original signed tag **now passes real local cryptographic GnuPG verification** with the [historically pinned upstream release keyring](P1A_RUNC_SIGNER_VERIFICATION.md). This is not a GitHub API-only verified flag and is separate from its raw SHA-256 receipt; the signer matches the expected historical primary fingerprint and signing subkey. This supports *signature integrity and release-key membership*, not separately attested real-world signer identity or proof of when the bytes became publicly reachable. **Candidate still unapproved; no source or case promotion.**
+
 ## Why this candidate and not the others *yet*
 
 - **CRI-O cr8escape (2022):** same-day coverage may lack strong independent *later new information*. Screen separately; don't reject permanently.
