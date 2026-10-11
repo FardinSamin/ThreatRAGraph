@@ -1,5 +1,7 @@
 # P1c — Kiss-a-dog original investigator chain: CrowdStrike + Cado
 
+**P1e evidence update (October 11, 2026):** [Original Cado research page recovered from the genuine Common Crawl **February 6, 2023** historical HTML/WARC bytes](P1E_CADO_FEB2023_REAL_PRIMARY_WARC.md). The original old URL and all **92,875 archived HTML bytes** now have independently recomputed SHA256/CDX/WARC hashes; verified visible text includes Kiss-a-dog, Redis, XMRig, XHide. **Source approval, earliest-public timestamp, reuse rights, reviewer-aligned campaign/variant claims and actual G1 prediction remain absent**. Earlier below "original bytes not recovered" comments are historical to the P1c stage.
+
 **Research checkpoint:** October 10, 2026 EDT. **Disposition: candidate method path found, no source/case approval or experiment.**
 
 [SCARLETEEL v2 case screen](../../datasets/case_screenings/scarleteel_peers_v2.json) identified two historical named campaigns (Chimaera and Kiss-a-dog) with the same tentative XMRig feature, but the G1v2 ranker requires **two historical publisher groups within a single historical peer's matching-plus-new-relation evidence path**, not one publisher for each of two unrelated peers. This follow-up identifies a more concrete, **same-peer** research pair.
