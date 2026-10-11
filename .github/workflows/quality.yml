@@ -35,6 +35,39 @@ jobs:
       - name: Audit runtime package advisories (PyPI)
         run: python -m pip_audit -r requirements-normalization.txt --no-deps --strict --progress-spinner off
 
+  original-runc-tag-witness:
+    name: Original runc release Git tag bytes
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Fetch only original signed upstream v1.1.12 tag (never execute fetched code)
+        shell: bash
+        env:
+          GIT_TERMINAL_PROMPT: '0'
+        run: |
+          set -euo pipefail
+          git init --bare "$RUNNER_TEMP/runc-release.git"
+          git -C "$RUNNER_TEMP/runc-release.git" fetch --no-tags --depth=1 https://github.com/opencontainers/runc.git '+refs/tags/v1.1.12:refs/tags/v1.1.12'
+      - name: Preserve original tag object bytes and emit candidate-only receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.acquire_runc_git_tag --git-repo "$RUNNER_TEMP/runc-release.git" --artifact-root "$RUNNER_TEMP/runc-private/source_versions/sha256" > "$RUNNER_TEMP/runc-tag-witness.json"
+          cat "$RUNNER_TEMP/runc-tag-witness.json"
+      - name: Retain only non-secret hash receipt, not third-party source bytes
+        uses: actions/upload-artifact@v4
+        with:
+          name: runc-v1-1-12-candidate-hash-receipt
+          path: ${{ runner.temp }}/runc-tag-witness.json
+          retention-days: 14
+          if-no-files-found: error
+
   preflight-and-tests:
     strategy:
       fail-fast: false
