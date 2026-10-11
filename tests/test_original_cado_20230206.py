@@ -7,7 +7,7 @@ import unittest
 
 from scripts.replay_original_cado_20230206 import (
     _fixed, FIRST_OBSERVED_LENGTH, FIRST_OBSERVED_OFFSET,
-    FIRST_OBSERVED_WARC, verify_range_headers,
+    FIRST_OBSERVED_WARC, verify_range_headers, verify_original_cado_html_identity,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,6 +65,25 @@ class OriginalCadoIndexedWarcTests(unittest.TestCase):
         for bad in rows:
             with self.subTest(headers=bad[:50]), self.assertRaises(ValueError):
                 verify_range_headers(bad)
+
+    def test_html_identity_screen_excludes_script_only_injections(self):
+        real = (b"<html><head><title>Kiss-a-Dog Discovered Utilizing a "
+                b"20-Year-Old Process Hider</title></head><body>"
+                b"<article><h1>Kiss-a-Dog and its process hider</h1>"
+                b"Our Redis honeypot found XMRig and XHide.</article></body></html>")
+        result = verify_original_cado_html_identity(real)
+        self.assertTrue(all(result.values()))
+        malicious = (b"<html><head><title>Unrelated admin page</title></head>"
+                     b"<body><script>Kiss-a-Dog XHide XMRig Redis process hider</script>"
+                     b"<p>Nothing to see here</p></body></html>")
+        with self.assertRaisesRegex(ValueError, "not the expected original"):
+            verify_original_cado_html_identity(malicious)
+
+    def test_html_word_presence_cannot_be_forged_just_by_title(self):
+        html = (b"<html><title>Kiss-a-Dog Process Hider</title>"
+                b"<body>general update without campaign details</body></html>")
+        with self.assertRaises(ValueError):
+            verify_original_cado_html_identity(html)
 
     def test_duplicate_headers_and_oversized_header_fail(self):
         with self.assertRaisesRegex(ValueError, "Duplicated"):
