@@ -7,13 +7,14 @@ publisher time, permissions, independent scientific review or G1 eligibility.
 from __future__ import annotations
 
 import argparse
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 import re
 
 from scripts.verify_candidate_warc_capture import (
     CADO_ID, CADO_HISTORIC_URL, _read_file, _read_json, validate_capture,
-    LIMIT_COMPRESSED, LIMIT_MANIFEST,
+    LIMIT_COMPRESSED, LIMIT_MANIFEST, _decode_member, _headers,
 )
 
 INDEX_PATH = "datasets/provenance_pointers/cado_kissadog_20230206_ccmain202306.json"
@@ -93,6 +94,69 @@ def verify_range_headers(raw: bytes) -> None:
              "Unexpected compressed transfer representation")
 
 
+class _ArticleTextOnly(HTMLParser):
+    """Never load scripts/resources; inspect bounded literal HTML text only."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.suppressed = []
+        self.title_depth = 0
+        self.heading_depth = 0
+        self.text = []
+        self.headings = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"script", "style", "noscript", "svg"}:
+            self.suppressed.append(tag)
+        if not self.suppressed:
+            if tag == "title":
+                self.title_depth += 1
+            elif tag == "h1":
+                self.heading_depth += 1
+
+    def handle_endtag(self, tag):
+        if self.suppressed:
+            if tag == self.suppressed[-1]:
+                self.suppressed.pop()
+            return
+        if tag == "title" and self.title_depth:
+            self.title_depth -= 1
+        if tag == "h1" and self.heading_depth:
+            self.heading_depth -= 1
+
+    def handle_data(self, data):
+        if self.suppressed:
+            return
+        self.text.append(data)
+        if self.heading_depth or self.title_depth:
+            self.headings.append(data)
+
+
+def verify_original_cado_html_identity(original_html: bytes) -> dict:
+    _require(isinstance(original_html, bytes) and 0 < len(original_html) <= 4 * 1024 * 1024,
+             "Historical original Cado HTML is missing or unbounded")
+    parser = _ArticleTextOnly()
+    try:
+        parser.feed(original_html.decode("utf-8", errors="replace"))
+        parser.close()
+    except (ValueError, RecursionError, UnicodeError) as exc:
+        raise ValueError("Historical HTML cannot be screened safely") from exc
+    titles = " ".join(parser.headings).casefold()
+    rendered = " ".join(parser.text).casefold()
+    title_ok = "kiss-a-dog" in titles and "process hider" in titles
+    # These are mere visible-word presence screens, NOT independent human
+    # confirmation of what any reported code/variant does.
+    token_presence = {
+        "kiss_a_dog_report_title": title_ok,
+        "redis": "redis" in rendered,
+        "xmrig": "xmrig" in rendered,
+        "xhide": "xhide" in rendered,
+    }
+    _require(all(token_presence.values()),
+             "Archived response is not the expected original Cado Kiss-a-dog/XHide research HTML")
+    return token_presence
+
+
 def verify_original_cado(archive: str, headers: str, *, manifest: str, metadata: str):
     index = _fixed(_read_json(metadata, 4096))
     verify_range_headers(_read_file(headers, 32768))
@@ -100,6 +164,16 @@ def verify_original_cado(archive: str, headers: str, *, manifest: str, metadata:
     _require(len(raw) == int(FIRST_OBSERVED_LENGTH), "Exact original WARC gzip member size differs")
     registry = _read_json(manifest, LIMIT_MANIFEST)
     receipt = validate_capture(index, raw, registry, CADO_ID)
+    warc_headers, remaining = _headers(_decode_member(raw), b"WARC/1.")
+    declared = int(warc_headers["content-length"])
+    http_headers, original_html = _headers(
+        remaining[:declared], b"HTTP/1.", allow_repeated_http_fields=True
+    )
+    _require(http_headers.get("content-type", "").lower().startswith("text/html"),
+             "Expected actual historical HTML content type")
+    lexical_checks = verify_original_cado_html_identity(original_html)
+    receipt["historical_html_visible_text_identity_tokens"] = lexical_checks
+    receipt["historical_html_token_presence_is_not_semantic_review"] = True
     _require(receipt["source_version_id"] == CADO_ID and receipt["captured_html_byte_count"] > 0,
              "Original report body missing or source identity mismatch")
     receipt["official_commoncrawl_range_http_206_verified"] = True
