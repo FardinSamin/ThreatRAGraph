@@ -63,6 +63,10 @@ If you lack permission to retain even a private copy, **do not download/archive 
 
 The above capture is an implementation capability; **no archived source bytes have been collected in the GitHub repository**, and this PR **does not** promote sources to the experimental manifest. Authentic archived original-version verification remains P1a's next substantive blocker.
 
+## P1a original signed-tag byte acquisition (October 2026)
+
+The [new pinned upstream Git tag acquisition](P1A_PINNED_TAG_ACQUISITION.md) **successfully fetched the real original 1,525-byte signed runc v1.1.12 tag** in GitHub Actions and computed a reproducible SHA-256 receipt. The original tag contains the CVE-2024-21626 advisory message; it is materially different from present-day mutable release HTML. We added it as a distinct, **same-publisher/unapproved** 20th source candidate. This is actual byte provenance, **not historical first-public-date certification or an approved experiment**. The tag bytes were not committed to this public repository, and the case manifest remains empty.
+
 ## Why this candidate and not the others *yet*
 
 - **CRI-O cr8escape (2022):** same-day coverage may lack strong independent *later new information*. Screen separately; don't reject permanently.
