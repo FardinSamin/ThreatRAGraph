@@ -394,10 +394,8 @@ def _check_case(item, artifacts, batch):
     }
 
 
-def replay_batch(root, receipt_digest):
-    """Recheck persisted *unscored* artifacts, not rerun source extraction."""
-    base = _root_directory(root)
-    batch = _load_named(base, receipt_digest)
+def _verify_batch_payload(base, batch, *, receipt_published):
+    """Validate one sealed receipt and every referenced persisted case artifact."""
     if not isinstance(batch, dict) or set(batch) != BATCH_FIELDS:
         raise ValueError("Unexpected batch receipt keys (possibly later labels)")
     _self_sealed(batch, "batch:", "batch_id", "batch")
@@ -449,7 +447,9 @@ def replay_batch(root, receipt_digest):
         "replay_version": REPLAY_VERSION,
         "batch_id": batch["batch_id"],
         "case_count": len(records),
-        "artifact_count": len(records) * len(ARTIFACT_NAMES) + 1,
+        "artifact_count": len(records) * len(ARTIFACT_NAMES)
+                          + int(receipt_published),
+        "receipt_published": receipt_published,
         "case_results": statuses,
         "canonical_hashes_checked": True,
         "cross_case_linkage_checked": True,
@@ -467,3 +467,20 @@ def replay_batch(root, receipt_digest):
         "empirical_evaluation": "not_performed",
         "research_ready": False,
     }
+
+
+def verify_unpublished_batch(root, receipt):
+    """Validate all stored leaves before making a final receipt visible.
+
+    The caller supplies the already sealed in-memory receipt; this check
+    intentionally does NOT require that its digest-named receipt file exists.
+    """
+    base = _root_directory(root)
+    return _verify_batch_payload(base, receipt, receipt_published=False)
+
+
+def replay_batch(root, receipt_digest):
+    """Require the exact final receipt AND all sealed per-case artifacts."""
+    base = _root_directory(root)
+    batch = _load_named(base, receipt_digest)
+    return _verify_batch_payload(base, batch, receipt_published=True)

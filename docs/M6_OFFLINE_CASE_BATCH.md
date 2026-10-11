@@ -55,9 +55,28 @@ the batch ID. The per-case receipt refuses feature-lineage digests that do not m
 per case, including an exact feature_lineage JSON record, plus one final batch receipt in artifacts/offline_case_batches.
 
 Every case is computed completely in memory BEFORE any output write, so
-failure of a later case cannot leave newly written outputs. Writes themselves
-are exclusive-create but not an atomic group transaction; an I/O failure
-partway through can leave earlier complete, reusable hash-addressed files.
+failure of a later case cannot leave newly written outputs. On --write, the
+updated publication gate first validates all in-memory content against the
+sealed case inventory; then it writes or reuses ten immutable files per case.
+It rereads and independently recomputes B0 and G1 from ALL stored leaves
+before publishing the final batch receipt. It then rereads the published
+receipt and repeats the full structural replay check before reporting success.
+An I/O error can still leave complete reusable hash-addressed leaves because
+the multi-file operation is not atomic; those leaves **cannot** imply a
+committed batch without an exact persisted and verified final receipt.
+
+Run this read-only completion probe with the exact digest returned by preview:
+
+    python -m scripts.check_batch_completion --artifact-root artifacts/offline_case_batches --batch-receipt-sha256 YOUR_PREVIEW_RECEIPT_SHA256
+
+The response is `uncommitted` (nonzero exit) if the final digest-named
+receipt is absent. Corrupted receipts, missing leaves, tampered hashes and
+profile mismatches are refused (nonzero exit). The only zero-exit state is
+`sealed_unscored_batch_verified` with research_ready=false, and is **not**
+an empirically completed experiment or approved historical case. A retry
+reuses exact previously written leaves after confirming they match and
+attempts the receipt gate again; it does not delete orphan stages or
+partially written earlier batch outputs.
 
 The canonical batch receipt contains no raw source or label text or private
 paths, only case IDs, case/pipeline/run/profile/audit IDs, G1 novel prediction
