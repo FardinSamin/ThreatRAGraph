@@ -30,6 +30,7 @@
 - [P1a actual pinned upstream tag acquisition](docs/research/P1A_PINNED_TAG_ACQUISITION.md) — GitHub CI fetches the original signed Git object and measures byte-level SHA-256; **candidate-only, no case/source approval**.
 - [P1a release-era GnuPG signer verification](docs/research/P1A_RUNC_SIGNER_VERIFICATION.md) — authentic PGP signature verified with a historically pinned runc keyring in isolated CI; exact first-public date and reviewer approval still pending.
 - [P1a original advisory public-event witness](docs/research/P1A_ORIGINAL_ADVISORY_WITNESS.md) — original advisory bytes tied to an independently retained pre-cutoff public commit, with repeatable offline verification and pending investigator approval.
+- [P1a case–method eligibility gate](docs/research/P1A_CASE_METHOD_ELIGIBILITY.md) — explains why CVE/vulnerability targets cannot be evaluated by G1 v2 and requires a reviewed case-unit decision before results.
 - [Private candidate byte capture](docs/research/P1A_LEAKY_VESSELS_CASE.md#safe-manual-source-byte-preservation-private-not-approval) — bounded offline original-byte archiving and unapproved receipts; not proof of historical content or rights.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M5.2 exact-only as-of feature lineage](docs/M5_ASOF_FEATURE_LINEAGE.md) — mandatory per-claim graph/date and no-alias/no-external-taxonomy contract; **not independent evidence approval**.
@@ -37,7 +38,7 @@
 
 ## Current engineering priorities
 
-**Next PR:** [P0 CI/contract/readiness hardening — Issue #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23). **In parallel:** [P1a verify one real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), and extend the [synthetic-tested M5 G1 v2 similarity ranker](docs/M5_G1_SIMILARITY.md) without claiming historically approved or empirical effectiveness. [Details and exit gates](docs/BUILD_PLAN.md).
+**Current research priority:** [P1a real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), with [case–method compatibility reviewed first](docs/research/P1A_CASE_METHOD_ELIGIBILITY.md). In parallel, finish [P0 CI/contract hardening — #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23) and [M5 G1 v2 — #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21), without claiming empirical effectiveness. [Details and exit gates](docs/BUILD_PLAN.md).
 
 No completed real-data GraphRAG comparison exists yet. The 21 source entries remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
 
