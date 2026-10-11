@@ -22,6 +22,7 @@
 - [M2 sourced evidence graph](docs/M2_EVIDENCE_GRAPH.md) — reference SQLite claim ledger, typed provenance edges and snapshot-scoped B0/G1 graph queries.
 - [M2 evidence alignment](docs/M2_EVIDENCE_ALIGNMENT.md) — source-byte-backed text and JSON citation validation before graph insertion.
 - [M2 GHSA structured candidate extraction](docs/M2_GHSA_CANDIDATES.md) — offline byte-pinned, human-review-only CVE-to-Go-package candidates, not approved source claims or G1 predictions.
+- [M2 GHSA compound review packets](docs/M2_GHSA_COMPOUND_REVIEW.md) — verifies both structured supporting fields and records append-only self-declared reviews in an isolated candidate-only store, never as approved sourced claims.
 - [M2 HTML/Falco normalization](docs/M2_HTML_FALCO_NORMALIZATION.md) — deterministic source-linked HTML visible text and safe pinned Falco YAML citation parsing.
 - [M2 PDF page evidence](docs/M2_PDF_PAGE_PROVENANCE.md) — pinned page-by-page PDF text extraction from approved archived bytes with verifiable page/offset citations.
 - [M2 semantic claim review](docs/M2_SEMANTIC_REVIEW.md) — explicit reviewer attestations bound to exact claim IDs, archive evidence, and strict graph readiness gates.
