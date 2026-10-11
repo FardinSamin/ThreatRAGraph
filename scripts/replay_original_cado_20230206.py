@@ -7,6 +7,7 @@ publisher time, permissions, independent scientific review or G1 eligibility.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from html.parser import HTMLParser
 import json
 import re
@@ -167,6 +168,99 @@ def verify_original_cado_html_identity(original_html: bytes) -> dict:
     return token_presence
 
 
+class _TextBlockFingerprints(HTMLParser):
+    """Deterministic inert original-HTML block locators; never export report text.
+
+    Paragraph, list item and visible heading content is normalized solely to
+    calculate SHA-256 fingerprints, not to assert the source's graph semantics.
+    """
+
+    BLOCKS = {"p", "li", "h2", "h3", "h4"}
+    SUPPRESSED = {"script", "style", "noscript", "svg", "template"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.hidden = []
+        self.active = []
+        self.blocks = []
+        self.line = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.SUPPRESSED:
+            self.hidden.append(tag)
+            return
+        if self.hidden:
+            return
+        if tag in self.BLOCKS:
+            self.active.append({"tag": tag, "parts": [],
+                                "line": self.getpos()[0]})
+
+    def handle_data(self, data):
+        if not self.hidden and self.active:
+            self.active[-1]["parts"].append(data)
+
+    def handle_endtag(self, tag):
+        if self.hidden:
+            if self.hidden[-1] == tag:
+                self.hidden.pop()
+            return
+        if not self.active or self.active[-1]["tag"] != tag:
+            return
+        node = self.active.pop()
+        norm = " ".join(" ".join(node["parts"]).split())
+        if self.active:
+            self.active[-1]["parts"].append(norm)
+        if not norm or len(norm) > 32 * 1024:
+            return
+        self.blocks.append({"tag": tag, "line": node["line"], "text": norm})
+
+
+def candidate_review_fingerprints(original_html: bytes) -> dict:
+    """Create reviewer locators without storing prose, gold labels, or a verdict."""
+    _require(isinstance(original_html, bytes)
+             and 0 < len(original_html) <= 4 * 1024 * 1024,
+             "Bounded original Cado HTML bytes required")
+    parser = _TextBlockFingerprints()
+    try:
+        parser.feed(original_html.decode("utf-8", errors="replace"))
+        parser.close()
+    except (ValueError, RecursionError, UnicodeError) as exc:
+        raise ValueError("Archived HTML review-block parser failed") from exc
+
+    terms = ("kiss-a-dog", "redis", "xmrig", "xhide")
+    cues = []
+    for i, block in enumerate(parser.blocks):
+        present = [term for term in terms if term in block["text"].casefold()]
+        if not present:
+            continue
+        cues.append({
+            "source_block_index": i,
+            "html_line_number": block["line"],
+            "html_element": block["tag"],
+            "normalized_block_text_sha256": hashlib.sha256(
+                block["text"].encode("utf-8")
+            ).hexdigest(),
+            "candidate_terms_present": present,
+        })
+    _require(len(cues) <= 128, "Excessive candidate evidence blocks")
+    _require(any("xmrig" in c["candidate_terms_present"] for c in cues)
+             and any("xhide" in c["candidate_terms_present"] for c in cues),
+             "No reviewer-locatable original XMRig/XHide evidence blocks")
+    return {
+        "schema_version": "original-cado-20230206-unreviewed-evidence-block-fingerprints-v1",
+        "original_html_sha256": hashlib.sha256(original_html).hexdigest(),
+        "indexed_visible_blocks": len(parser.blocks),
+        "matched_candidate_block_count": len(cues),
+        "evidence_block_hashes_and_structural_positions_only": cues,
+        "literal_source_text_exported": False,
+        "claim_semantics_reviewer_verified": False,
+        "same_campaign_variant_scope_verified": False,
+        "source_rights_approved": False,
+        "g1_evaluation_eligible": False,
+        "research_ready": False,
+    }
+
+
 def verify_original_cado(archive: str, headers: str, *, manifest: str, metadata: str):
     index = _fixed(_read_json(metadata, 4096))
     verify_range_headers(_read_file(headers, 32768))
@@ -183,6 +277,9 @@ def verify_original_cado(archive: str, headers: str, *, manifest: str, metadata:
              "Expected actual historical HTML content type")
     lexical_checks = verify_original_cado_html_identity(original_html)
     receipt["historical_html_visible_text_identity_tokens"] = lexical_checks
+    receipt["unreviewed_original_page_evidence_block_fingerprints"] = (
+        candidate_review_fingerprints(original_html)
+    )
     receipt["historical_html_token_presence_is_not_semantic_review"] = True
     _require(receipt["source_version_id"] == CADO_ID
              and receipt["captured_html_byte_count"] == EXPECTED_ORIGINAL_HTML_BYTE_COUNT
