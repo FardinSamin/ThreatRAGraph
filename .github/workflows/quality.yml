@@ -1,9 +1,27 @@
 name: Research repo checks
 
 on:
+  # Avoid two full runs for each commit to an open PR.
   push:
-    branches: [main, "chore/**", "docs/**", "feature/**", "research/**", "import/**"]
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      run_historical_witnesses:
+        description: 'Fetch and validate historically pinned external sources'
+        type: boolean
+        required: true
+        default: false
+      run_cross_platform:
+        description: 'Also run the full unit suite on Windows'
+        type: boolean
+        required: true
+        default: false
+
+# Supersede stale PR checks instead of burning minutes on obsolete heads.
+concurrency:
+  group: research-checks-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -36,6 +54,7 @@ jobs:
         run: python -m pip_audit -r requirements-normalization.txt --no-deps --strict --progress-spinner off
 
   original-runc-tag-witness:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: Original runc release Git tag bytes
     runs-on: ubuntu-latest
     timeout-minutes: 9
@@ -83,6 +102,7 @@ jobs:
           if-no-files-found: error
 
   original-ghsa-compound-witness:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: Original pinned GHSA dual-field candidate receipt
     runs-on: ubuntu-latest
     timeout-minutes: 9
@@ -118,6 +138,7 @@ jobs:
           if-no-files-found: error
 
   historical-chimaera-citation-witness:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: Pinned 2021/2022 Chimaera bibliography pointer receipts
     runs-on: ubuntu-latest
     timeout-minutes: 9
@@ -165,6 +186,7 @@ jobs:
           if-no-files-found: error
 
   historical-mitre-teamtnt-original:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: Original 2022 MITRE TeamTNT STIX object and citation discrepancy
     runs-on: ubuntu-latest
     timeout-minutes: 9
@@ -200,6 +222,7 @@ jobs:
           if-no-files-found: error
 
   original-2022-kissadog-cado-reference:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: Original December 2022 Cado article pointer Git bytes
     runs-on: ubuntu-latest
     timeout-minutes: 9
@@ -240,6 +263,7 @@ jobs:
           if-no-files-found: error
 
   cado-pointer-public-push-witness:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: GH Archive 2022 public-push witness for original Cado URL pointer
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -287,6 +311,7 @@ jobs:
           if-no-files-found: error
 
   original-2022-campaign-archive-index-probe:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: Real Common Crawl CDX search for original 2022 campaign publisher pages
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -332,6 +357,7 @@ jobs:
           if-no-files-found: error
 
   original-cado-february-2023-warc-bytes:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_historical_witnesses }}
     name: Real 2023-02-06 Cado original HTML WARC bytes and HTTP 206 receipt
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -377,7 +403,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # Keep Linux PR coverage; Windows only on deliberate manual full runs.
+        os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.run_cross_platform && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 12
     steps:
