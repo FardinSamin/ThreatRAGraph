@@ -148,7 +148,7 @@ def assess_screen(screen: dict, manifest: dict) -> dict:
         ),
         "case_approved": False,
         "g1_evaluation_eligible": False,
-        "approved_sources": 0,
+        "screened_source_versions_approved": 0,
         "experimental_predictions": 0,
         "research_ready": False,
         "next_gate": (
