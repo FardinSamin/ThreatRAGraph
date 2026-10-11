@@ -90,5 +90,14 @@ races; Windows filesystem checks need independent live validation.
 
 **21 alias-inspection tests authored, not executed**, including JSON nonfinite,
 parent-symlink and same-inode refusals. The shared reader is source code in
-this draft; its separate 15-test suite is staged in the independent exchange
+this draft; its separate 18-test suite is staged in the independent exchange
 branch and later integration candidate, not duplicated here.
+
+### Windows fallback inherited from the shared reader
+
+This branch's local input helper now rejects declared Windows reparse-point
+attributes even on older Python versions without `Path.is_junction`, and
+requests `O_BINARY` for lossless line endings. The 18 dedicated helper
+tests are tracked under the independent draft exchange PR #54, not counted
+as alias-specific tests. Windows concurrent path replacement is still a
+known unverified limitation. No historical entity candidates are approved.
