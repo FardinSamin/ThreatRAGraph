@@ -112,7 +112,7 @@ class AsOfFeatureLineageTests(unittest.TestCase):
     def test_changed_graph_edge_requires_new_reviewed_lineage(self):
         g = copy.deepcopy(self.g1_graph)
         g["edges"][0]["evidence_sha256"] = "1" * 64
-        with self.assertRaisesRegex(ValueError, "graph hashes"):
+        with self.assertRaisesRegex(ValueError, "historical graph/view hashes"):
             self.validate(graph=g)
 
     def test_changed_case_cutoff_or_source_view_requires_new_lineage(self):
