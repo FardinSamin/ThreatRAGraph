@@ -89,6 +89,24 @@ class CandidateWarcIntegrityTests(unittest.TestCase):
                 self.assertFalse(result["research_ready"])
                 self.assertEqual(CUTOFF, result["declared_cutoff_utc"])
 
+    def test_cado_2022_original_url_alias_and_modern_url_are_both_explicitly_bounded(self):
+        from scripts.verify_candidate_warc_capture import CADO_HISTORIC_URL, CADO_ID
+        idx, raw = self._fixture(CADO_ID, "20230206120544")
+        modern = validate_capture(idx, raw, self.registry, CADO_ID)
+        self.assertEqual(CADO_ID, modern["source_version_id"])
+        self.assertFalse(modern["research_ready"])
+        old, payload = synthetic_capture(CADO_HISTORIC_URL, "20230206120544")
+        original = validate_capture(old, payload, self.registry, CADO_ID)
+        self.assertEqual(CADO_HISTORIC_URL, original["cdx_capture_url"])
+        self.assertFalse(original["source_version_approved"])
+
+    def test_cado_same_domain_but_unregistered_path_must_not_pass(self):
+        from scripts.verify_candidate_warc_capture import CADO_ID
+        idx, raw = synthetic_capture("https://www.cadosecurity.com/unrelated-report",
+                                     "20230206120544")
+        with self.assertRaisesRegex(ValueError, "exact registered"):
+            validate_capture(idx, raw, self.registry, CADO_ID)
+
     def test_payload_digest_is_verified_exactly(self):
         index, raw = self._fixture()
         index["digest"] = _b32(b"other body")
