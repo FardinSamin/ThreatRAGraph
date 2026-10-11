@@ -70,6 +70,50 @@ def publish_batch(built, output_root):
     Returns only after the final receipt can itself be replayed.
     """
     receipt, records = _expected_entries(built)
+    # A final receipt is a commit marker. If one already exists, it must be
+    # verified BEFORE writing/reusing any leaf. A corrupt marker blocks
+    # recovery instead of letting a retry silently work around evidence of
+    # previously committed but now invalid state.
+    receipt_digest = snapshot_sha256(receipt)
+    root = Path(output_root).expanduser()
+    if root.exists() or root.is_symlink():
+        safe = _root_directory(root)
+        marker = safe / (receipt_digest + ".json")
+        if marker.exists() or marker.is_symlink():
+            existing = replay_batch(safe, receipt_digest)
+            if (existing["receipt_published"] is not True
+                    or existing["case_count"] != len(records)
+                    or existing["research_ready"] is not False):
+                raise ValueError("Existing batch receipt not valid for reuse")
+            return {
+                "batch_id": receipt["batch_id"],
+                "case_count": len(records),
+                "cases": [
+                    {
+                        "case_id": case_id,
+                        "artifacts": {
+                            key: {
+                                "sha256": inventory[key],
+                                "path": str(safe / (inventory[key] + ".json")),
+                                "created": False,
+                            }
+                            for key in ARTIFACT_NAMES
+                        },
+                    }
+                    for case_id, _, inventory in records
+                ],
+                "batch_receipt": {
+                    "sha256": receipt_digest,
+                    "path": str(marker),
+                    "created": False,
+                },
+                "receipt_published": True,
+                "stored_leaf_replay_verified": True,
+                "existing_receipt_reused": True,
+                "heldout_labels_accessed": False,
+                "research_ready": False,
+            }
+
     artifact_pointers = []
     for case_id, artifacts, inventory in records:
         pointers = {}
@@ -93,7 +137,7 @@ def publish_batch(built, output_root):
         raise ValueError("Batch leaf audit did not certify sealed inventory")
 
     digest, path, created = write_immutable_view(receipt, output_root)
-    if digest != snapshot_sha256(receipt):
+    if digest != receipt_digest:
         raise ValueError("Final batch receipt changed during publication")
     final = replay_batch(output_root, digest)
     if (final["receipt_published"] is not True
@@ -109,6 +153,7 @@ def publish_batch(built, output_root):
         },
         "receipt_published": True,
         "stored_leaf_replay_verified": True,
+        "existing_receipt_reused": not created,
         "heldout_labels_accessed": False,
         "research_ready": False,
     }

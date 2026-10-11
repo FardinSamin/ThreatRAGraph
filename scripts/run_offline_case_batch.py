@@ -258,6 +258,9 @@ def main(argv=None):
             "batch_receipt": batch_output,
             "receipt_published": args.write,
             "stored_leaf_replay_verified": args.write,
+            "existing_receipt_reused": (
+                published["existing_receipt_reused"] if args.write else False
+            ),
             "later_reference_labels_accessed": False,
             "empirical_evaluation": "not_performed",
             "research_ready": False,

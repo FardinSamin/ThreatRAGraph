@@ -105,3 +105,15 @@ This batch step does not compute metrics or certify a real study.
   and reviewed held-out labels before any empirical result is reported.
 
 FR-27, FR-28 and FR-29 remain PARTIAL, DRAFT and UNVERIFIED.
+
+### Retrying a previously published receipt
+
+When the expected digest-named batch receipt already exists, `--write`
+first replays that receipt and its full artifact inventory. If valid, it
+returns `existing_receipt_reused=true` without writing any new files.
+If the receipt or one of its leaves has been damaged, it fails before
+starting new writes; it never silently repairs an already published batch.
+If the receipt is absent, an interrupted run may safely reuse exact orphaned
+leaves and publish the receipt only after the full saved B0/G1 replay.
+The preview always reports `existing_receipt_reused=false` and remains
+read-only. This does not imply an authenticated external or pre-gold freeze.

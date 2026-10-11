@@ -1,6 +1,6 @@
 # M6.7 — Unscored batch publication and read-only recovery
 
-**Status:** Draft, 17 new tests authored but NOT executed. Based on the
+**Status:** Draft, 25 tests authored but NOT executed. Based on the
 unmerged consolidated integration PR #61. No research case is approved, no
 gold labels are used, and no tests or real experiments have been verified.
 
@@ -29,9 +29,13 @@ and could be mistaken by a manual operator for a complete batch.
 4. Only once all stored leaves pass, write the batch receipt as the final
    immutable JSON file. Reopen that exact digest-named receipt and perform
    the full structural replay again before reporting unscored success.
-5. A byte-identical retry reuses existing leaves and any already valid
-   receipt. Corrupt or missing leaves fail closed. No cleanup of unknown
-   orphans, no mutation of existing digest files and no gold access.
+5. A retry FIRST looks for the exact expected final receipt. If present, it
+   replays the existing record and all leaves before making any writes.
+   A corrupt receipt, broken source link or missing leaf blocks the retry
+   without rewriting anything. If fully valid, the receipt is reused and
+   no leaf write is attempted. Without a receipt, byte-identical orphaned
+   leaves may be reused and only after the full saved-data audit is a new
+   final receipt published. No cleanup of unknown orphans or gold access.
 
 ## Completion probe
 
@@ -72,7 +76,7 @@ who controls all stored data can still replace all self-hashes.
 ## Deferred gates
 
 - Execute `python -m unittest discover -s tests -p 'test_batch_publication.py' -v`
-  (17 synthetic/failure-injection tests authored, not run).
+  (25 synthetic/failure-injection tests authored, not run).
 - Run original `test_batch_replay.py`, `test_offline_case_batch.py`,
   `test_immutable_artifacts.py` and two-case byte-backed synthetic
   integration tests on the exact branch head.
@@ -81,3 +85,22 @@ who controls all stored data can still replace all self-hashes.
   durability as separate research/integration gates.
 - Run the full repository/security CI when INCLUDED Actions allowance
   resumes. Do not enable paid billing overages or merge to main now.
+
+## Concurrency and retry regression additions (authored, unexecuted)
+
+Eight additional tests cover strict early refusal of corrupt/dangling
+preexisting receipts, no-write reuse of a fully verified existing receipt,
+corrupted or missing leaves behind a previously published receipt, parallel
+publication of the same batch (only one new final receipt), a read-only
+probe during the prepublication replay barrier, recovery after a simulated
+exception immediately after the final receipt was published, and
+coexistence of two independently sealed batches in the same storage root.
+The CLI reports `existing_receipt_reused` so an already-sealed retry does not
+look like a new publication. This boolean is not a guarantee of external
+freeze or source authenticity.
+
+Parallel execution and filesystem races are **not yet tested**. In particular,
+correctness must be confirmed on Linux, Windows and the actual destination
+filesystem before treating the implementation as reliable. An existing
+corrupt digest-named receipt is never automatically repaired, replaced or
+deleted; it requires an explicit manual integrity investigation.

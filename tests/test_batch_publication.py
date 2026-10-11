@@ -9,7 +9,7 @@ from scripts.freeze_case_snapshots import snapshot_sha256, write_immutable_view
 from scripts.run_offline_case_batch import ARTIFACT_NAMES, _receipt
 from scripts.check_batch_completion import main as completion_cli
 from src.threatragraph.batch_publication import (
-    _expected_entries, check_batch_completion, publish_batch,
+    check_batch_completion, publish_batch,
 )
 
 # The existing frozen-run synthetic fixture exercises the REAL deterministic
@@ -215,6 +215,139 @@ class BatchPublicationTests(unittest.TestCase):
         payload = json.loads(output.getvalue())
         self.assertTrue(payload["full_artifact_integrity_verified"])
         self.assertFalse(payload["research_ready"])
+
+    def test_valid_existing_receipt_reused_without_writing_any_leaf(self):
+        from src.threatragraph import batch_publication
+        first = publish_batch(self.built, self.root)
+        with patch.object(batch_publication, "write_immutable_view",
+                          side_effect=AssertionError("should not write")):
+            recovered = publish_batch(self.built, self.root)
+        self.assertTrue(recovered["existing_receipt_reused"])
+        self.assertFalse(recovered["batch_receipt"]["created"])
+        self.assertEqual(first["batch_receipt"]["sha256"],
+                         recovered["batch_receipt"]["sha256"])
+        self.assertTrue(recovered["stored_leaf_replay_verified"])
+
+    def test_corrupt_existing_receipt_blocks_retry_before_leaf_write(self):
+        from src.threatragraph import batch_publication
+        publish_batch(self.built, self.root)
+        self.receipt.write_bytes(b'{"corrupt":true}\n')
+        with patch.object(batch_publication, "write_immutable_view",
+                          side_effect=AssertionError("must not write")):
+            with self.assertRaisesRegex(ValueError, "declared SHA-256"):
+                publish_batch(self.built, self.root)
+        self.assertEqual(b'{"corrupt":true}\n', self.receipt.read_bytes())
+
+    def test_symlinked_existing_receipt_blocks_retry_before_leaf_write(self):
+        from src.threatragraph import batch_publication
+        self.root.mkdir()
+        other = self.root / "unrelated.json"
+        other.write_bytes(b"{}")
+        try:
+            self.receipt.symlink_to(other)
+        except (OSError, NotImplementedError):
+            self.skipTest("Symlinks unavailable")
+        with patch.object(batch_publication, "write_immutable_view",
+                          side_effect=AssertionError("must not write")):
+            with self.assertRaises((ValueError, OSError)):
+                publish_batch(self.built, self.root)
+        self.assertTrue(self.receipt.is_symlink())
+
+    def test_valid_receipt_with_deleted_leaf_is_refused_on_retry(self):
+        from src.threatragraph import batch_publication
+        publish_batch(self.built, self.root)
+        sha = self.built["batch_receipt"]["cases"][0]["artifacts"]["b0_graph"]
+        (self.root / (sha + ".json")).unlink()
+        with patch.object(batch_publication, "write_immutable_view",
+                          side_effect=AssertionError("must not write")):
+            with self.assertRaisesRegex(ValueError, "Missing"):
+                publish_batch(self.built, self.root)
+
+    def test_post_commit_replay_exception_can_recover_via_existing_receipt(self):
+        from src.threatragraph import batch_publication
+        verifier = batch_publication.replay_batch
+        with patch.object(batch_publication, "replay_batch",
+                          side_effect=OSError("post-commit interruption")):
+            with self.assertRaisesRegex(OSError, "post-commit interruption"):
+                publish_batch(self.built, self.root)
+        # Publication was completed before the interrupted readback; don't
+        # report success until the retry independently replays the receipt.
+        self.assertTrue(self.receipt.is_file())
+        verified = verifier(self.root, self.digest)
+        self.assertTrue(verified["receipt_published"])
+        with patch.object(batch_publication, "write_immutable_view",
+                          side_effect=AssertionError("must not write")):
+            retry = publish_batch(self.built, self.root)
+        self.assertTrue(retry["existing_receipt_reused"])
+
+    def test_parallel_identical_publications_have_one_receipt_creator(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Barrier
+        from src.threatragraph import batch_publication
+        original = batch_publication.verify_unpublished_batch
+        barrier = Barrier(2)
+
+        def both_ready(*args):
+            barrier.wait(timeout=10)
+            return original(*args)
+
+        with patch.object(batch_publication, "verify_unpublished_batch",
+                          side_effect=both_ready):
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                futures = [
+                    pool.submit(publish_batch, self.built, self.root)
+                    for _ in range(2)
+                ]
+                results = [f.result(timeout=20) for f in futures]
+        self.assertEqual(1, sum(x["batch_receipt"]["created"] for x in results))
+        self.assertTrue(all(x["stored_leaf_replay_verified"] for x in results))
+        self.assertEqual("sealed_unscored_batch_verified",
+                         check_batch_completion(self.root, self.digest)["status"])
+
+    def test_probe_cannot_observe_commit_during_prepublication_replay(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Event
+        from src.threatragraph import batch_publication
+        started, proceed = Event(), Event()
+        original = batch_publication.verify_unpublished_batch
+
+        def paused_check(*args):
+            started.set()
+            if not proceed.wait(10):
+                raise RuntimeError("Test replay gate timed out")
+            return original(*args)
+
+        with patch.object(batch_publication, "verify_unpublished_batch",
+                          side_effect=paused_check):
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(publish_batch, self.built, self.root)
+                try:
+                    self.assertTrue(started.wait(10))
+                    probe = check_batch_completion(self.root, self.digest)
+                    self.assertEqual("uncommitted", probe["status"])
+                    self.assertFalse(self.receipt.exists())
+                finally:
+                    proceed.set()
+                completed = future.result(timeout=20)
+        self.assertTrue(completed["receipt_published"])
+        self.assertEqual("sealed_unscored_batch_verified",
+                         check_batch_completion(self.root, self.digest)["status"])
+
+    def test_different_batch_receipts_coexist_without_rewriting_existing(self):
+        existing = publish_batch(self.built, self.root)
+        alternate = built_for(("case-a",))
+        outcome = publish_batch(alternate, self.root)
+        self.assertNotEqual(existing["batch_receipt"]["sha256"],
+                            outcome["batch_receipt"]["sha256"])
+        self.assertTrue(self.receipt.exists())
+        self.assertTrue((self.root / (
+            outcome["batch_receipt"]["sha256"] + ".json")).exists())
+        self.assertEqual("sealed_unscored_batch_verified",
+                         check_batch_completion(self.root, self.digest)["status"])
+        self.assertEqual("sealed_unscored_batch_verified",
+                         check_batch_completion(
+                             self.root, outcome["batch_receipt"]["sha256"]
+                         )["status"])
 
     def test_extra_uncommitted_staging_file_is_not_completion(self):
         self.root.mkdir()
