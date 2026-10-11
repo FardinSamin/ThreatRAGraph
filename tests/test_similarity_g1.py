@@ -84,6 +84,9 @@ def fixtures():
 def feature_lineage(g1_view, g1_graph):
     """Synthetic claims about exact-only source vocabulary, never real attestations."""
     sources = {entry["source_version_id"]: entry for entry in g1_view["sources"]}
+    # Unknown IDs remain invalid at the G1 graph boundary, not in test setup.
+    sources = {**{"heldout": {"sha256": h("invalid-heldout"),
+                              "available_at": "2024-01-01T00:00:00Z"}}, **sources}
     return {
         "schema_version": CONTRACT_VERSION,
         "artifact_kind": ARTIFACT_KIND,
