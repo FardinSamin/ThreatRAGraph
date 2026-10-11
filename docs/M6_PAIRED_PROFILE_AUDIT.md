@@ -31,7 +31,8 @@ It does not export report bodies, create metrics or certify ground truth.
 - Different B0/G1 early source-version IDs, B0 source-view digests or early facts
 - G1 not bound to the exact B0 profile ID
 - Any B0 inferred prediction, unsupported observed-fact provenance, invalid
-  typed source triple or duplicate observed fact
+  typed source triple or duplicate observed fact (incoming sourced target
+  relations remain allowed; only G1 predictions must originate at the target)
 - G1 proposed edges overlapping source-observed facts, repeated predictions,
   nonprovisional prediction status, probability-like score or no independent
   historical corroboration paths

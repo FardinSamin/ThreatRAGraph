@@ -51,14 +51,16 @@ def _profile_identity(profile: dict, method: str, kind: str) -> str:
     return claimed
 
 
-def _triple(record: Any, *, target: str, kind: str) -> tuple:
+def _triple(record: Any, *, target: str, kind: str,
+            outgoing_only: bool = False) -> tuple:
     item = _object(record, kind)
     subject = item.get("subject_id")
     predicate = item.get("predicate")
     obj = item.get("object_id")
     validate_triple(subject, predicate, obj)
-    if subject != target:
-        raise ValueError(kind + " must describe the fixed target subject")
+    if ((outgoing_only and subject != target)
+            or (not outgoing_only and target not in (subject, obj))):
+        raise ValueError(kind + " must describe the fixed target entity")
     if FORBIDDEN_CONTEXT.intersection(item):
         raise ValueError("Held-out reference fields cannot enter claim output")
     return subject, predicate, obj
@@ -136,7 +138,8 @@ def audit_paired_profiles(b0_profile: dict, g1_profile: dict) -> dict:
     seen = set()
     for proposal in proposals:
         triple = _triple(proposal, target=b0["target_entity_id"],
-                         kind="G1 provisional prediction")
+                         kind="G1 provisional prediction",
+                         outgoing_only=True)
         if triple in seen or triple in observed_triples:
             raise ValueError("Duplicate or already-observed G1 prediction")
         seen.add(triple)

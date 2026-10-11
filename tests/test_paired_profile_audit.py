@@ -124,6 +124,23 @@ class PairedProfileAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "already-observed"):
             audit_paired_profiles(a, b)
 
+    def test_incoming_sourced_b0_fact_is_valid_for_fixed_target(self):
+        """B0 may observe incoming graph edges; only G1 proposals are outgoing."""
+        a, b = fixture()
+        incoming = copy.deepcopy(a["facts"][0])
+        incoming.update({
+            "subject_id": "indicator:synthetic-ioc",
+            "predicate": "INDICATES",
+            "object_id": "malware:new",
+        })
+        a["facts"] = [incoming]
+        reseal(a)
+        b["b0_profile_id"] = a["profile_id"]
+        b["observed_early_facts"] = [copy.deepcopy(incoming)]
+        reseal(b)
+        outcome = audit_paired_profiles(a, b)
+        self.assertEqual(1, outcome["observed_early_fact_count"])
+
     def test_unsupported_prediction_status_refused(self):
         a, b = fixture()
         b["predictions"][0]["status"] = "confirmed"
