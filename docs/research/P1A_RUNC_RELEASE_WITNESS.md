@@ -33,6 +33,8 @@ python -m scripts.verify_runc_release_witness --release-json '.\data\private\run
 
 **These commands access GitHub only while fetching the three JSON responses.** The verifier is strictly offline. The JSON is private, is a **current** API response, may contain PGP signature material and should not be committed. The parser accepts UTF-8 with or without a PowerShell BOM. No cloud compute or paid APIs are required.
 
+**Byte acquisition update:** [P1a pinned Git tag receipt](P1A_PINNED_TAG_ACQUISITION.md) now records an *actual* 1,525-byte original Git tag object fetched/hashed on CI, not merely API metadata. Public first-availability and trusted PGP key verification are still pending.
+
 ## Still required for authentic research approval
 
 1. Recover the exact historical source bytes and complete original Git objects; if using PGP as evidence, locally verify the original signed Git tag with a trusted publisher key.
