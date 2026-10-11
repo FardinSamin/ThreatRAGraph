@@ -132,8 +132,7 @@ class Original2022CadoPointerTests(unittest.TestCase):
         self.assertEqual(40, len(witness.REFERENCE_GIT_BLOB))
         self.assertEqual(40, len(witness.IOC_GIT_BLOB))
         self.assertEqual("2022-12-23T11:42:26Z",
-                         witness.verify_reference.__globals__["VERSION"] and
-                         "2022-12-23T11:42:26Z")
+                         self._verified()["git_declared_committer_time_unverified_as_public_by"])
 
 
 if __name__ == "__main__":
