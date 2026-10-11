@@ -105,3 +105,16 @@ separate independent review before legitimate empirical evaluation.
 
 FR-29 reproducibility remains **partial/draft**; this module adds structural
 persistence checks, not independent reproducibility certification.
+
+## Later integration hardening on dependent PR #62
+
+The dependent publication/recovery branch replaces separate artifact
+`is_symlink()/stat()/read_bytes()` checks with a bounded, regular-file,
+no-follow descriptor reader. All source artifact ancestors and the leaf
+are opened without following symlinks on POSIX; Windows junction checks
+are best effort and require actual platform tests. The verifier still
+checks exact declared SHA-256 and canonical JSON bytes. Six new tests in
+PR #62 extend the 19-test replay suite to **25 authored but unexecuted**
+methods, including a simulated path replacement at the moment of open.
+PR #58 itself remains unchanged until explicitly integrated. Neither
+version is scientific or historical-source authentication.

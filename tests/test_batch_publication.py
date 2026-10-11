@@ -349,6 +349,24 @@ class BatchPublicationTests(unittest.TestCase):
                              self.root, outcome["batch_receipt"]["sha256"]
                          )["status"])
 
+    def test_oversized_case_artifact_refused_before_any_disk_write(self):
+        from src.threatragraph.batch_replay import MAX_ARTIFACT_BYTES
+        self.built["case_results"][0]["b0_view"]["oversized"] = (
+            "x" * (MAX_ARTIFACT_BYTES + 1)
+        )
+        with self.assertRaisesRegex(ValueError, "replay reader size limit"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_oversized_batch_receipt_refused_before_disk_write(self):
+        from src.threatragraph.batch_replay import MAX_ARTIFACT_BYTES
+        self.built["batch_receipt"]["oversized"] = (
+            "x" * (MAX_ARTIFACT_BYTES + 1)
+        )
+        with self.assertRaisesRegex(ValueError, "receipt exceeds replay reader"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
     def test_extra_uncommitted_staging_file_is_not_completion(self):
         self.root.mkdir()
         (self.root / ".stage-abandoned.partial").write_bytes(b"truncated")

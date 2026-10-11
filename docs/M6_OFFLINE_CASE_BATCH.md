@@ -117,3 +117,13 @@ If the receipt is absent, an interrupted run may safely reuse exact orphaned
 leaves and publish the receipt only after the full saved B0/G1 replay.
 The preview always reports `existing_receipt_reused=false` and remains
 read-only. This does not imply an authenticated external or pre-gold freeze.
+
+### Replay-compatible artifact size ceiling (dependent PR #62)
+
+When publishing a sealed M6 batch, the in-memory leaf and final receipt
+must each serialize to no more than **8 MiB**, matching the structural
+replay reader limit. The lower-level shared artifact writer is allowed
+to store larger unrelated objects, but an M6 receipt must never commit
+a leaf that its own offline replay cannot read. Oversize inventories
+fail before output-directory creation; two new synthetic tests are authored
+and unexecuted. The default nonwriting preview does not imply publication.

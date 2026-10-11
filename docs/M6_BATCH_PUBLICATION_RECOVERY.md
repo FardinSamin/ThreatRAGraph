@@ -1,6 +1,6 @@
 # M6.7 — Unscored batch publication and read-only recovery
 
-**Status:** Draft, 25 tests authored but NOT executed. Based on the
+**Status:** Draft, 27 recovery tests plus 25 replay tests authored on this integration branch; NOT executed. Based on the
 unmerged consolidated integration PR #61. No research case is approved, no
 gold labels are used, and no tests or real experiments have been verified.
 
@@ -76,7 +76,7 @@ who controls all stored data can still replace all self-hashes.
 ## Deferred gates
 
 - Execute `python -m unittest discover -s tests -p 'test_batch_publication.py' -v`
-  (25 synthetic/failure-injection tests authored, not run).
+  (27 synthetic/failure-injection tests authored, not run).
 - Run original `test_batch_replay.py`, `test_offline_case_batch.py`,
   `test_immutable_artifacts.py` and two-case byte-backed synthetic
   integration tests on the exact branch head.
@@ -104,3 +104,22 @@ correctness must be confirmed on Linux, Windows and the actual destination
 filesystem before treating the implementation as reliable. An existing
 corrupt digest-named receipt is never automatically repaired, replaced or
 deleted; it requires an explicit manual integrity investigation.
+
+## Replay input hardening (integration follow-up)
+
+The verifier no longer performs a separate path type/size check followed by
+`Path.read_bytes()`. It now uses the existing bounded no-follow input
+reader: on POSIX every parent and leaf is opened via no-follow descriptors,
+with stable file metadata and an exact 8 MiB byte bound; the Windows path
+checks junctions/symlinks but still needs cross-platform race testing.
+Canonical JSON, exact declared SHA-256, duplicate-key and nonfinite checks
+remain in force. A preflight gate also refuses any in-memory leaf or receipt
+that exceeds the REPLAY size limit before any batch writes, even though the
+lower-level immutable writer can support larger unrelated artifacts.
+
+Six additional replay tests cover leaf and parent symlinks, named pipes,
+replacing a file at descriptor open, and use of the descriptor reader instead
+of a racy pathname read. Two additional batch publication tests cover
+oversized in-memory leaves/receipts. **27 publication tests and 25 replay
+tests exist on this PR tip; all are authored and unexecuted.** The separate
+parent PR #58 retains its original 19 replay tests.

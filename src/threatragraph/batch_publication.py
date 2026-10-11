@@ -6,12 +6,14 @@ pass the separate B0/G1 replay checks. No gold labels are opened.
 """
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
-from scripts.freeze_case_snapshots import snapshot_sha256, write_immutable_view
+from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256, write_immutable_view
 from scripts.run_offline_case_batch import ARTIFACT_NAMES
 from src.threatragraph.batch_replay import (
-    HEX64, _root_directory, replay_batch, verify_unpublished_batch,
+    HEX64, MAX_ARTIFACT_BYTES, _root_directory, replay_batch,
+    verify_unpublished_batch,
 )
 
 MAX_PUBLICATION_CASES = 100
@@ -52,13 +54,20 @@ def _expected_entries(built):
             if (not isinstance(artifact, dict)
                     or artifact.get("case_id") != case_id):
                 raise ValueError("Cross-case or nonobject artifact")
-            digest = snapshot_sha256(artifact)
+            serialized = canonical_bytes(artifact)
+            if len(serialized) > MAX_ARTIFACT_BYTES:
+                raise ValueError(
+                    "Batch artifact exceeds replay reader size limit"
+                )
+            digest = hashlib.sha256(serialized).hexdigest()
             if entry["artifacts"][name] != digest:
                 raise ValueError("Candidate artifact differs from sealed receipt")
             bound[name] = digest
         records.append((case_id, outputs, bound))
     if identifiers != sorted(set(identifiers)):
         raise ValueError("Noncanonical duplicate or unordered case identifiers")
+    if len(canonical_bytes(receipt)) > MAX_ARTIFACT_BYTES:
+        raise ValueError("Batch receipt exceeds replay reader size limit")
     return receipt, records
 
 

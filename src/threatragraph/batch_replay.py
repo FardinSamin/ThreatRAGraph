@@ -21,6 +21,7 @@ from src.threatragraph.evidence_graph import fingerprint, require_sha
 from src.threatragraph.paired_profile_audit import audit_paired_profiles
 from src.threatragraph.paired_run_freeze import RUN_LOCK_VERSION, _metadata
 from src.threatragraph.similarity_g1 import build_g1_profile
+from src.threatragraph.local_file_inputs import read_local_text
 
 REPLAY_VERSION = "unscored-batch-integrity-replay-v1"
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
@@ -85,34 +86,40 @@ def _root_directory(path):
     # must not rely on an implicit symlinked directory being safe.
     node = root.absolute()
     for segment in (node, *node.parents):
-        if segment.is_symlink():
-            raise ValueError("Symlinked batch artifact root/ancestor")
+        is_junction = getattr(segment, "is_junction", None)
+        if (segment.is_symlink()
+                or (is_junction is not None and is_junction())):
+            raise ValueError("Symlinked or junction batch artifact root/ancestor")
     if not node.is_dir():
         raise ValueError("Batch artifact root must be a directory")
     return node.resolve(strict=True)
 
 
 def _read_canonical(path, *, expected_hash=None):
-    file = Path(path)
-    if file.is_symlink() or not file.is_file():
-        raise ValueError("Missing, nonregular or symlinked batch artifact")
-    size = file.stat().st_size
-    if not 0 < size <= MAX_ARTIFACT_BYTES:
-        raise ValueError("Empty or oversized batch artifact")
-    body = file.read_bytes()
+    """Load a canonical JSON artifact from one no-follow bounded descriptor.
+
+    Avoid separate lstat/path.read_bytes checks: the shared reader opens
+    every POSIX path component without following symlinks, checks regular
+    file type and stable byte length around the read, and refuses non-UTF8.
+    No caller may treat a separate existence check as proof of safety.
+    """
+    try:
+        body = read_local_text(path, max_bytes=MAX_ARTIFACT_BYTES).encode("utf-8")
+    except FileNotFoundError as error:
+        raise ValueError("Missing, nonregular or symlinked batch artifact") from error
+    except UnicodeDecodeError as error:
+        raise ValueError("Batch artifact must be UTF-8") from error
     actual = hashlib.sha256(body).hexdigest()
     if expected_hash is not None and actual != expected_hash:
         raise ValueError("Batch artifact bytes differ from declared SHA-256")
-    try:
-        parsed = json.loads(body.decode("utf-8"),
-                            object_pairs_hook=_unique_keys,
-                            parse_constant=_no_constants)
-    except UnicodeDecodeError as error:
-        raise ValueError("Batch artifact must be UTF-8") from error
+    parsed = json.loads(
+        body.decode("utf-8"),
+        object_pairs_hook=_unique_keys,
+        parse_constant=_no_constants,
+    )
     if not isinstance(parsed, dict) or canonical_bytes(parsed) != body:
         raise ValueError("Noncanonical or nonobject batch artifact")
     return parsed, actual
-
 
 def _load_named(root, digest):
     if type(digest) is not str or not HEX64.fullmatch(digest):
