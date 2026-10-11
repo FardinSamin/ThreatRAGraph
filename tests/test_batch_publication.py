@@ -1,6 +1,4 @@
 """Synthetic-only batch publication/recovery tests; authored, not executed."""
-import copy
-import hashlib
 import json
 from pathlib import Path
 import tempfile

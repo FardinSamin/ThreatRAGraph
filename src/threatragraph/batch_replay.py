@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 import re
 
-from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256
+from scripts.freeze_case_snapshots import canonical_bytes
 from scripts.run_offline_case_batch import ARTIFACT_NAMES, MAX_CASES, VERSION
 from src.threatragraph.baseline_b0 import build_b0_profile
 from src.threatragraph.contracts import validate_graph_projection
