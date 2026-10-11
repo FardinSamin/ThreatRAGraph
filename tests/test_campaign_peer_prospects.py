@@ -43,7 +43,7 @@ class ExactCampaignPeerProspectTests(unittest.TestCase):
             (p["predicate"], p["object_id"])
             for p in self.screen["background_peer_candidates"]
         })
-        self.assertEqual(28, len(self.registry["sources"]))
+        self.assertEqual(29, len(self.registry["sources"]))
         self.assertFalse(any(s["status"] == "approved" for s in self.registry["sources"]))
 
     def test_forged_peer_review_or_byte_alignment_refused(self):

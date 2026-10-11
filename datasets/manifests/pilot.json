@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "dataset_id": "threatragraph-pilot",
   "dataset_version": "0.1.0-candidate",
-  "description": "28 candidates source versions, including the pinned runc signed tag and original GHSA JSON linked to an independently retained public push event. Measured provenance receipts are separate from source rights, historical eligibility and investigator approval. Zero approved source versions or selected cases.",
+  "description": "29 candidates source versions, including the pinned runc signed tag and original GHSA JSON linked to an independently retained public push event. Measured provenance receipts are separate from source rights, historical eligibility and investigator approval. Zero approved source versions or selected cases.",
   "sources": [
     {
       "source_id": "src:crio-crowdstrike",
@@ -479,6 +479,23 @@
       "sha256": null,
       "redistribution": "unknown",
       "selection_rationale": "P1b prospective same-type campaign:Kiss-a-dog USES tool:xmrig background analogy to SCARLETEEL; candidate only, requires exact pre-cutoff archived bytes and independently reviewed claim"
+    },
+    {
+      "source_id": "src:mitre-teamtnt-stix20-v12-1",
+      "source_version_id": "candidate:mitre-teamtnt-stix20-v12-1-original-20221108:unapproved",
+      "source_kind": "attack_stix",
+      "title": "Original MITRE ATT&CK v12.1 TeamTNT STIX 2.0 intrusion-set record (G0139), 2022 publisher blob",
+      "publisher": "MITRE ATT&CK",
+      "url": "https://raw.githubusercontent.com/mitre/cti/4cbf8cc4bdf2121ee987a23bfe5aac4fe4d2f5b1/enterprise-attack/intrusion-set/intrusion-set--35d1b3be-49d4-42f1-aaa6-ef159c880bca.json",
+      "status": "candidate",
+      "published_at": null,
+      "available_at": null,
+      "date_confidence": "unknown",
+      "date_evidence": "Original public MITRE/cti STIX 2.0 TeamTNT intrusion-set bundle from commit 4cbf8cc4bdf2121ee987a23bfe5aac4fe4d2f5b1, publisher-declared committer 2022-11-08T14:56:14Z, blob ce5239cb22093656b3f8e79fbd356a17b1fa5f19. Pinned original bytes independently re-acquirable and verified by CI. Commit date and STIX modified time are NOT independently trusted public-by timestamps. The blob itself embeds AT&T Alien Labs Chimaera link as a citation; erroneous label 'September 2020' conflicts with literal article citation September 8, 2021. This is a historical MITRE secondary CTI representation of a named threat actor, NOT historical original Alien Labs campaign article bytes, independent threat investigation or G1 same-type campaign peer.",
+      "independence_group": "mitre-attack-v12-1-curation",
+      "sha256": null,
+      "redistribution": "unknown",
+      "selection_rationale": "P1b original publisher-controlled versioned ATT&CK STIX background and historical metadata-drift witness. Typed intrusion-set:TeamTNT, not campaign:Chimaera. Source status remains unapproved until chronology, rights and expert review; not a G1-v2 campaign feature or second independent Chimaera evidence group."
     }
   ]
 }
