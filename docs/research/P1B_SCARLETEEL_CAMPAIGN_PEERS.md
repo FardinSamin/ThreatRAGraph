@@ -23,6 +23,10 @@ The two historical researcher publishers (Alien Labs and CrowdStrike) are **pros
 - Sysdig's [Japanese-language page dated March 1, 2023](https://www.sysdig.com/jp/blog/cloud-breach-terraform-data-theft) identifies the English February 28 original, while its own content is **after** the proposed March 1 00:00 UTC cutoff and therefore **must not** enter early source inference. Independent republication/translations are not exact original article bytes or independent threat investigations.
 - An attempt in this screening session to access Internet Archive CDX snapshot discovery through the available browsing interface returned an access error. **No February 2023 Wayback version was recovered or claimed**.
 
+## Independent dated *bibliography pointer*, not original source-article approval
+
+A follow-up [Chimaera historical Git-bibliography byte witness](P1B_CHIMAERA_HISTORICAL_BIBLIOGRAPHY.md) identifies and replays **two pinned independently authored 2021/2022 Git reference files** containing the **original AT&T URL and September 8, 2021 bibliographic citation**. RealityNet's bibliography also has a conflicting `September 2020` internal source-name label, which is explicitly flagged rather than promoted to a publication date. Original 2021 article **bytes**, original **public-by time**, and the campaign-to-XMRig **claim** remain unverified. A historical link citation is not a separately investigated report or G1 corroborating peer support.
+
 ## Why a named same-type peer is NOT yet sufficient for G1
 
 Read `src/threatragraph/similarity_g1.py` around its per-peer candidate loop: for **each individual historical peer**, G1 collects **source independence groups across that peer's shared matching feature AND its proposed not-yet-seen relation** before checking `min_background_groups=2`. Two peer subjects each with one original publisher group **do not aggregate into two groups to validate either peer's proposed relation**. The ranker only combines corroborated per-peer hypotheses after that gate passes; it must **not** count the Alien Labs report for Chimaera as a second witness for an unrelated CrowdStrike Kiss-a-dog claim.

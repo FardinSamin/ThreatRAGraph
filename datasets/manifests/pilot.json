@@ -457,7 +457,7 @@
       "published_at": null,
       "available_at": null,
       "date_confidence": "unknown",
-      "date_evidence": "Original research article currently displays September 8, 2021 and explicitly names Chimaera campaign plus XMRig in its Windows/Kubernetes payload section. Changed hosting/branding (AT&T -> LevelBlue) means today's webpage is NOT an attested 2021 source version; independent snapshot required.",
+      "date_evidence": "Original research article currently displays September 8, 2021 and explicitly names Chimaera campaign plus XMRig in its Windows/Kubernetes payload section. Changed hosting/branding (AT&T -> LevelBlue) means today's webpage is NOT an attested 2021 source version; independent snapshot required. Independently authored Git bibliography references at Metarget commit 9d68fc3a1e7a3790b12d59a120fb78ea2dd2b8d1 (declared 2021-12-19, blob 29f2948685b187be078a1d3f492d4a886e287e43) and RealityNet commit a933255173c0d512f712e2cb81a2067aa99a75a7 (declared 2022-05-05, blob c51a7ae9d06cc31451bf9cad5b60a102b6f92aab) contain the original AT&T link and 2021-09-08 citation. Git public push time and ORIGINAL AT&T article bytes are not attested; RealityNet source_name incorrectly says September 2020. See docs/research/P1B_CHIMAERA_HISTORICAL_BIBLIOGRAPHY.md.",
       "independence_group": "alien-labs-chimaera-original-research",
       "sha256": null,
       "redistribution": "unknown",
