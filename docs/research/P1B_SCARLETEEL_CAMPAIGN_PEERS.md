@@ -25,7 +25,7 @@ The two historical researcher publishers (Alien Labs and CrowdStrike) are **pros
 
 ## Independent dated *bibliography pointer*, not original source-article approval
 
-A follow-up [Chimaera historical Git-bibliography byte witness](P1B_CHIMAERA_HISTORICAL_BIBLIOGRAPHY.md) identifies and replays **two pinned independently authored 2021/2022 Git reference files** containing the **original AT&T URL and September 8, 2021 bibliographic citation**. RealityNet's bibliography also has a conflicting `September 2020` internal source-name label, which is explicitly flagged rather than promoted to a publication date. Original 2021 article **bytes**, original **public-by time**, and the campaign-to-XMRig **claim** remain unverified. A historical link citation is not a separately investigated report or G1 corroborating peer support.
+A follow-up [Chimaera historical Git-bibliography byte witness](P1B_CHIMAERA_HISTORICAL_BIBLIOGRAPHY.md) identifies and replays **two pinned 2021/2022 Git reference files** containing the **original AT&T URL and September 8, 2021 bibliographic citation**. RealityNet's bibliography also has a conflicting `September 2020` internal source-name label, which is explicitly flagged rather than promoted to a publication date. The [original MITRE ATT&CK v12.1 TeamTNT STIX data](P1B_MITRE_ORIGINAL_TEAMTNT_2022.md) proves the conflicting 2020 source-name/2021 bibliographic-date pair also exists in the publisher-controlled 2022 ATT&CK dataset; its entity is a TeamTNT **intrusion-set** and the original 2021 AT&T article **bytes**, original **public-by time**, and the campaign-to-XMRig **claim** remain unverified. A historical link citation is not a separately investigated report or G1 corroborating peer support.
 
 ## Why a named same-type peer is NOT yet sufficient for G1
 
@@ -54,4 +54,4 @@ The [P1b Common Crawl CDX/WARC verifier](P1B_COMMONCRAWL_PRIMARY_WARC_INTAKE.md)
 4. Freeze exact source IDs, cutoffs, methods, peer feature/claim families and abstentions **before** independent later reference annotations or results are consulted. Prior search-summary exposure necessitates blind external labeler; if not feasible exclude this case.
 5. Request investigator/faculty screening signoff. Only then consider the first **development** experiment, followed separately by the full 25–40 source/4–6 case pilot.
 
-**Disposition:** important positive *case search* advance; no research outcome. **28 candidate sources, zero approved source versions, zero selected cases and zero B0/G1 empirical comparisons.**
+**Disposition:** important positive *case search* advance; no research outcome. **29 candidate sources, zero approved source versions, zero selected cases and zero B0/G1 empirical comparisons.**
