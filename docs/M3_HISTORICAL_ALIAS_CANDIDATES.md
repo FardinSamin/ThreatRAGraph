@@ -1,6 +1,6 @@
 # M3.4 — Historical typed alias candidate registry (fail closed)
 
-**Status:** Draft engineering-only implementation (FR-13 partial); 18
+**Status:** Draft engineering-only implementation (FR-13 partial); 21
 synthetic/adversarial tests authored and not executed. No human identity,
 historical public availability or real entity-link review is authenticated.
 
@@ -78,3 +78,17 @@ source-native entity resolution contract. No such approval exists today.
 
 This module is deliberately not a general entity-linking engine nor a
 claim of completed FR-13. Its output is candidate-only, not a research result.
+
+## Local JSON input hardening (draft)
+
+The standalone alias-inspection CLI uses the shared bounded read-only file
+reader for strict UTF-8, nonfinite/duplicate JSON refusal, regular-file and
+symlink/junction checks through directory ancestors, and whole-file size
+stability. Duplicate/hardlinked `--view` and `--history` inputs are refused.
+On POSIX, no-follow directory descriptors also prevent parent-symlink swap
+races; Windows filesystem checks need independent live validation.
+
+**21 alias-inspection tests authored, not executed**, including JSON nonfinite,
+parent-symlink and same-inode refusals. The shared reader is source code in
+this draft; its separate 15-test suite is staged in the independent exchange
+branch and later integration candidate, not duplicated here.

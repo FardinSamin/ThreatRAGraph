@@ -190,6 +190,46 @@ class HistoricalAliasCandidateTests(unittest.TestCase):
             self.assertEqual(0, status)
             self.assertFalse(json.loads(output.getvalue())["research_ready"])
 
+    def test_cli_refuses_nested_nonfinite_alias_history_json(self):
+        view, rows = fixture()
+        history = create_history(view, rows)
+        with tempfile.TemporaryDirectory() as tmp:
+            a = Path(tmp) / "view.json"
+            b = Path(tmp) / "history.json"
+            a.write_text(json.dumps(view), encoding="utf-8")
+            b.write_text(json.dumps(history).replace(
+                '"entries": [', '"extra": {"x":NaN}, "entries": [', 1
+            ), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Nonfinite"):
+                _read(b)
+
+    def test_cli_refuses_symlinked_parent_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            real = root / "real"
+            real.mkdir()
+            (real / "history.json").write_text("{}", encoding="utf-8")
+            alias = root / "linked"
+            try:
+                alias.symlink_to(real, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symlinks not available")
+            with self.assertRaisesRegex(ValueError, "Symlink"):
+                _read(alias / "history.json")
+
+    def test_cli_rejects_identical_source_history_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "same.json"
+            path.write_text("{}", encoding="utf-8")
+            output = StringIO()
+            with redirect_stdout(output):
+                code = main(["--view", str(path), "--history", str(path),
+                             "--entity-id", "malware:fixture"])
+            self.assertEqual(2, code)
+            self.assertEqual(
+                "ValueError", json.loads(output.getvalue())["reason_category"]
+            )
+
     def test_cli_refuses_symlinked_history(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "original.json"
