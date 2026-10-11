@@ -1,5 +1,7 @@
 # P1e — Real byte-verified original Cado Kiss-a-dog research webpage, February 6, 2023
 
+**P1f follow-up:** [Hash-only evidence-block locator dossier](P1F_CADO_EVIDENCE_BLOCK_HASHES.md) now independently replays the exact same original HTML and pins candidate XMRig/XHide normalized paragraph SHA256s, block ordinals and source lines (107 parsed visible blocks, 15 cue-bearing blocks). This aids expert review but is **not semantic approval**. Eight attempted CrowdStrike/CSA/Sysdig historic CDX queries all returned HTTP 504, an inconclusive service error—not proof no archived reports exist.
+
 **Scientific disposition: real pre-cutoff original-publisher *capture candidate* recovered and exact HTML bytes replayed; research source version/case STILL UNAPPROVED.** This is a materially different kind of historical evidence from PR #47's Securonix derivative IOC pointer or PR #48's independent GitHub PushEvent of that pointer.
 
 ## Actual acquisition and verified historical bytes
