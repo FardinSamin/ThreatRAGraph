@@ -18,6 +18,8 @@ import secrets
 import stat
 import time
 
+from .local_file_inputs import is_linked_path_component
+
 MAX_OUTPUT_BYTES = 64 * 1024 * 1024
 EXTENSIONS = frozenset({".json", ".csv"})
 
@@ -54,14 +56,12 @@ def _posix_dir_fd(root):
 
 def _fallback_root(root):
     for ancestor in (root, *root.parents):
-        junction = getattr(ancestor, "is_junction", None)
-        if ancestor.is_symlink() or (junction is not None and junction()):
-            raise ValueError("Linked output directory ancestor refused")
+        if is_linked_path_component(ancestor):
+            raise ValueError("Linked or reparse output ancestor refused")
     root.mkdir(parents=True, exist_ok=True)
     for ancestor in (root, *root.parents):
-        junction = getattr(ancestor, "is_junction", None)
-        if ancestor.is_symlink() or (junction is not None and junction()):
-            raise ValueError("Linked output directory ancestor refused")
+        if is_linked_path_component(ancestor):
+            raise ValueError("Linked or reparse output ancestor refused")
     if not root.is_dir():
         raise ValueError("Output root must be a directory")
 
@@ -72,9 +72,8 @@ def _verify_existing(root, name, data, *, dir_fd):
     try:
         if dir_fd is None:
             file = root / name
-            junction = getattr(file, "is_junction", None)
-            if file.is_symlink() or (junction is not None and junction()):
-                raise ValueError("Symlinked destination artifact refused")
+            if is_linked_path_component(file):
+                raise ValueError("Symlinked or reparse destination artifact refused")
             fd = os.open(file, flags)
         else:
             fd = os.open(name, flags, dir_fd=dir_fd)

@@ -1,6 +1,6 @@
 # Safe content-addressed output files (engineering draft)
 
-**Status:** Draft implementation; 16 authored, unexecuted unit/fault-injection
+**Status:** Draft implementation; 18 authored, unexecuted unit/fault-injection
 tests. No CI runner has completed this branch's tests. Applies to canonical
 JSON snapshots (including M6 case/batch artifacts) and portable CSV exports.
 
@@ -43,8 +43,19 @@ power-loss guarantee. Content hashing is not third-party provenance or
 a trusted timestamp.
 
 This change was authored via GitHub but has not been tested. Deferred tests:
-test_immutable_artifacts.py (16 methods), test_freeze_case_snapshots.py,
+test_immutable_artifacts.py (18 methods), test_freeze_case_snapshots.py,
 test_portable_exchange.py, test_offline_case_pipeline.py,
 test_offline_case_batch.py, test_batch_replay.py, full security checks,
 and Windows/Linux filesystem-specific CI when allowed. No paid overages,
 external historical source fetch or gold-label access was authorized.
+
+## Windows reparse point fallback hardening (unexecuted)
+
+On Windows, a reparse-point attribute may be set even when the Python
+interpreter has no `Path.is_junction()` method. Before any path-based fallback
+read/write, `is_linked_path_component` checks `st_file_attributes & 0x400`
+from `lstat`, as well as detected symlinks and junctions. No-follow POSIX
+methods remain unchanged. The Windows input reader requests `O_BINARY`.
+These checks are **not atomic on Windows**: a malicious actor replacing
+an ancestor after inspection remains a documented limitation and requires
+platform-specific verification before release.

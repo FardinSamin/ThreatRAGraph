@@ -14,6 +14,28 @@ from pathlib import Path
 import stat
 
 MAX_JSON_BYTES = 8 * 1024 * 1024
+WINDOWS_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+
+
+def is_linked_path_component(path):
+    """Reject links, junctions and other Windows reparse points as inputs.
+
+    The st_file_attributes test works on Windows Python interpreters that
+    do not expose Path.is_junction. It is an observation, not a defense
+    against a concurrent attacker replacing the component afterwards.
+    """
+    item = Path(path)
+    if item.is_symlink():
+        return True
+    junction = getattr(item, "is_junction", None)
+    if junction is not None and junction():
+        return True
+    try:
+        info = item.lstat()
+    except FileNotFoundError:
+        return False
+    return bool(getattr(info, "st_file_attributes", 0)
+                & WINDOWS_REPARSE_POINT)
 
 
 def _unique_pairs(pairs):
@@ -69,11 +91,11 @@ def _open_regular(path):
         # eliminate a concurrent malicious reparse-point replacement.
         check = target
         for item in (check, *check.parents):
-            junction = getattr(item, "is_junction", None)
-            if item.is_symlink() or (junction is not None and junction()):
-                raise ValueError("Symlinked/junction local file path refused")
+            if is_linked_path_component(item):
+                raise ValueError("Symlinked/reparse local file path refused")
         fd = os.open(target, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0)
-                     | getattr(os, "O_NOFOLLOW", 0))
+                     | getattr(os, "O_NOFOLLOW", 0)
+                     | getattr(os, "O_BINARY", 0))
     if not stat.S_ISREG(os.fstat(fd).st_mode):
         os.close(fd)
         raise ValueError("Local input must be a regular file")

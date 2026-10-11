@@ -134,6 +134,33 @@ class ImmutableArtifactWriterTests(unittest.TestCase):
         self.assertTrue(all(row[0] == self.sha for row in results))
         self.assertEqual(self.payload, results[0][1].read_bytes())
 
+    def test_windows_reparse_output_ancestor_is_rejected_before_mkdir(self):
+        from src.threatragraph import immutable_artifacts
+        destination = self.base / "pretend-junction"
+        original = immutable_artifacts.is_linked_path_component
+
+        def linked(path):
+            return path == destination or original(path)
+
+        with patch.object(immutable_artifacts,
+                          "is_linked_path_component", side_effect=linked):
+            with self.assertRaisesRegex(ValueError, "reparse"):
+                immutable_artifacts._fallback_root(destination)
+        self.assertFalse(destination.exists())
+
+    def test_reparse_digest_destination_is_refused_without_open(self):
+        from src.threatragraph import immutable_artifacts
+        self.root.mkdir()
+        destination = self.root / (self.sha + ".json")
+        destination.write_bytes(self.payload)
+        with patch.object(immutable_artifacts,
+                          "is_linked_path_component", return_value=True):
+            with self.assertRaisesRegex(ValueError, "reparse"):
+                immutable_artifacts._verify_existing(
+                    self.root, destination.name, self.payload, dir_fd=None,
+                )
+        self.assertEqual(self.payload, destination.read_bytes())
+
     def test_rejects_unsupported_extensions_and_unbounded_payloads(self):
         for value in (".exe", "../results.json", ".json.extra"):
             with self.subTest(value=value):

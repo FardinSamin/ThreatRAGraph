@@ -182,13 +182,14 @@
         "tests/test_local_file_inputs.py",
         "tests/test_immutable_artifacts.py"
       ],
-      "min_authored_test_methods": 55,
+      "min_authored_test_methods": 60,
       "test_command": "python -m unittest discover -s tests -p 'test_portable_exchange.py' -v",
       "manual_gates": [
         "Verify CSV/JSON round-trip, duplicate keys and spreadsheet formula refusal",
         "Confirm exports contain no third-party source bodies or gold labels",
-        "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 15 shared input tests authored but not executed",
-        "Verify staged/fsynced atomic no-replace publication, interrupted write cleanup and idempotent retry on Linux/Windows before approving any M6 batch writes"
+        "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 18 shared input tests authored but not executed",
+        "Verify staged/fsynced atomic no-replace publication, interrupted write cleanup and idempotent retry on Linux/Windows before approving any M6 batch writes",
+        "On pre-Python-3.12 Windows, reject st_file_attributes reparse points; confirm binary descriptor read preserves CRLF and exact artifact bytes"
       ]
     },
     {

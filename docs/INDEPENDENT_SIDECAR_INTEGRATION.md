@@ -64,8 +64,8 @@ entity. Neither becomes a pipeline input or feature enrichment.
 
 ## Validation gates
 
-- 19 synthetic original-CDXJ tests, 24 exchange tests, 15 shared
-  local-file tests, 16 atomic-output tests, 21 alias tests, and 25 sidecar integration tests are **authored but not executed** in
+- 19 synthetic original-CDXJ tests, 24 exchange tests, 18 shared
+  local-file tests, 18 atomic-output tests, 21 alias tests, and 25 sidecar integration tests are **authored but not executed** in
   this branch. Those counts are inventories, not pass rates.
 - `python -m scripts.preflight_validation_plan --scope all` is a
   static check only; do not claim passing tests. Real unit/CLI tests,
@@ -140,3 +140,13 @@ a filesystem failure may still leave reusable individual digest files.
 Cross-platform filesystem semantics, concurrent write behavior and crash
 recovery require executed validation. **16 writer failure-injection tests
 were authored but not run**. See `docs/IMMUTABLE_ARTIFACT_OUTPUT_POLICY.md`.
+
+## Reparse-point fallback synchronization (draft)
+
+The shared reader and writer now reject raw Windows reparse attributes
+when `Path.is_junction` is unavailable, and input descriptors use binary
+mode to preserve exact source bytes. Three extra reader and two extra
+writer tests are authored but **not executed**. Input/output safeguards
+remain observational on Windows, with a documented concurrent-replacement
+race until real platform validation. The portable validation inventory now
+contains 24 exchange + 18 reader + 18 writer = 60 authored tests.
