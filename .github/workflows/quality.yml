@@ -117,6 +117,53 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+  historical-chimaera-citation-witness:
+    name: Pinned 2021/2022 Chimaera bibliography pointer receipts
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Retrieve only two pinned historical public Git bibliography files (never execute)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --show-error --silent --location \
+            --retry 2 --max-time 30 --max-filesize 614400 \
+            --output "$RUNNER_TEMP/chimaera-reference-2021.md" \
+            "https://raw.githubusercontent.com/Metarget/awesome-cloud-native-security/9d68fc3a1e7a3790b12d59a120fb78ea2dd2b8d1/README.md"
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --show-error --silent --location \
+            --retry 2 --max-time 30 --max-filesize 614400 \
+            --output "$RUNNER_TEMP/chimaera-reference-2022.txt" \
+            "https://raw.githubusercontent.com/RealityNet/attack-coverage/a933255173c0d512f712e2cb81a2067aa99a75a7/20220505/attack_groups.txt"
+      - name: Byte-verify exact original AT&T citation in historical bibliography blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.verify_historical_chimaera_bibliography \
+            --witness cloud-native-reference-dec2021 \
+            --raw-file "$RUNNER_TEMP/chimaera-reference-2021.md" \
+            > "$RUNNER_TEMP/chimaera-citation-2021-receipt.json"
+          python -m scripts.verify_historical_chimaera_bibliography \
+            --witness mitre-reference-may2022 \
+            --raw-file "$RUNNER_TEMP/chimaera-reference-2022.txt" \
+            > "$RUNNER_TEMP/chimaera-citation-2022-receipt.json"
+          cat "$RUNNER_TEMP/chimaera-citation-2021-receipt.json"
+          cat "$RUNNER_TEMP/chimaera-citation-2022-receipt.json"
+      - name: Retain only metadata-only bibliography pointers, not third-party article bodies
+        uses: actions/upload-artifact@v4
+        with:
+          name: chimaera-2021-2022-historical-bibliography-receipts
+          path: |
+            ${{ runner.temp }}/chimaera-citation-2021-receipt.json
+            ${{ runner.temp }}/chimaera-citation-2022-receipt.json
+          retention-days: 14
+          if-no-files-found: error
+
   preflight-and-tests:
     strategy:
       fail-fast: false
@@ -158,6 +205,8 @@ jobs:
         run: python -m scripts.screen_candidate_method
       - name: Prior SCARLETEEL v1 screening remains reproducible
         run: python -m scripts.screen_candidate_method --screen datasets/case_screenings/scarleteel.json
+      - name: Historical Chimaera bibliography verification CLI smoke (offline only)
+        run: python -m scripts.verify_historical_chimaera_bibliography --help
       - name: G1 paired graph-similarity CLI smoke (offline only)
         run: python -m scripts.profile_g1 --help
       - name: Candidate byte capture CLI interface smoke (no downloads or writes)
