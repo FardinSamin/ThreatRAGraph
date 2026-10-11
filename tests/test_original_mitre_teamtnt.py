@@ -170,7 +170,7 @@ class MitreOriginalStixWitnessTests(unittest.TestCase):
         self.assertEqual("unknown", record["redistribution"])
         for field in ("published_at", "available_at", "sha256"):
             self.assertIsNone(record[field])
-        self.assertEqual(29, len(registry["sources"]))
+        self.assertEqual(30, len(registry["sources"]))
         self.assertFalse(any(s["status"] == "approved" for s in registry["sources"]))
 
     def test_cli_symlink_refused(self):
