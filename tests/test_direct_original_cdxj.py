@@ -145,6 +145,60 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
         self.assertEqual(2, len(original_query["index_surt_variant_diagnostics"]))
         self.assertEqual(1, original_query["matched_rows"])
 
+    def test_sparse_binary_search_finds_cado_inside_large_index_block(self):
+        """Real cluster.idx indexes block starts, not every captured URL."""
+        url = TARGETS["cado-original-2022"][0]
+        fake = _FakeOriginalArchive()
+        shard = "cdx-00000.gz"
+        fake.files[shard] = b""
+        records = []
+        offset = 0
+
+        def add(first_key, cdj_lines):
+            nonlocal offset
+            member = gzip.compress(cdj_lines, mtime=0)
+            records.append(
+                f"{first_key} 20230206120544\t{shard}\t"
+                f"{offset}\t{len(member)}\t1\n"
+            )
+            fake.files[shard] += member
+            offset += len(member)
+
+        for i in range(650):
+            key = f"com,aaa{i:04d})/long-sorted-sparse-index-path/{i:04d}"
+            add(key, (key + ' 20230206120544 {"url":"https://irrelevant.invalid/"}\n'
+                      ).encode("utf-8"))
+
+        # Authentic Cado capture is the *second* record in a gzip member:
+        # the sparse cluster index points only to another domain's first key.
+        predecessor = "com,cadortextiles)/index-member-first-url"
+        add(
+            predecessor,
+            (predecessor +
+             ' 20230206120544 {"url":"https://irrelevant.invalid/"}\n'
+             ).encode("utf-8") + _cdx_line(url)
+        )
+
+        for i in range(650):
+            key = f"com,zzz{i:04d})/long-sorted-sparse-index-path/{i:04d}"
+            add(key, (key + ' 20230206120544 {"url":"https://irrelevant.invalid/"}\n'
+                      ).encode("utf-8"))
+
+        fake.files["cluster.idx"] = "".join(records).encode("ascii")
+        self.assertGreater(len(fake.files["cluster.idx"]), 64000)
+        receipt = module.probe_direct(
+            ["cado-original-2022"], ["CC-MAIN-2023-06"],
+            reader=fake.reader()
+        )
+        self.assertTrue(receipt["known_cado_20230206_positive_control_matched"])
+        self.assertEqual(1, receipt["matching_pre_cutoff_candidate_count"])
+        lookup = receipt["query_receipts"][0]["index_surt_variant_diagnostics"][0]
+        self.assertGreater(lookup["binary_probe_count"], 0)
+        self.assertIn(
+            predecessor, lookup["selected_surt_boundary_keys"]
+        )
+        self.assertFalse(receipt["research_ready"])
+
     def test_index_access_failure_is_never_reported_as_capture_absence(self):
         class UnavailableArchive:
             def size(self, url):

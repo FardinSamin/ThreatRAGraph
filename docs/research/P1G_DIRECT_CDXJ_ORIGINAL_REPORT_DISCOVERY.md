@@ -63,6 +63,17 @@ file, or claiming a non-200/non-HTML response, cannot validate the lookup.
 Synthetic adversarial regressions exercise each field; neither source rights
 nor the first 2022 publication timestamp are independently certified here.
 
+## Sparse-index binary-search regression
+
+Common Crawl documents `cluster.idx` as a sparse **first-record-per-gzip-block**
+index, not a per-URL registry. An additional deterministic offline regression
+constructs 1,301 sorted cluster rows (more than 64 KiB, forcing actual binary
+probes). It places the authentic known-Cado metadata record **second inside**
+a gzip block indexed only under an earlier unrelated domain. The probe must
+recover the exact known Cado locator through the predecessor block and
+preserve `research_ready=false`. The fixture verifies algorithm structure;
+it does **not** replace a direct live-index replay or CI on the final PR head.
+
 ## Current CI runner constraint
 
 Following multiple successful archived index read runs, [a subsequent workflow run](https://github.com/FardinSamin/ThreatRAGraph/actions/runs/38112454293) and its retry failed **before any job step started**: each job returned an empty step list and runner logs were unavailable (`BlobNotFound`). These are **job orchestration/start failures**, not executed unit-test, WARC-identity, security or index-lookup failures. GitHub [documents Actions job diagnostic steps](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs); the platform status page may show operational even when a particular account's runners cannot start.
