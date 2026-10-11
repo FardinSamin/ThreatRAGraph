@@ -14,6 +14,7 @@ MITRE itself committed a [STIX 2.0 TeamTNT intrusion-set bundle](https://github.
 | Git commit | `4cbf8cc4bdf2121ee987a23bfe5aac4fe4d2f5b1` |
 | Git source path | `enterprise-attack/intrusion-set/intrusion-set--35d1b3be-49d4-42f1-aaa6-ef159c880bca.json` |
 | Git blob identity | `ce5239cb22093656b3f8e79fbd356a17b1fa5f19` |
+| Independently replayed original bytes | **5,506 bytes**, SHA-256 `d7e539a97c53d2c6786bb6d821151b259e2783702f0c421065458318b8a24a74` from the authentic CI file replay |
 | Git declared committer timestamp | **2022-11-08T14:56:14Z** — unverified as first public availability |
 | STIX container | `type=bundle`, `spec_version=2.0`, one embedded object |
 | Original embedded entity | `type=intrusion-set`, `id=intrusion-set--35d1b3be-49d4-42f1-aaa6-ef159c880bca`, `name=TeamTNT`, `x_mitre_version=1.2` |
@@ -47,7 +48,7 @@ Therefore:
 5. A **seventh GitHub Actions job** fetches exactly the original primary `mitre/cti` source bytes at the fixed 2022 Git commit from `raw.githubusercontent.com`, validates them and retains a **14-day hash-only receipt**, not the raw STIX content. The existing source bibliography, signed runc and GHSA jobs remain active.
 6. Adversarial tests check byte pin/tampering, wrong bundle/object type, actor/campaign masquerading, additional future aliases, missing/doubled Chimaera citations, wrong 2020/2021 discrepancy, unsafe oversized input and symlinks. No synthetic fixture is claimed as historical evidence.
 
-**Provisional measured provenance:** original Git SHA-1 blob is pinned above. CI computes the actual source byte SHA-256 dynamically and prints it only in a non-sensitive receipt. The candidate manifest's **approved** `sha256`, `available_at`, `date_confidence` and rights fields remain null/unknown until independent investigator review.
+**Measured provenance:** the original Git SHA-1 blob is pinned above. The actual original MITRE source byte SHA-256 and 5,506-byte count are printed in the verified CI metadata receipt and documented in the table; these are **not** a public timestamp, rights approval or the same as writing an approved source registry hash. The candidate manifest's **approved** `sha256`, `available_at`, `date_confidence` and rights fields remain null/unknown until independent investigator review.
 
 The source registry now contains **29 unapproved candidates** (one new `attack_stix` original MITRE version), **0 approved sources**, **0 selected real cases** and **0 empirical B0/G1 results**.
 
