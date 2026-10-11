@@ -45,12 +45,12 @@ EXPECTED_REVIEW_BLOCK_COUNT = 107
 EXPECTED_MATCHED_REVIEW_BLOCK_COUNT = 15
 EXPECTED_UNREVIEWED_ORIGINAL_BLOCKS = {
     52: ("xmrig", "".join((
-        "9f0062acb7d7eae0", "1ba18b57f2b40e5b",
-        "e810f4eefd7aed81", "64174ccf0d6144f2",
+        "9f0062ac", "b7d7eae0", "1ba18b57", "f2b40e5b",
+        "e810f4ee", "fd7aed81", "64174ccf", "0d6144f2",
     ))),
     59: ("xmrig,xhide", "".join((
-        "6c45096683853ea3", "1b4a2c486f79bc76",
-        "98e16aa909e49780", "da1eb0565595c9d1",
+        "6c450966", "83853ea3", "1b4a2c48", "6f79bc76",
+        "98e16aa9", "09e49780", "da1eb056", "5595c9d1",
     ))),
 }
 
