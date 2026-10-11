@@ -7,7 +7,9 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
+from scripts import verify_kissadog_cado_public_push as witness
 from scripts.verify_kissadog_cado_public_push import (
     COMMIT, REPO, REPO_ID, SCHEMA, event_matches,
     main, verify_archive,
@@ -161,6 +163,56 @@ class HistoricalKissadogPublicPushTests(unittest.TestCase):
                                           "--pinned-archive-sha256", "0" * 64]))
             self.assertEqual("historical_pointer_push_witness_refused",
                              json.loads(bad.getvalue())["status"])
+
+    def test_original_pinning_enforces_actual_hour_file_and_event_identity(self):
+        raw = _jsonl(_event())
+        with self.assertRaisesRegex(ValueError, "digest differs"):
+            self._with_archive(
+                raw, lambda p: verify_archive(p, require_original=True)
+            )
+
+    def test_synthetic_fixture_can_exercise_strict_pinned_gate_without_claiming_real(self):
+        original = _event()
+        line = json.dumps(original, sort_keys=True).encode() + b"\\n"
+        raw = _jsonl(original)
+        with patch.object(witness, "ARCHIVE_SHA256", hashlib.sha256(raw).hexdigest()), \
+             patch.object(witness, "EVENT_LINE_SHA256", hashlib.sha256(line).hexdigest()), \\
+             patch.object(witness, "PUBLIC_EVENT_ID", original["id"]), \\
+             patch.object(witness, "ARCHIVE_BYTES", len(raw)):
+            def run(path):
+                report = verify_archive(path, require_original=True)
+                self.assertTrue(report["exact_original_event_id_and_line_sha256_verified"])
+                self.assertTrue(report["archive_sha256_frozen_in_source"])
+                self.assertFalse(report["historical_pointer_git_tree_chain_verified_in_this_replay"])
+                self.assertFalse(report["original_cado_report_public_by_verified"])
+            self._with_archive(raw, run)
+
+    def test_original_event_hash_mismatch_is_not_silently_accepted(self):
+        original = _event()
+        raw = _jsonl(original)
+        with patch.object(witness, "ARCHIVE_SHA256", hashlib.sha256(raw).hexdigest()), \
+             patch.object(witness, "ARCHIVE_BYTES", len(raw)), \\
+             patch.object(witness, "PUBLIC_EVENT_ID", original["id"]):
+            with self.assertRaisesRegex(ValueError, "identity mismatch"):
+                self._with_archive(raw, lambda p: verify_archive(p, require_original=True))
+
+    def test_unverified_git_repo_or_symlink_never_claims_tree_chain(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "hour.gz"
+            archive.write_bytes(_jsonl(_event()))
+            nonexistent = root / "missing-repo"
+            with self.assertRaisesRegex(ValueError, "Git object repository"):
+                verify_archive(archive, git_repo=nonexistent)
+            legit = root / "repo"
+            legit.mkdir()
+            link = root / "link"
+            try:
+                link.symlink_to(legit, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                return
+            with self.assertRaisesRegex(ValueError, "Git object repository"):
+                verify_archive(archive, git_repo=link)
 
     def test_archive_event_sha256_hashes_original_line(self):
         e = _event()
