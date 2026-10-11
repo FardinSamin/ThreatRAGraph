@@ -9,7 +9,6 @@ from __future__ import annotations
 import argparse
 from html.parser import HTMLParser
 import json
-from pathlib import Path
 import re
 
 from scripts.verify_candidate_warc_capture import (
