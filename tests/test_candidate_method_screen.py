@@ -32,7 +32,7 @@ class ProspectiveCaseScreenTests(unittest.TestCase):
         self.assertFalse(result["original_source_bytes_and_dates_approved"])
         self.assertFalse(result["case_approved"])
         self.assertFalse(result["research_ready"])
-        self.assertEqual(0, result["approved_sources"])
+        self.assertEqual(0, result["screened_source_versions_approved"])
         self.assertEqual(0, result["experimental_predictions"])
         self.assertTrue(result["independent_blinded_later_labeling_required"])
         self.assertEqual(26, len(self.sources["sources"]))
