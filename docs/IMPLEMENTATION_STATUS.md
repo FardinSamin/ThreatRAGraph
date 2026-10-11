@@ -13,6 +13,10 @@ This is a **code-and-test audit**, not a certification. Status labels:
 
 **Current reference:** the existing code through M4 and prior 149-test synthetic suite. Re-run tests on the current commit to establish an up-to-date count; test count alone cannot prove corpus validity or research effectiveness.
 
+**Draft-branch note (October 11, 2026):** The FR-13 alias-history
+candidate layer is read-only, unexecuted and unapproved; it never rewrites
+B0/G1 inputs or relaxes the exact-only feature-lineage policy.
+
 ## Functional requirements FR-01–FR-36
 
 | SRS ID | Implementation status | Current concrete implementation/test evidence | Missing gate / next step |
@@ -29,7 +33,7 @@ This is a **code-and-test audit**, not a certification. Status labels:
 | FR-10 | Partial | `normalized_sources.py`, `test_normalized_sources.py` | Actual Falco rule entity/field extraction and relationship mapping |
 | FR-11 | Partial / synthetic-tested | `evidence_graph.py`, `evidence_alignment.py` and `compound_claims.py` re-derive approved-source GHSA two-field claims and emit separate source- and cutoff-bound evidence views | Independent historical source and claim validation, official G1 output-contract integration, measured field extraction precision |
 | FR-12 | Present/tested synthetic (limited ontology) | `evidence_graph.py`, `test_evidence_graph.py` | Full type coverage, schema evolution/migrations |
-| FR-13 | **Missing** | Typed IDs enforced, but no time-aware alias resolution engine | Historized canonicalization and collision decisions |
+| FR-13 | **Partial / draft, tests not executed** | Draft historized candidate alias ledger and read-only as-of inspection, source-view/byte-hash/UTC cutoff binding, typed-collision, chain and future-alias refusals; 17 authored synthetic/adversarial tests | Authentic independently dated aliases, human identity/adjudication, reviewed approved canonicalizer and integration into historical feature-lineage reconstruction |
 | FR-14 | Partial | SQLite sourced claim tables and graph JSON projection | Full logical entity/evidence storage and export round-trip |
 | FR-15 | Partial | `assertion_kind` + polarity + review ledger; predicted claims prohibited | Separate prediction plane and state transition contract |
 | FR-16 | Partial | Source-allowlisted graph projection and neighborhood helper | General lineage/time/case query interface and access isolation |
