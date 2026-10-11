@@ -484,7 +484,7 @@ Both methods output **typed profile facts** with:
 
 The baseline retains source-asserted facts from early reports only. The graph method starts with the identical facts and proposes **additional** testable candidate relations. Score new proposed facts separately from copied observed facts.
 
-### 8.2 Interpretable similarity engine version 1 **[PARTIAL: typed Jaccard v1 implemented; full design below not yet implemented]**
+### 8.2 Interpretable similarity engine **[PARTIAL: typed Jaccard v2 + exact-only lineage contract; independent historical verification still absent]**
 
 A case is represented by feature sets extracted from the early profile:
 - **techniques** (ATT&CK IDs) and tactic context;
@@ -806,7 +806,7 @@ Metrics: extraction precision/recall, provenance coverage, orphan claims, graph 
 | **M2 — Extraction/evidence graph** | Synthetic-tested parsers, evidence alignment, SQLite sourced claim ledger and self-declared review gates. | P2: real source → typed candidate extractor/adapters, historized aliases, full coverage/independent annotations and precision/recall; AC-02/03 |
 | **M3 — As-of safety** | Deterministic source-level snapshots, case role allowlist and digest-bound graph views. | P3: independent case cutoff validation; feature/alias/taxonomy/decision-level reconstruction, gold-store isolation, strict adversarial leakage tests; AC-04 |
 | **M4 — B0 baseline** | Deterministic early-source report-assertion profile with abstention; synthetic tests. | P4: run from approved cases using same extracted/reviewed early inputs as G1; freeze output/run provenance |
-| **M5 — G1 similarity** | **Partial / synthetic-tested** [typed Jaccard v1](M5_G1_SIMILARITY.md): paired B0/G1 early parity, independent-source gate, versioned provisional ranking paths, abstention. [#21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) stays open. | P4: vetted historical corpus, alias/ATT&CK/Falco-as-of reconstruction, source independence authentication, tuning discipline, evaluation and ablations; no LLM required |
+| **M5 — G1 similarity** | **Partial / synthetic-tested** [typed Jaccard v2 and source-claim as-of input](M5_ASOF_FEATURE_LINEAGE.md): paired B0/G1 early parity, independent-source gate, versioned provisional ranking paths, abstention. [#21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) stays open. | P4: vetted historical corpus, alias/ATT&CK/Falco-as-of reconstruction, source independence authentication, tuning discipline, evaluation and ablations; no LLM required |
 | **M6 — Evaluator** | **Not implemented**. | P5: frozen paired B0/G1 outputs and independently adjudicated held-out facts, metrics incl. NA, extraction F1, per-case/ablation and leakage report; AC-05/06 |
 | **M7 — Reporting/release** | Research outline/design only. | P6: clean-room offline reproducibility, mentor approval, rights/ethics, negative-result reporting and symposium outputs; AC-07–09 |
 
@@ -908,7 +908,7 @@ This section makes **actual implementation** distinguishable from diagrams and e
 
 **M4:** `baseline_b0.py` emits only source-asserted, reviewer-supported target triples in `facts[]` and an intentionally empty `predictions[]`, with abstention and `confidence=null`. Its `research_ready` field is based on supplied structural conditions, **not faculty or historical source approval**, and must be corrected before production study claims.
 
-**M5 [PARTIALLY IMPLEMENTED]:** The versioned [G1 exact-feature Jaccard v1](M5_G1_SIMILARITY.md) produces provisional hypothesis objects **separate** from `sourced_claims`, with candidate triple, uncalibrated ranking score, typed matching features, claimed evidence paths, source-group support and abstention. The output remains structurally checked only and lacks authenticated raw-byte historical paths, full alias/taxonomy-as-of controls, signed run manifests and real evaluation; no LLM inference or empirically validated G1 exists.
+**M5 [PARTIALLY IMPLEMENTED]:** The versioned [G1 exact-feature Jaccard v2](M5_G1_SIMILARITY.md) produces provisional hypothesis objects **separate** from `sourced_claims`, with candidate triple, uncalibrated ranking score, typed matching features, claimed evidence paths, source-group support and abstention. The output remains structurally checked only and lacks authenticated raw-byte historical paths, full alias/taxonomy-as-of controls, signed run manifests and real evaluation; no LLM inference or empirically validated G1 exists.
 
 ### 18.2 Contamination and access architecture to implement
 
