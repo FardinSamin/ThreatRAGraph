@@ -1,5 +1,7 @@
 # P1c — Kiss-a-dog original investigator chain: CrowdStrike + Cado
 
+**P1f reviewer-location update:** the [real original 2023-02-06 Cado archived HTML](P1F_CADO_EVIDENCE_BLOCK_HASHES.md) now has *metadata-only exact SHA256 paragraph locators* for XMRig and XHide (including both lexemes in one original paragraph). The typed `USES` claims/variant semantics remain unreviewed, and CrowdStrike/Sysdig original archival discovery is still unresolved due Common Crawl 504 responses.
+
 **P1e evidence update (October 11, 2026):** [Original Cado research page recovered from the genuine Common Crawl **February 6, 2023** historical HTML/WARC bytes](P1E_CADO_FEB2023_REAL_PRIMARY_WARC.md). The original old URL and all **92,875 archived HTML bytes** now have independently recomputed SHA256/CDX/WARC hashes; verified visible text includes Kiss-a-dog, Redis, XMRig, XHide. **Source approval, earliest-public timestamp, reuse rights, reviewer-aligned campaign/variant claims and actual G1 prediction remain absent**. Earlier below "original bytes not recovered" comments are historical to the P1c stage.
 
 **Research checkpoint:** October 10, 2026 EDT. **Disposition: candidate method path found, no source/case approval or experiment.**
