@@ -43,10 +43,10 @@ def _unique_ids(raw, name, maximum=30):
 def assess_screen(screen: dict, manifest: dict) -> dict:
     if not isinstance(screen, dict):
         raise ValueError("Prospective case screen must be a JSON object")
-    version = screen.get("schema_version")
-    if version not in (SCREEN_VERSION, SCREEN_VERSION_V2):
+    screen_schema = screen.get("schema_version")
+    if screen_schema not in (SCREEN_VERSION, SCREEN_VERSION_V2):
         raise ValueError("Unsupported prospective screen version")
-    fields = SCREEN_FIELDS if version == SCREEN_VERSION else SCREEN_FIELDS_V2
+    fields = SCREEN_FIELDS if screen_schema == SCREEN_VERSION else SCREEN_FIELDS_V2
     if set(screen) != fields:
         raise ValueError("Prospective case screen has unsupported or missing fields")
     screen_id = screen["screen_id"]
@@ -137,7 +137,7 @@ def assess_screen(screen: dict, manifest: dict) -> dict:
             raise ValueError("Screen cannot assert reviewed/aligned extracted evidence")
 
     peers = []
-    if version == SCREEN_VERSION_V2:
+    if screen_schema == SCREEN_VERSION_V2:
         peers = screen["background_peer_candidates"]
         if not isinstance(peers, list) or not 2 <= len(peers) <= 12:
             raise ValueError("V2 requires two or more bounded named campaign peer prospects")
@@ -175,7 +175,7 @@ def assess_screen(screen: dict, manifest: dict) -> dict:
                 raise ValueError("Peer cannot be predeclared as aligned or reviewed")
 
     return {
-        "schema_version": version,
+        "schema_version": screen_schema,
         "screen_id": screen_id,
         "target_entity_id": target,
         "proposed_cutoff_at": screen["proposed_cutoff_at"],
