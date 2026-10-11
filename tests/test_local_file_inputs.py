@@ -4,9 +4,12 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from src.threatragraph.local_file_inputs import (
-    assert_distinct_input_files, read_local_json, read_local_text,
+    assert_distinct_input_files, is_linked_path_component,
+    read_local_json, read_local_text,
 )
 
 
@@ -109,6 +112,25 @@ class LocalFileInputsTests(unittest.TestCase):
     def test_path_requires_existing_regular_file(self):
         with self.assertRaises((ValueError, OSError)):
             read_local_json(self.root / "missing.json")
+
+    def test_windows_reparse_attribute_rejected_without_junction_method(self):
+        """Legacy interpreters must still detect Windows reparse metadata."""
+        marker = SimpleNamespace(st_file_attributes=0x400)
+        with (patch.object(Path, "is_symlink", return_value=False),
+              patch.object(Path, "is_junction", new=None, create=True),
+              patch.object(Path, "lstat", return_value=marker)):
+            self.assertTrue(is_linked_path_component(self.file))
+
+    def test_normal_windows_file_attributes_not_falsely_rejected(self):
+        ordinary = SimpleNamespace(st_file_attributes=0x20)
+        with (patch.object(Path, "is_symlink", return_value=False),
+              patch.object(Path, "is_junction", new=None, create=True),
+              patch.object(Path, "lstat", return_value=ordinary)):
+            self.assertFalse(is_linked_path_component(self.file))
+
+    def test_missing_future_output_component_is_not_a_link(self):
+        missing = self.root / "to-be-created"
+        self.assertFalse(is_linked_path_component(missing))
 
     def test_invalid_bound_must_fail(self):
         with self.assertRaisesRegex(ValueError, "bound"):
