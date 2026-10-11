@@ -58,7 +58,7 @@ This is a **code-and-test audit**, not a certification. Status labels:
 
 | Cluster | Current assessment | Gate |
 |---|---|---|
-| RC-01/02 | 29 **candidate entries**; original Git tag/GHSA replay and two byte-verified 2021/2022 **third-party Chimaera bibliography pointers** plus genuine original **MITRE ATT&CK v12.1 TeamTNT STIX** publisher bytes in CI and an offline-only original-HTML CDX/WARC verifier (no actual capture yet), but **0 approved** real source versions, **0 approved original Chimaera article** and **0 selected** cases | P1 complete original publisher source byte snapshots, independent public chronology, rights and reviewed same-type peer chains |
+| RC-01/02 | 30 **candidate entries**; original Git tag/GHSA replay and two byte-verified 2021/2022 **third-party Chimaera bibliography pointers** plus genuine original **MITRE ATT&CK v12.1 TeamTNT STIX** publisher bytes plus a December 2022 **Securonix derivative Cado link/IOC pointer** replayed in CI (not an original Cado article) and an offline-only original-HTML CDX/WARC verifier (no actual capture yet), but **0 approved** real source versions, **0 approved original Chimaera article** and **0 selected** cases | P1 complete original publisher source byte snapshots, independent public chronology, rights and reviewed same-type peer chains |
 | RC-03/04 | Kubernetes/container/Falco types and source-vs-rule distinction in bounded graph | P2 real extraction, review, source lineage |
 | RC-05/06 | Source-level cutoff + held-out exclusion synthetic tests | P3 full alias/taxonomy/feature/index/label isolation |
 | DR-01/02 | Limited typed ontology, not full vocab | Ontology/version and compatibility tests |
