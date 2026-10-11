@@ -1,0 +1,35 @@
+{
+  "schema_version": "g1-v2-prospective-case-screen-v1",
+  "screen_id": "screen:scarleteel-campaign-original-2023-v1",
+  "target_entity_id": "campaign:SCARLETEEL",
+  "proposed_cutoff_at": "2023-03-01T00:00:00Z",
+  "early_source_version_ids": [
+    "candidate:scarleteel-sysdig-20230228:unfrozen"
+  ],
+  "date_corroboration_source_version_ids": [
+    "candidate:scarleteel-bleeping-20230228:unfrozen"
+  ],
+  "background_source_version_ids": [
+    "candidate:teamtnt-intezer-20200908:unfrozen",
+    "candidate:teamtnt-trendmicro-20210720:unfrozen"
+  ],
+  "later_reference_source_version_ids": [
+    "candidate:scarleteel-sysdig-20230711:unfrozen"
+  ],
+  "early_feature_candidates": [
+    {
+      "subject_id": "campaign:SCARLETEEL",
+      "predicate": "USES",
+      "object_id": "tool:xmrig",
+      "source_version_id": "candidate:scarleteel-sysdig-20230228:unfrozen",
+      "evidence_location_note": "Sysdig original Feb 28 report, Technical analysis > Initial access, XMRig executable named. Current webpage only; exact 2023 bytes not retained.",
+      "evidence_byte_aligned": false,
+      "semantic_reviewed": false
+    }
+  ],
+  "same_type_background_peers_verified": false,
+  "two_group_peer_relation_support_verified": false,
+  "later_reference_preview_exposure": "search_result_summary_exposed",
+  "case_approved": false,
+  "research_ready": false
+}
