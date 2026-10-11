@@ -49,7 +49,7 @@ def _url_key(url):
 
 def _cluster_filename(collection, shard):
     _require(collection in COLLECTIONS, "Unexpected Common Crawl collection")
-    _require(re.fullmatch(r"cdx-[0-9]{5}\\.gz", shard) is not None,
+    _require(re.fullmatch(r"cdx-[0-9]{5}\.gz", shard) is not None,
              "Untrusted compressed CDXJ shard path")
     return f"{BASE}/{collection}/indexes/{shard}"
 
@@ -58,18 +58,18 @@ def _cluster_rows(buffer, *, start_offset, total):
     _require(isinstance(buffer, bytes) and buffer
              and 0 <= start_offset < total, "Missing original cluster index span")
     # Slice to complete ASCII rows on both ends of a partial HTTP range.
-    begin = 0 if start_offset == 0 else buffer.find(b"\\n") + 1
-    end = buffer.rfind(b"\\n")
+    begin = 0 if start_offset == 0 else buffer.find(b"\n") + 1
+    end = buffer.rfind(b"\n")
     _require(begin >= 0 and end >= begin, "No complete index lines in byte range")
     rows = []
-    for line in buffer[begin:end].split(b"\\n"):
+    for line in buffer[begin:end].split(b"\n"):
         try:
             original = line.decode("ascii")
-            cols = original.split("\\t")
+            cols = original.split("\t")
             _require(len(cols) >= 4, "Incorrect cluster index column count")
             first = cols[0].rsplit(" ", 1)
             _require(len(first) == 2 and bool(first[0]), "Invalid SURT boundary")
-            _require(re.fullmatch(r"cdx-[0-9]{5}\\.gz", cols[1]) is not None,
+            _require(re.fullmatch(r"cdx-[0-9]{5}\.gz", cols[1]) is not None,
                      "Unexpected indexed CDXJ filename")
             offset, length = int(cols[2]), int(cols[3])
             _require(0 <= offset <= 5_000_000_000
@@ -122,7 +122,7 @@ class _RangeReader:
             _require(res.status == 206 and res.geturl() == url,
                      "Archive must honor exact immutable HTTP 206 byte range")
             field = res.headers.get("Content-Range", "")
-            match = re.fullmatch(r"bytes (\\d+)-(\\d+)/(\\d+)", field)
+            match = re.fullmatch(r"bytes (\d+)-(\d+)/(\d+)", field)
             _require(match is not None
                      and int(match.group(1)) == start
                      and int(match.group(2)) == end
@@ -159,12 +159,12 @@ def _block_covering_url(reader, collection, needle):
         midpoint = (lo+hi)//2
         fetch = min(WINDOW, total-midpoint)
         buf = reader.read(url, midpoint, fetch, total)
-        first = buf.find(b"\\n")
-        second = buf.find(b"\\n", first+1)
+        first = buf.find(b"\n")
+        second = buf.find(b"\n", first+1)
         _require(first >= 0 and second > first,
                  "Cannot locate complete original cluster boundary line")
         line = buf[first+1:second].decode("ascii", "strict")
-        key = line.split("\\t", 1)[0].split(" ", 1)[0]
+        key = line.split("\t", 1)[0].split(" ", 1)[0]
         if key < needle:
             lo = midpoint+second+1
         else:
