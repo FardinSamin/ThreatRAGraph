@@ -121,7 +121,7 @@ class GHSAReviewCandidateTests(unittest.TestCase):
             {"ecosystem": "npm", "name": "github.com/example/engine"},
             {"ecosystem": "Go", "name": "evil:name"},
             {"ecosystem": "Go", "name": "unsafe\npackage"},
-            {"ecosystem": "Go", "name": "../a"},
+            {"ecosystem": "Go", "name": "../a"},\n            {"ecosystem": "Go", "name": "github.com/../evil"},\n            {"ecosystem": "Go", "name": "github.com//evil"},
             {"ecosystem": "Go", "name": ""},
             None,
         ]
