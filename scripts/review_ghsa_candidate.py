@@ -4,6 +4,7 @@ No source approval, sourced_claims or semantic_reviews insertion, web or cloud.
 """
 from __future__ import annotations
 
+from contextlib import closing
 import argparse
 import json
 from pathlib import Path
@@ -55,7 +56,7 @@ def main(argv=None):
             path = Path(args.database)
             if path.is_symlink() or (path.exists() and not path.is_file()):
                 raise ValueError("Review database must be a regular nonsymlink file")
-            with sqlite3.connect(path) as conn:
+            with closing(sqlite3.connect(path)) as conn:
                 result = CompoundCandidateReviewLedger(conn).record(
                     raw, source_version_id=args.source_version_id,
                     expected_sha256=args.expected_sha256,
