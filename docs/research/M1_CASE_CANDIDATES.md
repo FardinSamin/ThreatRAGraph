@@ -10,7 +10,7 @@
 
 Screen real container/Kubernetes security disclosures for the eventual 4–6-case sparse-report experiment. The list below **does not choose final time cutoffs**, label any ground truth, or assert that a current webpage is historically faithful to its stated publication date.
 
-All 21 source candidates in the draft JSON registry are marked **candidate**, with null available_at, null SHA-256 and unverified historical versions. A publication date shown on a webpage is *not* a verified, exact availability timestamp. Source copies/archives and independent chronology must be reviewed before approval.
+All 26 source candidates in the draft JSON registry are marked **candidate**, with null available_at, null SHA-256 and unverified historical versions. A publication date shown on a webpage is *not* a verified, exact availability timestamp. Source copies/archives and independent chronology must be reviewed before approval.
 
 The proposed comparison is **B0** (first one or two public sources only) versus **G1** (B0 plus independently historical background graph), evaluated against later factual descriptions without exposing those descriptions during inference.
 
@@ -109,7 +109,7 @@ The proposed comparison is **B0** (first one or two public sources only) versus 
 - Review dates of specific later reports independently, then approve only eligible source versions.
 - Require [target/method eligibility](P1A_CASE_METHOD_ELIGIBILITY.md) and early/reference novelty review **before** approving a G1-v2 evaluation case; never relabel CVEs to bypass unsupported ontology types.
 - Add selected cases to datasets/cases/pilot.json **after** each reference and cutoff pass the validator and the reviewer accepts its case-unit/method fit.
-- Expand the corpus with versioned ATT&CK/STIX, Falco rules, Kubernetes documentation and other diverse historical CTI; 21 candidate entries are **not** the planned 25–40 approved source corpus.
+- Expand the corpus with versioned ATT&CK/STIX, Falco rules, Kubernetes documentation and other diverse historical CTI; 26 candidate entries are **not** the planned 25–40 approved source corpus.
 - Run strict validation and faculty methodological review before an actual experiment.
 
 **No experiments, predictions, extraction quality scores or model comparisons have been run.**
