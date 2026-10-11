@@ -389,6 +389,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m scripts.probe_direct_original_cdxj \
+            --require-cado-positive \
             --targets cado-original-2022 crowdstrike-original-2022 \
             --collections CC-MAIN-2023-06 \
             > "$RUNNER_TEMP/p1g-original-crowdstrike-cado-direct-index.json"
