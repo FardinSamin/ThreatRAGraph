@@ -255,6 +255,7 @@ def probe_direct(targets, collections, reader=None):
                 try:
                     diag, locator_rows = _block_covering_url(reader, collection, needle)
                     found = []
+                    debug_chunk_keys = []
                     for row in locator_rows:
                         index_url = _cluster_filename(collection, row["shard"])
                         block_key = (index_url, row["offset"], row["length"])
@@ -263,6 +264,18 @@ def probe_direct(targets, collections, reader=None):
                                 index_url, row["offset"], row["length"]
                             )
                         block = cached[block_key]
+                        uncompressed = _read_gzip_chunk(block)
+                        keys = [line.partition(b" ")[0].decode("ascii", errors="replace")
+                                for line in uncompressed.splitlines() if line]
+                        lookup_hostname = urlsplit(alias).hostname or ""
+                        hostpart = lookup_hostname.removeprefix("www.").encode("ascii")
+                        debug_chunk_keys.append({
+                            "boundary": row["key"], "row_count": len(keys),
+                            "first_urlkey": keys[0] if keys else None,
+                            "last_urlkey": keys[-1] if keys else None,
+                            "registered_original_host_token_present":
+                                hostpart in uncompressed,
+                        })
                         found.extend(_parse_cdxj(block, target, alias, collection))
                     # Match the exact source URL, not coincidental neighboring host.
                     for item in found:
@@ -276,6 +289,7 @@ def probe_direct(targets, collections, reader=None):
                         "original_publisher_url": alias,
                         "status": status,
                         "matched_rows": len(found), "blocks_read": len(locator_rows),
+                        "bounded_compressed_cdxj_block_diagnostics": debug_chunk_keys,
                         **diag,
                     }
                 except (OSError, ValueError, UnicodeError, TimeoutError) as exc:
