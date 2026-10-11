@@ -30,8 +30,16 @@ FIRST_CLAIMED_PUBLICATION_DAY = {
     "candidate:scarleteel-sysdig-20230228:unfrozen": "2023-02-28T00:00:00Z",
     "candidate:chimaera-alienlabs-20210908:unfrozen": "2021-09-08T00:00:00Z",
     "candidate:kissadog-crowdstrike-20221026:unfrozen": "2022-10-26T00:00:00Z",
+    "candidate:kissadog-cado-202212:unfrozen": "2022-10-26T00:00:00Z",
 }
 CANDIDATES = set(FIRST_CLAIMED_PUBLICATION_DAY)
+# Cado moved its original December 2022 report URL to a /blog/ form.
+# Only its exact known historic URL is admitted as an alternate report path.
+CADO_HISTORIC_URL = (
+    "https://www.cadosecurity.com/"
+    "kiss-a-dog-discovered-utilizing-a-20-year-old-process-hider/"
+)
+CADO_ID = "candidate:kissadog-cado-202212:unfrozen"
 WARC_PATH = re.compile(
     r"crawl-data/CC-MAIN-[0-9]{4}-[0-9]{2}/segments/"
     r"[0-9]+\.[0-9]+/warc/CC-MAIN-[A-Za-z0-9.-]+\.warc\.gz"
@@ -176,8 +184,11 @@ def validate_capture(index: dict, gzip_member: bytes, manifest: dict,
     _require(len(gzip_member) == int(index["length"]), "WARC range length mismatch")
     _require(DIGEST_B32.fullmatch(index["digest"].upper()) is not None,
              "CDX SHA-1 payload digest missing or malformed")
-    _require(_canonical_url(index["url"]) == _canonical_url(row["url"]),
-             "CDX capture URL is not the exact registered publisher page")
+    acceptable_urls = {_canonical_url(row["url"])}
+    if source_version_id == CADO_ID:
+        acceptable_urls.add(_canonical_url(CADO_HISTORIC_URL))
+    _require(_canonical_url(index["url"]) in acceptable_urls,
+             "CDX capture URL is not the exact registered or historically pinned publisher page")
 
     _require(re.fullmatch(r"[0-9]{14}", index["timestamp"]) is not None,
              "CDX timestamp must be exactly 14 digits")
