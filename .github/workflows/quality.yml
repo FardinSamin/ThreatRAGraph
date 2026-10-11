@@ -329,6 +329,44 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+  original-cado-february-2023-warc-bytes:
+    name: Real 2023-02-06 Cado original HTML WARC bytes and HTTP 206 receipt
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Fetch exact original Common Crawl historical 22387-byte member (no execution)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 --fail --show-error --silent \
+            --retry 2 --max-time 65 --max-filesize 4194304 \
+            --range 696857860-696880246 \
+            --dump-header "$RUNNER_TEMP/cado-original-20230206-range-headers.txt" \
+            --output "$RUNNER_TEMP/cado-original-20230206-member.warc.gz" \
+            "https://data.commoncrawl.org/crawl-data/CC-MAIN-2023-06/segments/1674764500339.37/warc/CC-MAIN-20230206113934-20230206143934-00755.warc.gz"
+      - name: Replay exact publisher URL, UTC cutoff, HTTP 206 byte range and original WARC/HTML digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.replay_original_cado_20230206 \
+            --warc-member "$RUNNER_TEMP/cado-original-20230206-member.warc.gz" \
+            --range-headers "$RUNNER_TEMP/cado-original-20230206-range-headers.txt" \
+            > "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
+          cat "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
+      - name: Retain only original-Cado WARC metadata and hashes, never report HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: cado-20230206-original-publisher-html-verified-candidate-receipt
+          path: ${{ runner.temp }}/cado-original-20230206-historical-warc-hashes.json
+          retention-days: 14
+          if-no-files-found: error
+
   preflight-and-tests:
     strategy:
       fail-fast: false
@@ -378,6 +416,8 @@ jobs:
         run: python -m scripts.verify_kissadog_cado_public_push --help
       - name: Original 2022 campaign official Common Crawl CDX probe CLI smoke
         run: python -m scripts.probe_original_campaign_cdx --help
+      - name: Real original 2023 Cado indexed WARC replay CLI smoke
+        run: python -m scripts.replay_original_cado_20230206 --help
       - name: Original Dec 2022 Cado article pointer Git replay CLI smoke
         run: python -m scripts.verify_kissadog_cado_pointer --help
       - name: SCARLETEEL candidate-only same-peer Kiss-a-dog path check
