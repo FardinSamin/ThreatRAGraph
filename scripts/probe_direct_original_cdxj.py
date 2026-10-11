@@ -221,8 +221,11 @@ def _parse_cdxj(chunk, target, alias, collection):
     for raw in _read_gzip_chunk(chunk).splitlines():
         if not raw or len(raw) > 16384:
             continue
-        key, sep, rest = raw.partition(b" ")
-        if not sep or not key.startswith(_url_key(alias).rstrip("/").encode()):
+        # Older CDXJ writers can preserve www in SURT even when a browser
+        # lookup would normalize it. Authoritative eligibility is the exact
+        # archived JSON URL value, not an inferred/reconstructed SURT prefix.
+        _, sep, rest = raw.partition(b" ")
+        if not sep:
             continue
         _, sp, data = rest.partition(b" ")
         if not sp:
@@ -311,6 +314,16 @@ def probe_direct(targets, collections, reader=None):
             "prospective_pre_cutoff_html_record_not_yet_warc_verified"
             for r in records
         ),
+        "known_cado_20230206_positive_control_matched": any(
+            r.get("target") == "cado-original-2022"
+            and r.get("collection") == "CC-MAIN-2023-06"
+            and r.get("observed_url") == TARGETS["cado-original-2022"][0]
+            and r.get("cdx_timestamp_declared_utc") == "2023-02-06T12:05:44Z"
+            and r.get("archive_offset") == "696857860"
+            and r.get("archive_length") == "22387"
+            and r.get("archive_payload_digest") == "IIQQZYE7EHNZFM6CFTJLNT226VHY2D3P"
+            for r in records
+        ),
         "archive_article_bytes_acquired": False,
         "archive_timestamp_independently_authenticated": False,
         "publisher_reuse_rights_approved": False,
@@ -323,13 +336,19 @@ def probe_direct(targets, collections, reader=None):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--require-cado-positive", action="store_true",
+                   help="Refuse to treat historical index search as validated unless known archived Cado 2023-02-06 CDXJ record is recovered")
     p.add_argument("--targets", nargs="+", choices=tuple(TARGETS),
                    default=["cado-original-2022", "crowdstrike-original-2022"])
     p.add_argument("--collections", nargs="+", choices=COLLECTIONS,
                    default=["CC-MAIN-2023-06"])
     args = p.parse_args(argv)
-    print(json.dumps(probe_direct(args.targets, args.collections),
-                     indent=2, sort_keys=True))
+    receipt = probe_direct(args.targets, args.collections)
+    if args.require_cado_positive and not receipt["known_cado_20230206_positive_control_matched"]:
+        receipt["status"] = "original_index_lookup_unvalidated_known_cado_positive_control_failed"
+        print(json.dumps(receipt, indent=2, sort_keys=True))
+        return 2
+    print(json.dumps(receipt, indent=2, sort_keys=True))
     return 0
 
 
