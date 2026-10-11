@@ -93,6 +93,77 @@ class OriginalIndexDirectLookupTests(unittest.TestCase):
                          found[0]["cdx_timestamp_declared_utc"])
         self.assertFalse(found[0]["research_ready"])
 
+    def test_www_keyspace_is_searched_even_when_apex_blocks_are_far_away(self):
+        """A positive archival record may be indexed under a preserved www SURT."""
+        url = TARGETS["cado-original-2022"][0]
+        canonical, alternate = module._index_surt_variants(url)
+        self.assertTrue(alternate.startswith("com,cadosecurity,www)/"))
+        self.assertNotEqual(canonical, alternate)
+
+        # More than five intervening apex index chunks: expanding a local
+        # predecessor-only window cannot substitute for a second key search.
+        fake = _FakeOriginalArchive()
+        gzip_name = "cdx-00000.gz"
+        index_lines = []
+        offset = 0
+        for i in range(12):
+            key = f"com,cadosecurity)/filler-{i:03d}"
+            payload = gzip.compress((key + " 20230206120544 {}\\n").encode(),
+                                    mtime=0)
+            index_lines.append(
+                f"{key} 20230206120544\\t{gzip_name}\\t{offset}\\t"
+                f"{len(payload)}\\t1\\n"
+            )
+            fake.files[gzip_name] = fake.files.get(gzip_name, b"") + payload
+            offset += len(payload)
+        raw = _cdx_line(url)
+        payload = gzip.compress(
+            raw.replace(canonical.encode(), alternate.encode(), 1), mtime=0
+        )
+        index_lines.append(
+            f"{alternate} 20230206120544\\t{gzip_name}\\t{offset}\\t"
+            f"{len(payload)}\\t1\\n"
+        )
+        fake.files[gzip_name] += payload
+        fake.files["cluster.idx"] = "".join(index_lines).encode("ascii")
+
+        reader = fake.reader()
+        _, apex_rows = module._block_covering_url(
+            reader, "CC-MAIN-2023-06", canonical
+        )
+        self.assertTrue(all(row["key"] != alternate for row in apex_rows))
+        receipt = module.probe_direct(
+            ["cado-original-2022"], ["CC-MAIN-2023-06"], reader=reader
+        )
+        self.assertTrue(receipt["known_cado_20230206_positive_control_matched"])
+        self.assertEqual(1, receipt["matching_pre_cutoff_candidate_count"])
+        original_query = receipt["query_receipts"][0]
+        self.assertTrue(original_query["all_declared_surt_variants_probed"])
+        self.assertEqual(2, len(original_query["index_surt_variant_diagnostics"]))
+        self.assertEqual(1, original_query["matched_rows"])
+
+    def test_variant_lookup_incomplete_is_not_an_archive_absence(self):
+        fake = _FakeOriginalArchive()
+        canonical = module._url_key(TARGETS["cado-original-2022"][0])
+        original_reader = fake.reader()
+        class BrokenPreservedWww:
+            def size(self, url):
+                return original_reader.size(url)
+            def read(self, url, offset, length, total=None):
+                return original_reader.read(url, offset, length, total)
+        # A missing alternate host range in a tiny fabricated index must be
+        # reported conservatively, not interpreted as an archive-negative.
+        self.assertEqual(2, len(module._index_surt_variants(
+            TARGETS["cado-original-2022"][0]
+        )))
+        self.assertTrue(canonical.startswith("com,cadosecurity)"))
+        result = module.probe_direct(
+            ["cado-original-2022"], ["CC-MAIN-2023-06"],
+            reader=BrokenPreservedWww()
+        )
+        self.assertFalse(result["source_version_approved"])
+
+
     def test_source_url_surt_normalizes_www_but_not_other_domains(self):
         self.assertEqual(
             "com,crowdstrike)/blog/new-kiss-a-dog",

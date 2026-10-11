@@ -47,6 +47,23 @@ def _url_key(url):
     return ",".join(reversed(host.split("."))) + ")" + parts.path.lower()
 
 
+def _index_surt_variants(url):
+    """Probe apex and preserved-www sort keys; trust only exact JSON URLs.
+
+    Historical index generations can differ on whether leading www is
+    canonicalized. Selecting a compressed block using only the apex key can
+    silently miss an existing original-publisher record in the www keyspace.
+    """
+    canonical = _url_key(url)
+    host = urlsplit(url).hostname or ""
+    if not host.startswith("www."):
+        return (canonical,)
+    key_host, separator, suffix = canonical.partition(")")
+    _require(separator == ")", "Malformed generated canonical SURT")
+    preserved_www = key_host + ",www)" + suffix
+    return (canonical, preserved_www)
+
+
 def _cluster_filename(collection, shard):
     _require(collection in COLLECTIONS, "Unexpected Common Crawl collection")
     _require(re.fullmatch(r"cdx-[0-9]{5}\.gz", shard) is not None,
@@ -254,56 +271,96 @@ def probe_direct(targets, collections, reader=None):
     for collection in collections:
         for target in targets:
             for alias in TARGETS[target]:
-                needle = _url_key(alias)
-                try:
-                    diag, locator_rows = _block_covering_url(reader, collection, needle)
-                    found = []
-                    debug_chunk_keys = []
-                    for row in locator_rows:
-                        index_url = _cluster_filename(collection, row["shard"])
-                        block_key = (index_url, row["offset"], row["length"])
-                        if block_key not in cached:
-                            cached[block_key] = reader.read(
-                                index_url, row["offset"], row["length"]
+                variant_diagnostics = []
+                matched = []
+                for needle in _index_surt_variants(alias):
+                    try:
+                        diag, locator_rows = _block_covering_url(
+                            reader, collection, needle
+                        )
+                        debug_chunk_keys = []
+                        count_before = len(matched)
+                        for row in locator_rows:
+                            index_url = _cluster_filename(collection, row["shard"])
+                            block_key = (index_url, row["offset"], row["length"])
+                            if block_key not in cached:
+                                cached[block_key] = reader.read(
+                                    index_url, row["offset"], row["length"]
+                                )
+                            block = cached[block_key]
+                            uncompressed = _read_gzip_chunk(block)
+                            keys = [
+                                line.partition(b" ")[0].decode(
+                                    "ascii", errors="replace"
+                                )
+                                for line in uncompressed.splitlines() if line
+                            ]
+                            host = (urlsplit(alias).hostname or "").removeprefix(
+                                "www."
                             )
-                        block = cached[block_key]
-                        uncompressed = _read_gzip_chunk(block)
-                        keys = [line.partition(b" ")[0].decode("ascii", errors="replace")
-                                for line in uncompressed.splitlines() if line]
-                        lookup_hostname = urlsplit(alias).hostname or ""
-                        hostpart = lookup_hostname.removeprefix("www.").encode("ascii")
-                        debug_chunk_keys.append({
-                            "boundary": row["key"], "row_count": len(keys),
-                            "first_urlkey": keys[0] if keys else None,
-                            "last_urlkey": keys[-1] if keys else None,
-                            "registered_original_host_token_present":
-                                hostpart in uncompressed,
+                            debug_chunk_keys.append({
+                                "boundary": row["key"],
+                                "row_count": len(keys),
+                                "first_urlkey": keys[0] if keys else None,
+                                "last_urlkey": keys[-1] if keys else None,
+                                "registered_original_host_token_present":
+                                    host.encode("ascii") in uncompressed,
+                            })
+                            matched.extend(
+                                _parse_cdxj(block, target, alias, collection)
+                            )
+                        variant_diagnostics.append({
+                            "searched_surt_key": needle,
+                            "status": "index_range_examined",
+                            "raw_matches": len(matched) - count_before,
+                            "blocks_read": len(locator_rows),
+                            "bounded_compressed_cdxj_block_diagnostics":
+                                debug_chunk_keys,
+                            **diag,
                         })
-                        found.extend(_parse_cdxj(block, target, alias, collection))
-                    # Match the exact source URL, not coincidental neighboring host.
-                    for item in found:
-                        item["cdxj_direct_index_original_bytes_verified"] = True
-                        item["source_version_approved"] = False
-                        item["research_ready"] = False
-                        records.append(item)
-                    status = "matching_original_cdxj_rows_found" if found else "no_matching_exact_url_in_selected_index_blocks"
-                    observation = {
-                        "collection": collection, "target": target,
-                        "original_publisher_url": alias,
-                        "status": status,
-                        "matched_rows": len(found), "blocks_read": len(locator_rows),
-                        "bounded_compressed_cdxj_block_diagnostics": debug_chunk_keys,
-                        **diag,
-                    }
-                except (OSError, ValueError, UnicodeError, TimeoutError) as exc:
-                    observation = {
-                        "collection": collection, "target": target,
-                        "original_publisher_url": alias,
-                        "status": "direct_index_access_or_format_error",
-                        "error_category": type(exc).__name__,
-                        "matched_rows": 0,
-                    }
-                observations.append(observation)
+                    except (OSError, ValueError, UnicodeError, TimeoutError) as exc:
+                        variant_diagnostics.append({
+                            "searched_surt_key": needle,
+                            "status": "direct_index_access_or_format_error",
+                            "error_category": type(exc).__name__,
+                        })
+                # Overlapping index ranges may contain the same source record.
+                # Keep each original WARC locator once, not once per search key.
+                deduplicated = {}
+                for item in matched:
+                    identity = (
+                        item["observed_url"], item["cdx_timestamp_declared_utc"],
+                        item["archive_filename"], item["archive_offset"],
+                        item["archive_length"], item["archive_payload_digest"],
+                    )
+                    deduplicated[identity] = item
+                found = list(deduplicated.values())
+                for item in found:
+                    item["cdxj_direct_index_original_bytes_verified"] = True
+                    item["source_version_approved"] = False
+                    item["research_ready"] = False
+                    records.append(item)
+                coverage_complete = all(
+                    result["status"] == "index_range_examined"
+                    for result in variant_diagnostics
+                )
+                # A miss is never an archive-absence claim; a failed variant
+                # makes even the bounded lookup incomplete.
+                if found:
+                    status = "matching_original_cdxj_rows_found"
+                elif not coverage_complete:
+                    status = "direct_index_partial_coverage_unvalidated"
+                else:
+                    status = "no_matching_exact_url_in_selected_index_blocks"
+                observations.append({
+                    "collection": collection,
+                    "target": target,
+                    "original_publisher_url": alias,
+                    "status": status,
+                    "matched_rows": len(found),
+                    "all_declared_surt_variants_probed": coverage_complete,
+                    "index_surt_variant_diagnostics": variant_diagnostics,
+                })
     return {
         "schema_version": VERSION,
         "status": "original_index_bytes_only_source_capture_not_authenticated",

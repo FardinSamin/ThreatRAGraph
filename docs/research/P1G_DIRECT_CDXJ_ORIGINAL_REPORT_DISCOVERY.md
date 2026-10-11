@@ -25,6 +25,21 @@ In GitHub Actions [run 38112369253](https://github.com/FardinSamin/ThreatRAGraph
 
 I additionally made the **known real Cado positive control mandatory in the exploratory CI job**. If a real Cado CDXJ row cannot be reproduced, the job refuses validation rather than purporting to disprove historical article availability or report that CrowdStrike has no capture. All source-version and claim approvals stay false.
 
+## P1g follow-up: preserved-www keyspace coverage (unverified on real index)
+
+The initial source-index probe searched only the normalized apex SURT key. A
+separate unit test already accepted JSON records whose actual CDXJ key retains
+`www`, but it did **not** prove the cluster-index locator reached that keyspace.
+The updated offline search independently bounds and probes both apex and
+preserved-`www` SURT positions for registered `www.` URLs, deduplicates matching
+WARC locators, and reports coverage failures separately from misses. A regression
+fixture places the genuine known-Cado locator under preserved-`www` after twelve
+sorted apex chunks, beyond the original five-block neighborhood. Only the
+exact archived JSON source URL and original WARC locator can satisfy the positive
+control. This is an engineering correction and synthetic validation, **not
+verification of the live historical index**. Do not merge until current-head
+CI starts and the real positive control and all twelve jobs pass.
+
 ## Current CI runner constraint
 
 Following multiple successful archived index read runs, [a subsequent workflow run](https://github.com/FardinSamin/ThreatRAGraph/actions/runs/38112454293) and its retry failed **before any job step started**: each job returned an empty step list and runner logs were unavailable (`BlobNotFound`). These are **job orchestration/start failures**, not executed unit-test, WARC-identity, security or index-lookup failures. GitHub [documents Actions job diagnostic steps](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs); the platform status page may show operational even when a particular account's runners cannot start.
