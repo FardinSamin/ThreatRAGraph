@@ -28,6 +28,7 @@
 - [P1a first real-source screening](docs/research/P1A_LEAKY_VESSELS_CASE.md) — real dated Leaky Vessels source chronology and explicit remaining archive/review blockers; **not an approved case**.
 - [P1a signed upstream release provenance](docs/research/P1A_RUNC_RELEASE_WITNESS.md) — replayable offline audit of runc GitHub release, annotated tag, reported PGP signature and hard historical-approval boundaries.
 - [P1a actual pinned upstream tag acquisition](docs/research/P1A_PINNED_TAG_ACQUISITION.md) — GitHub CI fetches the original signed Git object and measures byte-level SHA-256; **candidate-only, no case/source approval**.
+- [P1a release-era GnuPG signer verification](docs/research/P1A_RUNC_SIGNER_VERIFICATION.md) — authentic PGP signature verified with a historically pinned runc keyring in isolated CI; exact first-public date and reviewer approval still pending.
 - [Private candidate byte capture](docs/research/P1A_LEAKY_VESSELS_CASE.md#safe-manual-source-byte-preservation-private-not-approval) — bounded offline original-byte archiving and unapproved receipts; not proof of historical content or rights.
 - [M1 preliminary case shortlist](docs/research/M1_CASE_CANDIDATES.md) — five researched container vulnerability case possibilities, not yet approved.
 - [M5.2 exact-only as-of feature lineage](docs/M5_ASOF_FEATURE_LINEAGE.md) — mandatory per-claim graph/date and no-alias/no-external-taxonomy contract; **not independent evidence approval**.

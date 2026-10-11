@@ -212,6 +212,7 @@ flowchart TD
 **[PR-B / Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24) — One historical development case (P1a):**
 - **Signed-release provenance subtask:** an offline [runc release/ref/tag witness verifier](research/P1A_RUNC_RELEASE_WITNESS.md) can cross-check GitHub's PGP verification claim, annotated-tag target and public release timestamp; this does **not** independently certify 2024 original web bytes, permissions or a research-ready source.
 - **Byte acquisition achieved, not case approved:** [pinned runc tag raw bytes obtained in GitHub CI](research/P1A_PINNED_TAG_ACQUISITION.md) (1,525 bytes; SHA-256 receipt retained 14 days). Signature trust, exact historic public release availability, reuse rights and researcher-approved cases remain blocked; there are 0 approved source-version manifest entries.
+- **Local release-era signature verification achieved, not case approved:** isolated GnuPG has verified the original tag against the **historically pinned runc v1.1.12 project keyring**; see [measured signature evidence and limits](research/P1A_RUNC_SIGNER_VERIFICATION.md). Independent signer identity, exact public timestamp, rights and human acceptance remain P1 blockers.
 - select one candidate with verifiable original and follow-up reporting dates **before reviewing prediction outcome**;
 - collect permitted exact archived versions outside Git, source rights and hash/date evidence;
 - freeze initial 1–2 report split and background/later reference separation; manually review in GitHub using metadata only;

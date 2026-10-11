@@ -60,6 +60,20 @@ jobs:
           set -euo pipefail
           python -m scripts.acquire_runc_git_tag --git-repo "$RUNNER_TEMP/runc-release.git" --artifact-root "$RUNNER_TEMP/runc-private/source_versions/sha256" > "$RUNNER_TEMP/runc-tag-witness.json"
           cat "$RUNNER_TEMP/runc-tag-witness.json"
+      - name: Verify original signed tag with historical pinned project keyring
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v gpg
+          python -m scripts.verify_runc_tag_signer --git-repo "$RUNNER_TEMP/runc-release.git" > "$RUNNER_TEMP/runc-signer-witness.json"
+          cat "$RUNNER_TEMP/runc-signer-witness.json"
+      - name: Retain signer cryptographic witness without source or keys
+        uses: actions/upload-artifact@v4
+        with:
+          name: runc-v1-1-12-historical-signer-receipt
+          path: ${{ runner.temp }}/runc-signer-witness.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Retain only non-secret hash receipt, not third-party source bytes
         uses: actions/upload-artifact@v4
         with:
