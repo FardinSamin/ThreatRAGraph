@@ -34,8 +34,8 @@ CASE_SPECIFIC = ("claims_jsonl", "reviews_jsonl", "feature_lineage_json",
                  "metadata_json")
 ARTIFACT_NAMES = (
     "b0_view", "b0_graph", "g1_view", "g1_graph",
-    "b0_profile", "g1_profile", "paired_audit", "run_lock",
-    "pipeline_receipt",
+    "feature_lineage", "b0_profile", "g1_profile",
+    "paired_audit", "run_lock", "pipeline_receipt",
 )
 
 
@@ -118,6 +118,13 @@ def _receipt(cases, plan):
         b0 = outputs["b0_profile"]
         g1 = outputs["g1_profile"]
         audit = outputs["paired_audit"]
+        lineage = outputs["feature_lineage"]
+        declared_inputs = lock.get("input_artifact_sha256")
+        if (not isinstance(lineage, dict)
+                or not isinstance(declared_inputs, dict)
+                or declared_inputs.get("feature_lineage") != fingerprint(lineage)
+                or pipeline.get("feature_lineage_sha256") != fingerprint(lineage)):
+            raise ValueError("Unfrozen or unbound as-of feature lineage")
         if (pipeline.get("case_id") != case_id
                 or lock.get("case_id") != case_id
                 or b0.get("case_id") != case_id

@@ -12,6 +12,7 @@ require independent real-world authentication.
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
@@ -40,8 +41,8 @@ REVIEW_KEYS = frozenset({
 })
 ARTIFACT_KEYS = (
     "b0_view", "b0_graph", "g1_view", "g1_graph",
-    "b0_profile", "g1_profile", "paired_audit", "run_lock",
-    "pipeline_receipt",
+    "feature_lineage", "b0_profile", "g1_profile",
+    "paired_audit", "run_lock", "pipeline_receipt",
 )
 
 
@@ -155,6 +156,7 @@ def run_offline_case(
         },
         "source_manifest_sha256": actual_hashes["source_manifest_sha256"],
         "case_manifest_sha256": actual_hashes["case_manifest_sha256"],
+        "feature_lineage_sha256": fingerprint(feature_lineage),
         "graph_sha256": {
             "B0": fingerprint(projected["B0"]),
             "G1": fingerprint(projected["G1"]),
@@ -178,6 +180,7 @@ def run_offline_case(
         "b0_graph": projected["B0"],
         "g1_view": views["G1"],
         "g1_graph": projected["G1"],
+        "feature_lineage": deepcopy(feature_lineage),
         "b0_profile": paired["b0_profile"],
         "g1_profile": paired["g1_profile"],
         "paired_audit": paired["paired_audit"],
