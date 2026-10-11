@@ -1,4 +1,6 @@
 # P1b follow-up — Two named campaign peers with an exact shared XMRig feature
+**P1e follow-up (October 11, 2026):** [A real original Cado Kiss-a-dog first-party webpage is now SHA256/WARC/CDX byte-verified from February 6 2023](P1E_CADO_FEB2023_REAL_PRIMARY_WARC.md), including visible title and Redis/XMRig/XHide tokens. This is a historical source-capture candidate, NOT approved evidence or a scored SCARLETEEL prediction; original early Sysdig remains unrecovered.
+
 
 **Screened 2026-10-10 (EDT)** | **Decision:** *two promising same-type campaign candidates are identified, but G1 v2 is still **not eligible** to make any empirical prediction.* No source or case is approved, no exact historical page bytes are attested, and **no held-out later reference body or labels were read or extracted for this follow-up**.
 

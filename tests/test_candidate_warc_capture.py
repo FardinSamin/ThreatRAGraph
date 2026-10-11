@@ -89,6 +89,39 @@ class CandidateWarcIntegrityTests(unittest.TestCase):
                 self.assertFalse(result["research_ready"])
                 self.assertEqual(CUTOFF, result["declared_cutoff_utc"])
 
+    def test_cado_2022_original_url_alias_and_modern_url_are_both_explicitly_bounded(self):
+        from scripts.verify_candidate_warc_capture import CADO_HISTORIC_URL, CADO_ID
+        idx, raw = self._fixture(CADO_ID, "20230206120544")
+        modern = validate_capture(idx, raw, self.registry, CADO_ID)
+        self.assertEqual(CADO_ID, modern["source_version_id"])
+        self.assertFalse(modern["research_ready"])
+        old, payload = synthetic_capture(CADO_HISTORIC_URL, "20230206120544")
+        original = validate_capture(old, payload, self.registry, CADO_ID)
+        self.assertEqual(CADO_HISTORIC_URL, original["cdx_capture_url"])
+        self.assertFalse(original["source_version_approved"])
+
+    def test_cado_same_domain_but_unregistered_path_must_not_pass(self):
+        from scripts.verify_candidate_warc_capture import CADO_ID
+        idx, raw = synthetic_capture("https://www.cadosecurity.com/unrelated-report",
+                                     "20230206120544")
+        with self.assertRaisesRegex(ValueError, "exact registered"):
+            validate_capture(idx, raw, self.registry, CADO_ID)
+
+    def test_http_vary_and_set_cookie_repeats_are_legal_but_digest_headers_are_not(self):
+        from scripts.verify_candidate_warc_capture import _headers
+        http = (b"HTTP/1.1 200 OK\r\ncontent-type: text/html\r\n"
+                b"vary: Accept-Encoding\r\nvary: User-Agent\r\n"
+                b"set-cookie: abc=a\r\nset-cookie: def=b\r\n\r\n"
+                b"<html></html>")
+        headers, body = _headers(http, b"HTTP/1.", allow_repeated_http_fields=True)
+        self.assertEqual("text/html", headers["content-type"])
+        self.assertEqual(b"<html></html>", body)
+        for field in (b"content-type", b"content-length", b"content-encoding",
+                      b"transfer-encoding", b"warc-payload-digest"):
+            raw = b"HTTP/1.1 200 OK\r\n" + field + b": a\r\n" + field + b": b\r\n\r\nbody"
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, "Duplicate"):
+                _headers(raw, b"HTTP/1.", allow_repeated_http_fields=True)
+
     def test_payload_digest_is_verified_exactly(self):
         index, raw = self._fixture()
         index["digest"] = _b32(b"other body")

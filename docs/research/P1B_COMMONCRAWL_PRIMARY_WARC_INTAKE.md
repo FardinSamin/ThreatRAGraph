@@ -1,5 +1,7 @@
 # P1b — Common Crawl primary-page WARC intake (candidate only)
 
+**P1e October 11, 2026 update:** The original paper's implementation became operational on a real **2023-02-06** Common Crawl **original Cado first-party HTML capture**, not just synthetic tests. See [genuine Cado historical WARC replay](P1E_CADO_FEB2023_REAL_PRIMARY_WARC.md) for 92,875 original article bytes, original URL/206/CDX/WARC digests, title/visible words and explicit no-approval boundaries. The *original 2021 Alien Labs, October 2022 CrowdStrike, and February 28 2023 Sysdig* historical source pages remain unrecovered.
+
 **Date:** October 10, 2026 EDT. **Scientific outcome:** Not a recovered historical report and not an approved case. Historical target-specific Common Crawl and Internet Archive index endpoints were **unavailable from this browsing/network environment**; no WARC record or index match has been asserted. The new code is an **offline byte-integrity/acquisition gate** that can check a separately obtained authentic capture of a **primary researcher HTML page** instead of another derived citation.
 
 Sources: [Common Crawl's official CDXJ index guide](https://commoncrawl.org/cdxj-index) and [Get Started: URL index and WARC range replay](https://commoncrawl.org/get-started). These establish the retrieval *method*, not the existence of an eligible target capture. Research context: [SCARLETEEL campaign peers](P1B_SCARLETEEL_CAMPAIGN_PEERS.md) and [Chimaera pinned third-party bibliographies](P1B_CHIMAERA_HISTORICAL_BIBLIOGRAPHY.md).

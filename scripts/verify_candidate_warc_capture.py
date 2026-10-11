@@ -30,8 +30,16 @@ FIRST_CLAIMED_PUBLICATION_DAY = {
     "candidate:scarleteel-sysdig-20230228:unfrozen": "2023-02-28T00:00:00Z",
     "candidate:chimaera-alienlabs-20210908:unfrozen": "2021-09-08T00:00:00Z",
     "candidate:kissadog-crowdstrike-20221026:unfrozen": "2022-10-26T00:00:00Z",
+    "candidate:kissadog-cado-202212:unfrozen": "2022-10-26T00:00:00Z",
 }
 CANDIDATES = set(FIRST_CLAIMED_PUBLICATION_DAY)
+# Cado moved its original December 2022 report URL to a /blog/ form.
+# Only its exact known historic URL is admitted as an alternate report path.
+CADO_HISTORIC_URL = (
+    "https://www.cadosecurity.com/"
+    "kiss-a-dog-discovered-utilizing-a-20-year-old-process-hider/"
+)
+CADO_ID = "candidate:kissadog-cado-202212:unfrozen"
 WARC_PATH = re.compile(
     r"crawl-data/CC-MAIN-[0-9]{4}-[0-9]{2}/segments/"
     r"[0-9]+\.[0-9]+/warc/CC-MAIN-[A-Za-z0-9.-]+\.warc\.gz"
@@ -99,7 +107,8 @@ def _read_json(path: str | Path, cap: int):
         raise ValueError("Invalid UTF-8 JSON input") from exc
 
 
-def _headers(raw: bytes, prefix: bytes, *, limit: int = 32768) -> tuple[dict, bytes]:
+def _headers(raw: bytes, prefix: bytes, *, limit: int = 32768,
+             allow_repeated_http_fields: bool = False) -> tuple[dict, bytes]:
     _require(len(raw) <= LIMIT_UNCOMPRESSED and len(raw) >= 10, "Invalid record size")
     stop = raw.find(b"\r\n\r\n")
     _require(0 <= stop <= limit, "Missing or oversized CRLF headers")
@@ -115,8 +124,15 @@ def _headers(raw: bytes, prefix: bytes, *, limit: int = 32768) -> tuple[dict, by
             value = val.strip().decode("ascii")
         except UnicodeError as exc:
             raise ValueError("Non-ASCII metadata header") from exc
-        _require(bool(re.fullmatch(r"[a-z0-9-]+", name)) and name not in headers,
-                 "Duplicate or unsupported header")
+        _require(bool(re.fullmatch(r"[a-z0-9-]+", name)),
+                 "Unsupported metadata header key")
+        if name in headers:
+            # RFC-valid repeated HTTP response negotiation/cookie metadata is
+            # safe to ignore here; never silently override Content-Type,
+            # length, encoding, transfer-encoding, or any WARC evidence digest.
+            if allow_repeated_http_fields and name in {"vary", "set-cookie"}:
+                continue
+            raise ValueError("Duplicate HTTP/WARC header key: " + name)
         headers[name] = value
     return headers, raw[stop + 4:]
 
@@ -176,8 +192,11 @@ def validate_capture(index: dict, gzip_member: bytes, manifest: dict,
     _require(len(gzip_member) == int(index["length"]), "WARC range length mismatch")
     _require(DIGEST_B32.fullmatch(index["digest"].upper()) is not None,
              "CDX SHA-1 payload digest missing or malformed")
-    _require(_canonical_url(index["url"]) == _canonical_url(row["url"]),
-             "CDX capture URL is not the exact registered publisher page")
+    acceptable_urls = {_canonical_url(row["url"])}
+    if source_version_id == CADO_ID:
+        acceptable_urls.add(_canonical_url(CADO_HISTORIC_URL))
+    _require(_canonical_url(index["url"]) in acceptable_urls,
+             "CDX capture URL is not the exact registered or historically pinned publisher page")
 
     _require(re.fullmatch(r"[0-9]{14}", index["timestamp"]) is not None,
              "CDX timestamp must be exactly 14 digits")
@@ -211,7 +230,7 @@ def validate_capture(index: dict, gzip_member: bytes, manifest: dict,
     if "warc-block-digest" in wh:
         _require(wh["warc-block-digest"].upper() == "SHA1:" + _sha1_b32(http_block),
                  "WARC HTTP block digest mismatch")
-    hh, body = _headers(http_block, b"HTTP/1.")
+    hh, body = _headers(http_block, b"HTTP/1.", allow_repeated_http_fields=True)
     _require(re.match(rb"HTTP/1\.[01] 200(?:\s|$)", http_block.split(b"\r\n", 1)[0]) is not None,
              "Archive HTTP status is not 200")
     _require(hh.get("content-type", "").lower().startswith(("text/html", "application/xhtml+xml")),

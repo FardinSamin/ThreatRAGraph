@@ -1,0 +1,19 @@
+{
+  "source_version_id": "candidate:kissadog-cado-202212:unfrozen",
+  "original_commoncrawl_collection": "CC-MAIN-2023-06",
+  "original_index_query_run_id": 38110672261,
+  "index_reported_capture_timestamp": "20230206120544",
+  "url": "https://www.cadosecurity.com/kiss-a-dog-discovered-utilizing-a-20-year-old-process-hider/",
+  "timestamp": "20230206120544",
+  "filename": "crawl-data/CC-MAIN-2023-06/segments/1674764500339.37/warc/CC-MAIN-20230206113934-20230206143934-00755.warc.gz",
+  "offset": "696857860",
+  "length": "22387",
+  "status": "200",
+  "mime": "text/html",
+  "digest": "IIQQZYE7EHNZFM6CFTJLNT226VHY2D3P",
+  "provenance_status": "official_cdx_index_fields_observed_via_github_actions_not_yet_archived_html_verified",
+  "publisher_article_rights_approved": false,
+  "archive_time_independently_authenticated": false,
+  "source_version_approved": false,
+  "research_ready": false
+}

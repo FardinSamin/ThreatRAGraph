@@ -286,6 +286,93 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+  original-2022-campaign-archive-index-probe:
+    name: Real Common Crawl CDX search for original 2022 campaign publisher pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Query real official historic Common Crawl CDX indexes (not article HTML)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.probe_original_campaign_cdx \
+            --targets cado-original-2022 \
+            --collections CC-MAIN-2023-06 \
+            > "$RUNNER_TEMP/p1e-historic-campaign-cdx-candidates.json"
+          python - "$RUNNER_TEMP/p1e-historic-campaign-cdx-candidates.json" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding="utf-8") as fp:
+              result = json.load(fp)
+          print("official_cdx_queries=", result["query_count"])
+          print("pre_cutoff_candidate_index_records=", result["candidate_record_count"])
+          for row in result["candidate_metadata_rows"]:
+              print("index_candidate:", row["target"], row["candidate_status"],
+                    row["collection"], row["cdx_timestamp_declared_utc"],
+                    "url=", row["observed_url"],
+                    "filename=", row["archive_filename"],
+                    "offset=", row["archive_offset"], "length=", row["archive_length"],
+                    "digest=", row["archive_payload_digest"])
+          for q in result["query_receipts"]:
+              print("cdx_query:", q["target"], q["collection"], q["query_status"])
+          assert result["research_ready"] is False
+          PY
+      - name: Retain only candidate index metadata, not unreviewed publisher article bodies
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1e-original-2022-primary-report-cdx-candidate-search
+          path: ${{ runner.temp }}/p1e-historic-campaign-cdx-candidates.json
+          retention-days: 14
+          if-no-files-found: error
+
+  original-cado-february-2023-warc-bytes:
+    name: Real 2023-02-06 Cado original HTML WARC bytes and HTTP 206 receipt
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Fetch exact original Common Crawl historical 22387-byte member (no execution)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 --fail --show-error --silent \
+            --retry 2 --max-time 65 --max-filesize 4194304 \
+            --range 696857860-696880246 \
+            --dump-header "$RUNNER_TEMP/cado-original-20230206-range-headers.txt" \
+            --output "$RUNNER_TEMP/cado-original-20230206-member.warc.gz" \
+            "https://data.commoncrawl.org/crawl-data/CC-MAIN-2023-06/segments/1674764500339.37/warc/CC-MAIN-20230206113934-20230206143934-00755.warc.gz"
+      - name: Replay exact publisher URL, UTC cutoff, HTTP 206 byte range and original WARC/HTML digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python -m scripts.replay_original_cado_20230206 \
+              --warc-member "$RUNNER_TEMP/cado-original-20230206-member.warc.gz" \
+              --range-headers "$RUNNER_TEMP/cado-original-20230206-range-headers.txt" \
+              > "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"; then
+            cat "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
+          else
+            cat "$RUNNER_TEMP/cado-original-20230206-historical-warc-hashes.json"
+            exit 2
+          fi
+      - name: Retain only original-Cado WARC metadata and hashes, never report HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: cado-20230206-original-publisher-html-verified-candidate-receipt
+          path: ${{ runner.temp }}/cado-original-20230206-historical-warc-hashes.json
+          retention-days: 14
+          if-no-files-found: error
+
   preflight-and-tests:
     strategy:
       fail-fast: false
@@ -333,6 +420,10 @@ jobs:
         run: python -m scripts.verify_original_mitre_teamtnt --help
       - name: GH Archive 2022 Securonix public push verifier CLI smoke (offline)
         run: python -m scripts.verify_kissadog_cado_public_push --help
+      - name: Original 2022 campaign official Common Crawl CDX probe CLI smoke
+        run: python -m scripts.probe_original_campaign_cdx --help
+      - name: Real original 2023 Cado indexed WARC replay CLI smoke
+        run: python -m scripts.replay_original_cado_20230206 --help
       - name: Original Dec 2022 Cado article pointer Git replay CLI smoke
         run: python -m scripts.verify_kissadog_cado_pointer --help
       - name: SCARLETEEL candidate-only same-peer Kiss-a-dog path check
