@@ -8,6 +8,7 @@ import sys
 
 from scripts.exchange_graph_bundle import _read_json, _read_text
 from src.threatragraph.portable_exchange import parse_bundle_json
+from src.threatragraph.local_file_inputs import assert_distinct_input_files
 from src.threatragraph.sidecar_reconciliation import reconcile_sidecars
 
 
@@ -31,9 +32,7 @@ def main(argv=None):
             paths.append(args.alias_history)
         if args.b0_csv is not None:
             paths.extend((args.b0_csv, args.g1_csv))
-        from pathlib import Path
-        if len({Path(path).resolve(strict=True) for path in paths}) != len(paths):
-            raise ValueError("Sidecar input files must be distinct")
+        assert_distinct_input_files(paths)
         result = reconcile_sidecars(
             _read_json(args.b0_view), _read_json(args.b0_graph),
             _read_json(args.g1_view), _read_json(args.g1_graph),

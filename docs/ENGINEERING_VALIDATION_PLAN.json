@@ -172,17 +172,20 @@
       "base_branch": "main",
       "requires": [],
       "source_paths": [
+        "src/threatragraph/local_file_inputs.py",
         "src/threatragraph/portable_exchange.py",
         "scripts/exchange_graph_bundle.py"
       ],
       "test_paths": [
-        "tests/test_portable_exchange.py"
+        "tests/test_portable_exchange.py",
+        "tests/test_local_file_inputs.py"
       ],
-      "min_authored_test_methods": 21,
+      "min_authored_test_methods": 39,
       "test_command": "python -m unittest discover -s tests -p 'test_portable_exchange.py' -v",
       "manual_gates": [
         "Verify CSV/JSON round-trip, duplicate keys and spreadsheet formula refusal",
-        "Confirm exports contain no third-party source bodies or gold labels"
+        "Confirm exports contain no third-party source bodies or gold labels",
+        "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 15 shared input tests authored but not executed"
       ]
     },
     {
@@ -193,17 +196,19 @@
       "base_branch": "main",
       "requires": [],
       "source_paths": [
+        "src/threatragraph/local_file_inputs.py",
         "src/threatragraph/alias_history.py",
         "scripts/audit_alias_history.py"
       ],
       "test_paths": [
         "tests/test_alias_history.py"
       ],
-      "min_authored_test_methods": 18,
+      "min_authored_test_methods": 21,
       "test_command": "python -m unittest discover -s tests -p 'test_alias_history.py' -v",
       "manual_gates": [
         "Audit real as-of source chronology and typed alias ambiguities",
-        "No candidate alias may automatically enrich G1 feature lineage"
+        "No candidate alias may automatically enrich G1 feature lineage",
+        "Check nested nonfinite JSON, parent symlinks and hardlink duplicate inputs"
       ]
     },
     {
@@ -225,14 +230,15 @@
       "test_paths": [
         "tests/test_sidecar_reconciliation.py"
       ],
-      "min_authored_test_methods": 22,
+      "min_authored_test_methods": 25,
       "test_command": "python -m unittest discover -s tests -p 'test_sidecar_reconciliation.py' -v",
       "manual_gates": [
         "Verify original source discovery remains unapproved and no costly workflow jobs are triggered",
         "Compare B0/G1 portable bundle byte hashes against the same frozen graph inputs",
         "Verify that optional canonical CSV witnesses are both present or both absent and that the receipt records actual CSV verification honestly",
         "Do not feed candidate historical aliases to G1 feature lineage or evaluate labels",
-        "Reconcile competing status-document changes and verify PR #60 workflow proposal separately"
+        "Reconcile competing status-document changes and verify PR #60 workflow proposal separately",
+        "Check all six core files and optional CSV and alias sidecars reject linked ancestor directories and hardlink reuse"
       ]
     }
   ]

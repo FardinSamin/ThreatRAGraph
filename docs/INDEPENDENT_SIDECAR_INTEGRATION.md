@@ -64,8 +64,8 @@ entity. Neither becomes a pipeline input or feature enrichment.
 
 ## Validation gates
 
-- 19 synthetic original-CDXJ tests, 21 exchange tests, 18 alias tests,
-  and 22 sidecar integration tests are **authored but not executed** in
+- 19 synthetic original-CDXJ tests, 24 exchange tests, 15 shared
+  local-file tests, 21 alias tests, and 25 sidecar integration tests are **authored but not executed** in
   this branch. Those counts are inventories, not pass rates.
 - `python -m scripts.preflight_validation_plan --scope all` is a
   static check only; do not claim passing tests. Real unit/CLI tests,
@@ -86,13 +86,13 @@ or force-pushed.
 This integration draft also incorporates narrowly scoped upstream fixes:
 PR #54 now rejects invisible Unicode spreadsheet-formula prefixes and
 embedded control characters in exported CSV fields, and verifies canonical
-CSV bytes in addition to parsed claim rows (21 authored, unexecuted tests).
+CSV bytes in addition to parsed claim rows (24 authored, unexecuted tests).
 PR #55 now reports contradictory supported/rejected identity evidence as
 **conflicting_evidence_requires_adjudication**, not a single uncontested
-candidate (18 authored, unexecuted tests). The sidecar reconciler refuses
+candidate (21 authored, unexecuted tests). The sidecar reconciler refuses
 unaligned, unsupported or background-contaminated source evidence and counts
 competing/rebutted alias mappings without converting them into features.
-Its 22 authored synthetic tests are unexecuted.
+Its 25 authored synthetic tests are unexecuted.
 
 No historical source rights, dates, semantic truth or reviewer identities
 were independently authenticated by these contract fixes.
@@ -106,3 +106,19 @@ independently; missing partners, altered claims, and equivalent but
 noncanonical CSV are refused. Eight additional authored tests exercise the
 paired library and CLI contracts. This is not proof of source copyright,
 publisher chronology, human semantic review, or research readiness.
+
+## Bounded local input-reader consolidation (unexecuted)
+
+The exchange, alias and combined sidecar CLIs now use one bounded helper
+`src/threatragraph/local_file_inputs.py` with strict UTF-8 decoding,
+refusal of nested duplicate/nonfinite JSON, binary read-size bounds,
+file-change checks, regular-file checks, no-follow directory traversal on
+POSIX, and Windows symlink/junction component checks (with documented
+race limitations). Distinct input arguments must not reference the same
+inode, even through hardlinks. The new shared helper has 15 authored tests.
+The exchange suite has 24 tests; alias has 21; integrated sidecar has 25.
+
+These local filesystem protections do **not** authenticate original
+publisher evidence, prove reviewer independence, replace sandboxing, or
+establish that the historical case is research-ready. CI and local tests
+remain deferred; no passing outcome is implied by authored test counts.

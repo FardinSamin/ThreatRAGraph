@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import json
+import os
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -313,6 +314,82 @@ class SidecarReconciliationTests(unittest.TestCase):
                 "--b0-bundle", missing, "--g1-bundle", missing,
                 "--b0-csv", missing,
             ]
+            text = StringIO()
+            with redirect_stdout(text):
+                status = main(argv)
+            self.assertEqual(2, status)
+            self.assertEqual("ValueError",
+                             json.loads(text.getvalue())["reason_category"])
+
+    def test_cli_refuses_symlinked_parent_of_b0_view(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            real = root / "real"
+            real.mkdir()
+            path = real / "view.json"
+            path.write_text("{}", encoding="utf-8")
+            linked = root / "linked"
+            try:
+                linked.symlink_to(real, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("Directory symlinks not available")
+            others = []
+            for i in range(5):
+                p = root / ("other-" + str(i) + ".json")
+                p.write_text("{}", encoding="utf-8")
+                others.append(str(p))
+            fields = ("b0-view", "b0-graph", "g1-view", "g1-graph",
+                      "b0-bundle", "g1-bundle")
+            argv = []
+            for key, name in zip(fields, [str(linked / "view.json"), *others]):
+                argv.extend(["--" + key, name])
+            text = StringIO()
+            with redirect_stdout(text):
+                status = main(argv)
+            self.assertEqual(2, status)
+            self.assertEqual("ValueError",
+                             json.loads(text.getvalue())["reason_category"])
+
+    def test_cli_refuses_hardlinked_distinct_argument_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            paths = []
+            for i in range(6):
+                path = root / ("part-" + str(i) + ".json")
+                path.write_text("{}", encoding="utf-8")
+                paths.append(path)
+            paths[-1].unlink()
+            try:
+                os.link(paths[-2], paths[-1])
+            except OSError:
+                self.skipTest("Hardlinks not available")
+            fields = ("b0-view", "b0-graph", "g1-view", "g1-graph",
+                      "b0-bundle", "g1-bundle")
+            argv = []
+            for key, path in zip(fields, paths):
+                argv.extend(["--" + key, str(path)])
+            text = StringIO()
+            with redirect_stdout(text):
+                status = main(argv)
+            self.assertEqual(2, status)
+            self.assertEqual("ValueError",
+                             json.loads(text.getvalue())["reason_category"])
+
+    def test_cli_refuses_nonfinite_nested_json_before_graph_validation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            paths = []
+            for i in range(6):
+                path = root / ("part-" + str(i) + ".json")
+                path.write_text("{}", encoding="utf-8")
+                paths.append(path)
+            paths[0].write_text('{"nested":{"future":Infinity}}',
+                                encoding="utf-8")
+            fields = ("b0-view", "b0-graph", "g1-view", "g1-graph",
+                      "b0-bundle", "g1-bundle")
+            argv = []
+            for key, path in zip(fields, paths):
+                argv.extend(["--" + key, str(path)])
             text = StringIO()
             with redirect_stdout(text):
                 status = main(argv)
