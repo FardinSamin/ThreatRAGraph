@@ -109,6 +109,8 @@ jobs:
         run: python -m scripts.validate_case_screening
       - name: Signed release provenance CLI smoke (offline only)
         run: python -m scripts.verify_runc_release_witness --help
+      - name: GHSA structured review-candidate CLI smoke (offline only)
+        run: python -m scripts.extract_ghsa_candidates --help
       - name: G1 paired graph-similarity CLI smoke (offline only)
         run: python -m scripts.profile_g1 --help
       - name: Candidate byte capture CLI interface smoke (no downloads or writes)
