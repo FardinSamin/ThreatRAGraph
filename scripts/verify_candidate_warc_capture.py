@@ -123,8 +123,9 @@ def _headers(raw: bytes, prefix: bytes, *, limit: int = 32768) -> tuple[dict, by
             value = val.strip().decode("ascii")
         except UnicodeError as exc:
             raise ValueError("Non-ASCII metadata header") from exc
-        _require(bool(re.fullmatch(r"[a-z0-9-]+", name)) and name not in headers,
-                 "Duplicate or unsupported header")
+        _require(bool(re.fullmatch(r"[a-z0-9-]+", name)),
+                 "Unsupported metadata header key")
+        _require(name not in headers, "Duplicate HTTP/WARC header key: " + name)
         headers[name] = value
     return headers, raw[stop + 4:]
 
