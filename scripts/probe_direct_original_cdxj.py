@@ -197,6 +197,9 @@ def _block_covering_url(reader, collection, needle):
         "cluster_local_offset": start,
         "cluster_local_length": len(chunk),
         "binary_probe_count": probes,
+        "cluster_first_key": lines[0]["key"],
+        "cluster_last_key": lines[-1]["key"],
+        "selected_surt_boundary_keys": [r["key"] for r in uniques],
     }, uniques
 
 
