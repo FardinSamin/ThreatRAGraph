@@ -166,9 +166,9 @@ class CompoundClaimsTests(unittest.TestCase):
         self.assertEqual("supported_by_excerpt", result["edges"][0]["semantic_review_status"])
         self.assertEqual(rid, result["edges"][0]["review_id"])
         self.assertFalse(result["research_ready"])
-        self.assertEqual(0, self.conn.execute(
-            "SELECT COUNT(*) FROM semantic_reviews"
-        ).fetchone()[0])
+        self.assertIsNone(self.conn.execute(
+            "SELECT name FROM sqlite_master WHERE name='semantic_reviews'"
+        ).fetchone())
 
     def test_unapproved_manifest_candidate_cannot_be_used(self):
         records = copy.deepcopy(self.manifest)
@@ -243,7 +243,7 @@ class CompoundClaimsTests(unittest.TestCase):
             self.ledger.project(self._view(when="2023-01-01T00:00:00Z"))
 
     def test_view_metadata_hash_and_future_date_fails_closed(self):
-        cid = self.ledger.append(self.claim)
+        self.ledger.append(self.claim)
         view = self._view()
         view["sources"][0]["sha256"] = "0" * 64
         with self.assertRaises(ValueError):
