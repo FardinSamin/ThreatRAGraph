@@ -1,6 +1,6 @@
 # M3.4 — Historical typed alias candidate registry (fail closed)
 
-**Status:** Draft engineering-only implementation (FR-13 partial); 17
+**Status:** Draft engineering-only implementation (FR-13 partial); 18
 synthetic/adversarial tests authored and not executed. No human identity,
 historical public availability or real entity-link review is authenticated.
 
@@ -35,7 +35,10 @@ malware), self-aliases, unsorted histories, and multistep or cyclic mappings.
 
 When the same alias has more than one candidate canonical ID, the audit
 reports **ambiguous_candidates_require_adjudication**; it never silently
-chooses a winner. Rejected/uncertain aliases remain separately disclosed.
+chooses a winner. Rejected/uncertain aliases remain separately disclosed. If exactly the same
+alias/canonical candidate pair has both supported and rejected evidence, the
+inspection now reports conflicting_evidence_requires_adjudication rather than
+a deceptively unambiguous single candidate. No automatic rewrite is allowed.
 
 ## Offline read-only inspection
 

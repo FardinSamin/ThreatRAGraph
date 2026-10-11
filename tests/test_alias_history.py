@@ -83,6 +83,18 @@ class HistoricalAliasCandidateTests(unittest.TestCase):
         self.assertEqual(["malware:known", "malware:other"],
                          result["candidate_canonical_ids"])
 
+    def test_conflicting_supported_and_rejected_same_target_requires_review(self):
+        view, rows = fixture()
+        opposed = dict(rows[0], evidence_sha256=digest("contradicting excerpt"),
+                       decision="candidate_rejected")
+        history = create_history(view, [rows[0], opposed])
+        report = inspect_alias(view, history, "malware:oldname")
+        self.assertEqual("conflicting_evidence_requires_adjudication",
+                         report["status"])
+        self.assertEqual(["malware:known"], report["candidate_canonical_ids"])
+        self.assertEqual(["malware:known"], report["disputed_or_uncertain_ids"])
+        self.assertFalse(report["automatic_entity_rewrite_allowed"])
+
     def test_cross_type_actor_malware_conflation_refused(self):
         view, rows = fixture()
         rows[0]["canonical_candidate_id"] = "threat-actor:known"
