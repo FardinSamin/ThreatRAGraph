@@ -484,7 +484,7 @@ Both methods output **typed profile facts** with:
 
 The baseline retains source-asserted facts from early reports only. The graph method starts with the identical facts and proposes **additional** testable candidate relations. Score new proposed facts separately from copied observed facts.
 
-### 8.2 Interpretable similarity engine version 1 **[NOT IMPLEMENTED — M5, Issue #21]**
+### 8.2 Interpretable similarity engine version 1 **[PARTIAL: typed Jaccard v1 implemented; full design below not yet implemented]**
 
 A case is represented by feature sets extracted from the early profile:
 - **techniques** (ATT&CK IDs) and tactic context;
@@ -523,7 +523,7 @@ candidate_relation_score(t, r) =
 - Conflict handling can reduce score or cause abstention. Explanations name shared features and source paths, not rhetorical model justification.
 - Scores are **ranking heuristics**, not calibrated likelihoods until empirically validated.
 
-### 8.3 Candidate construction and abstention **[M5 DESIGN]**
+### 8.3 Candidate construction and abstention **[PARTIAL: synthetic-tested provisional hypotheses and abstention; additional methods remain design]**
 
 ~~~text
 for case in frozen_cases:
@@ -806,7 +806,7 @@ Metrics: extraction precision/recall, provenance coverage, orphan claims, graph 
 | **M2 — Extraction/evidence graph** | Synthetic-tested parsers, evidence alignment, SQLite sourced claim ledger and self-declared review gates. | P2: real source → typed candidate extractor/adapters, historized aliases, full coverage/independent annotations and precision/recall; AC-02/03 |
 | **M3 — As-of safety** | Deterministic source-level snapshots, case role allowlist and digest-bound graph views. | P3: independent case cutoff validation; feature/alias/taxonomy/decision-level reconstruction, gold-store isolation, strict adversarial leakage tests; AC-04 |
 | **M4 — B0 baseline** | Deterministic early-source report-assertion profile with abstention; synthetic tests. | P4: run from approved cases using same extracted/reviewed early inputs as G1; freeze output/run provenance |
-| **M5 — G1 similarity** | **Not implemented**, [#21](https://github.com/FardinSamin/ThreatRAGraph/issues/21). | P4: historically eligible neighbor ranker, weighted feature provenance, independence/correlation discount, versioned provisional hypotheses, abstention; no LLM required |
+| **M5 — G1 similarity** | **Partial / synthetic-tested** [typed Jaccard v1](M5_G1_SIMILARITY.md): paired B0/G1 early parity, independent-source gate, versioned provisional ranking paths, abstention. [#21](https://github.com/FardinSamin/ThreatRAGraph/issues/21) stays open. | P4: vetted historical corpus, alias/ATT&CK/Falco-as-of reconstruction, source independence authentication, tuning discipline, evaluation and ablations; no LLM required |
 | **M6 — Evaluator** | **Not implemented**. | P5: frozen paired B0/G1 outputs and independently adjudicated held-out facts, metrics incl. NA, extraction F1, per-case/ablation and leakage report; AC-05/06 |
 | **M7 — Reporting/release** | Research outline/design only. | P6: clean-room offline reproducibility, mentor approval, rights/ethics, negative-result reporting and symposium outputs; AC-07–09 |
 
@@ -896,7 +896,7 @@ This section makes **actual implementation** distinguishable from diagrams and e
 | `scripts/freeze_case_snapshots.py` | Deterministic B0/G1 **source lists** and optional artifact freeze when metadata/bytes pass | Graph feature/alias/taxonomy historical provenance or validity of declaration timestamps | P3 full snapshot / process boundary |
 | `scripts/project_case_graph.py` | Offline reviewed attributed claims → source-scoped graph JSON, strict pilot count rules | Automated extraction or empirical readiness from a synthetic count-matching manifest | P0 readiness semantics, P2 real ingestion |
 | `src/threatragraph/baseline_b0.py` and `scripts/profile_b0.py` | Isolated early-only reviewed-source assertions + abstention; no inference or invented probability | New fact prediction, case-level research benefit or strict-source approval from JSON alone | P4 pair with G1 on frozen real case |
-| M5/M6 | Design/issue only | A functioning similarity engine, reranker, gold-label scorer or measured research outcomes | P4/P5 |
+| M5/M6 | G1 v1 similarity ranker and separate inferred-output CLI present; M6 scorer not implemented | No real empirical results, full versioned G1 output approval/lineage signature, frozen gold-label scorer or assessed efficacy | P4/P5 |
 
 ### 18.1 Actual data boundaries versus future target schemas
 
@@ -908,7 +908,7 @@ This section makes **actual implementation** distinguishable from diagrams and e
 
 **M4:** `baseline_b0.py` emits only source-asserted, reviewer-supported target triples in `facts[]` and an intentionally empty `predictions[]`, with abstention and `confidence=null`. Its `research_ready` field is based on supplied structural conditions, **not faculty or historical source approval**, and must be corrected before production study claims.
 
-**M5 [DESIGN ONLY]:** A future `G1Prediction` must be stored separately from ``sourced_claims`; its versioned schema needs candidate triple, uncalibrated ranking score, feature-family contributions, source-verified historical path(s), independence/correlation discount, abstention, cutoff/snapshot and code/config/run hashes. Neither G1 nor an LLM inference workflow exists at this revision.
+**M5 [PARTIALLY IMPLEMENTED]:** The versioned [G1 exact-feature Jaccard v1](M5_G1_SIMILARITY.md) produces provisional hypothesis objects **separate** from `sourced_claims`, with candidate triple, uncalibrated ranking score, typed matching features, claimed evidence paths, source-group support and abstention. The output remains structurally checked only and lacks authenticated raw-byte historical paths, full alias/taxonomy-as-of controls, signed run manifests and real evaluation; no LLM inference or empirically validated G1 exists.
 
 ### 18.2 Contamination and access architecture to implement
 
