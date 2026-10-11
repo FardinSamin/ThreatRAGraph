@@ -129,6 +129,11 @@ class CompoundCandidateReviewLedger:
 
     def __init__(self, connection: sqlite3.Connection):
         self.conn = connection
+        existing = {row[0] for row in self.conn.execute(
+            "SELECT name FROM sqlite_master WHERE type=\'table\'"
+        )}
+        if existing & {"source_versions", "sourced_claims", "semantic_reviews"}:
+            raise ValueError("Candidate review store must be separate from the sourced-claim ledger")
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS ghsa_candidate_reviews (
                 packet_id TEXT PRIMARY KEY,
