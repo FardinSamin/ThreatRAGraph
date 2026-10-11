@@ -1,0 +1,55 @@
+{
+  "schema_version": "g1-prospective-same-peer-chain-v1",
+  "screen_id": "screen:scarleteel-kissadog-two-original-research-groups-2023",
+  "target_entity_id": "campaign:SCARLETEEL",
+  "proposed_cutoff_at": "2023-03-01T00:00:00Z",
+  "historical_peer_id": "campaign:Kiss-a-dog",
+  "early_source_version_id": "candidate:scarleteel-sysdig-20230228:unfrozen",
+  "early_matching_feature": {
+    "subject_id": "campaign:SCARLETEEL",
+    "predicate": "USES",
+    "object_id": "tool:xmrig",
+    "source_version_id": "candidate:scarleteel-sysdig-20230228:unfrozen",
+    "evidence_location_note": "Current Sysdig SCARLETEEL 2023 report mentions XMRig miner; original Feb 28 bytes unavailable.",
+    "evidence_byte_aligned": false,
+    "semantic_reviewed": false
+  },
+  "historical_matching_feature_support": [
+    {
+      "subject_id": "campaign:Kiss-a-dog",
+      "predicate": "USES",
+      "object_id": "tool:xmrig",
+      "source_version_id": "candidate:kissadog-crowdstrike-20221026:unfrozen",
+      "evidence_location_note": "CrowdStrike original named Kiss-a-dog report, section Use of Dog Pools and Disguised Xmrig.",
+      "evidence_byte_aligned": false,
+      "semantic_reviewed": false
+    },
+    {
+      "subject_id": "campaign:Kiss-a-dog",
+      "predicate": "USES",
+      "object_id": "tool:xmrig",
+      "source_version_id": "candidate:kissadog-cado-202212:unfrozen",
+      "evidence_location_note": "Cado researchers independently investigated Kiss-a-dog Redis honeypot and confirmed XMRig miner.",
+      "evidence_byte_aligned": false,
+      "semantic_reviewed": false
+    }
+  ],
+  "historical_proposed_relation_support": [
+    {
+      "subject_id": "campaign:Kiss-a-dog",
+      "predicate": "USES",
+      "object_id": "tool:xhide",
+      "source_version_id": "candidate:kissadog-cado-202212:unfrozen",
+      "evidence_location_note": "Cado variant report: XHide process hider used to camouflage XMRig as sendmail; variant scope review pending.",
+      "evidence_byte_aligned": false,
+      "semantic_reviewed": false
+    }
+  ],
+  "source_original_bytes_approved": false,
+  "date_and_rights_reviewed": false,
+  "same_peer_chain_semantically_reviewed": false,
+  "novel_target_relation_verified": false,
+  "case_approved": false,
+  "research_ready": false,
+  "later_reference_preview_exposure": "search_result_summary_exposed"
+}
