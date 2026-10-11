@@ -38,6 +38,21 @@ EXPECTED_ORIGINAL_HTML_SHA256 = "".join((
     "2b2137f6", "ceda143d", "dc89e130", "2c88ef83",
 ))
 EXPECTED_ORIGINAL_HTML_BYTE_COUNT = 92875
+# These original first-party HTML block fingerprints were measured in real
+# GitHub Actions run 38111634755. Hashes refer to normalized p/li/h2-h4
+# text blocks, *not* editor-approved security relations or legal use rights.
+EXPECTED_REVIEW_BLOCK_COUNT = 107
+EXPECTED_MATCHED_REVIEW_BLOCK_COUNT = 15
+EXPECTED_UNREVIEWED_ORIGINAL_BLOCKS = {
+    52: ("xmrig", "".join((
+        "9f0062acb7d7eae0", "1ba18b57f2b40e5b",
+        "e810f4eefd7aed81", "64174ccf0d6144f2",
+    ))),
+    59: ("xmrig,xhide", "".join((
+        "6c45096683853ea3", "1b4a2c486f79bc76",
+        "98e16aa909e49780", "da1eb0565595c9d1",
+    ))),
+}
 
 
 def _require(value: bool, message: str):
@@ -277,9 +292,22 @@ def verify_original_cado(archive: str, headers: str, *, manifest: str, metadata:
              "Expected actual historical HTML content type")
     lexical_checks = verify_original_cado_html_identity(original_html)
     receipt["historical_html_visible_text_identity_tokens"] = lexical_checks
-    receipt["unreviewed_original_page_evidence_block_fingerprints"] = (
-        candidate_review_fingerprints(original_html)
-    )
+    anchors = candidate_review_fingerprints(original_html)
+    _require(anchors["indexed_visible_blocks"] == EXPECTED_REVIEW_BLOCK_COUNT
+             and anchors["matched_candidate_block_count"] ==
+             EXPECTED_MATCHED_REVIEW_BLOCK_COUNT,
+             "Original historical Cado reviewer block inventory drifted")
+    cue_map = {
+        cue["source_block_index"]: cue
+        for cue in anchors["evidence_block_hashes_and_structural_positions_only"]
+    }
+    for block_index, (expected_terms, expected_sha) in EXPECTED_UNREVIEWED_ORIGINAL_BLOCKS.items():
+        cue = cue_map.get(block_index)
+        _require(cue is not None
+                 and cue["normalized_block_text_sha256"] == expected_sha
+                 and ",".join(cue["candidate_terms_present"]) == expected_terms,
+                 "Historical XMRig/XHide source evidence fingerprint changed")
+    receipt["unreviewed_original_page_evidence_block_fingerprints"] = anchors
     receipt["historical_html_token_presence_is_not_semantic_review"] = True
     _require(receipt["source_version_id"] == CADO_ID
              and receipt["captured_html_byte_count"] == EXPECTED_ORIGINAL_HTML_BYTE_COUNT
