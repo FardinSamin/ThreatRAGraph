@@ -71,10 +71,10 @@ def verify_range_headers(raw: bytes) -> None:
         raise ValueError("Invalid HTTP response header encoding") from exc
     # Multiple response blocks can reflect proxy CONNECT; validate the *last*
     # definitive response, and do not treat earlier 200/302 as a range success.
-    blocks = [x for x in re.split(r"\\r?\\n\\r?\\n", headers) if x.strip()]
+    blocks = [x for x in re.split(r"\r?\n\r?\n", headers) if x.strip()]
     _require(bool(blocks), "Missing HTTP response headers")
     response = blocks[-1].splitlines()
-    _require(bool(response) and re.match(r"^HTTP/[0-9.]+ 206(?:\\s|$)", response[0]) is not None,
+    _require(bool(response) and re.match(r"^HTTP/[0-9.]+ 206(?:\s|$)", response[0]) is not None,
              "Official archive range retrieval must be HTTP 206 Partial Content")
     fields = {}
     for line in response[1:]:
