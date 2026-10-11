@@ -152,6 +152,10 @@ jobs:
         run: python -m scripts.replay_original_ghsa_candidate --help
       - name: Versioned approved-source compound case CLI smoke (offline only)
         run: python -m scripts.project_compound_case --help
+      - name: Prospective G1-v2 campaign screening CLI smoke (offline only)
+        run: python -m scripts.screen_candidate_method --help
+      - name: SCARLETEEL candidate-only method screen (not research approval)
+        run: python -m scripts.screen_candidate_method
       - name: G1 paired graph-similarity CLI smoke (offline only)
         run: python -m scripts.profile_g1 --help
       - name: Candidate byte capture CLI interface smoke (no downloads or writes)
