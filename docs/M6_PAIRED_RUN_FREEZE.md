@@ -20,7 +20,10 @@ early-output parity contract, and creates a digest-bound engineering lock.
 
 This is a **preview**. For content-addressed, exclusive-creation disk
 artifacts, add: \`--write --output-dir artifacts/paired_runs\`.
-A repeat run with identical inputs is byte-stable, and a conflicting
+Both preview and write modes report SHA-256 of identical canonical JSON
+bytes (including the trailing newline). JSON documents with duplicate keys
+are refused to avoid silently changed provenance. A repeat run with identical
+inputs is byte-stable, and a conflicting
 preexisting output at the same digest path is refused.
 
 The output set is \`b0_profile\`, \`g1_profile\`, \`paired_audit\`,
@@ -71,7 +74,7 @@ WORM storage, a signed certificate or proof of original historical fairness.
 Source byte rights approval, real cutoff research, true labels, paired
 scoring, and faculty review remain separate future tasks.
 
-**Testing phase:** 12 synthetic and adversarial unit tests are authored
+**Testing phase:** 13 synthetic and adversarial unit tests are authored
 for this module. Run local unit tests and full security suite before merging,
 and preserve PR drafts while GitHub Actions cannot allocate runners. The
 earlier passing CI heads do not validate new code.

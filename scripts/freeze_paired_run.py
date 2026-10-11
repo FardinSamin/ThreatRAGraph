@@ -11,10 +11,19 @@ import json
 from pathlib import Path
 import sys
 
-from scripts.freeze_case_snapshots import write_immutable_view
+from scripts.freeze_case_snapshots import snapshot_sha256, write_immutable_view
 from src.threatragraph.paired_run_freeze import build_paired_run
 
 MAX_INPUT_BYTES = 8 * 1024 * 1024
+
+
+def _no_duplicate_fields(pairs):
+    obj = {}
+    for name, value in pairs:
+        if name in obj:
+            raise ValueError("Duplicate JSON fields are not permitted")
+        obj[name] = value
+    return obj
 
 
 def _load(pathname):
@@ -25,7 +34,7 @@ def _load(pathname):
     if not 0 < size <= MAX_INPUT_BYTES:
         raise ValueError("Input JSON must be bounded")
     with file.open("r", encoding="utf-8") as stream:
-        item = json.load(stream)
+        item = json.load(stream, object_pairs_hook=_no_duplicate_fields)
     if not isinstance(item, dict):
         raise ValueError("Input must be a JSON object")
     return item
@@ -62,10 +71,7 @@ def main(argv=None):
             "paired_audit_id": result["paired_audit"]["audit_id"],
             "artifact_hashes": {
                 name: write_immutable_view(item, args.output_dir)[0]
-                if args.write else __import__(
-                    "src.threatragraph.evidence_graph",
-                    fromlist=["fingerprint"],
-                ).fingerprint(item)
+                if args.write else snapshot_sha256(item)
                 for name, item in result.items()
             },
             "empirical_evaluation": "not_performed",

@@ -156,6 +156,12 @@ class PairedRunFreezeTests(unittest.TestCase):
         self.assertNotEqual(a["run_lock"]["run_id"], b["run_lock"]["run_id"])
         self.assertEqual(a["g1_profile"]["profile_id"], b["g1_profile"]["profile_id"])
 
+    def test_version_control_characters_are_refused(self):
+        data = fixture()
+        data[5]["extractor_version"] = "v1\\nsource-injection"
+        with self.assertRaisesRegex(ValueError, "bounded research version"):
+            run(data)
+
     def test_unknown_metadata_or_gold_key_refused(self):
         data = fixture()
         data[5]["gold_labels"] = ["post-cutoff answer"]

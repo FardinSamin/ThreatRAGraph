@@ -24,10 +24,6 @@ _META_FIELDS = frozenset({
 _G1_CONFIG_FIELDS = frozenset({
     "top_k", "min_overlap", "min_background_groups", "max_peers_per_feature",
 })
-_FORBIDDEN_TERMS = ("gold", "heldout", "holdout", "outcome", "reference_label",
-                    "future_label", "ground_truth", "evaluation_answer")
-
-
 def _metadata(record):
     if not isinstance(record, dict) or set(record) != _META_FIELDS:
         raise ValueError("Run metadata requires exact reproducibility fields")
@@ -42,7 +38,7 @@ def _metadata(record):
     for key in ("ontology_version", "extractor_version", "ruleset_version"):
         value = record[key]
         if (type(value) is not str or not value.strip() or len(value) > 160
-                or any(term in key.lower() for term in _FORBIDDEN_TERMS)):
+                or any(c in value for c in "\r\n\x00")):
             raise ValueError("Nonempty bounded research version required: " + key)
     if record["random_seed"] is not None:
         raise ValueError("B0/G1 v1 engines use no RNG; random_seed must be null")
@@ -97,9 +93,6 @@ def build_paired_run(
         raise ValueError("Runtime G1 configuration differs from frozen config")
     if g1["b0_profile_id"] != b0["profile_id"]:
         raise ValueError("Runtime G1 did not consume identical B0")
-    if any(term in key.lower()
-           for key in attrs for term in _FORBIDDEN_TERMS):
-        raise ValueError("Later-outcome key present in run provenance")
 
     lock = {
         "schema_version": "1.0",
