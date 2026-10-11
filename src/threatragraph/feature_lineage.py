@@ -31,6 +31,14 @@ ENTRY_FIELDS = frozenset({
 })
 
 
+def graph_claim_set_sha256(graph: dict) -> str:
+    """Stable graph digest independent of presentation order of sourced edges."""
+    return fingerprint({
+        **graph,
+        "edges": sorted(graph["edges"], key=lambda edge: edge["claim_id"]),
+    })
+
+
 def validate_asof_lineage(lineage: dict, g1_view: dict, g1_graph: dict) -> dict:
     """Bind EVERY reviewed source assertion to its own frozen source-version metadata.
 
@@ -51,7 +59,7 @@ def validate_asof_lineage(lineage: dict, g1_view: dict, g1_graph: dict) -> dict:
     if (require_sha(lineage["g1_source_view_sha256"], "lineage source view hash")
             != fingerprint(g1_view)
             or require_sha(lineage["g1_graph_sha256"], "lineage graph hash")
-            != fingerprint(g1_graph)):
+            != graph_claim_set_sha256(g1_graph)):
         raise ValueError("As-of lineage differs from exact historical graph/view hashes")
     caveat = lineage["limitations"]
     if not isinstance(caveat, str) or not caveat.strip() or len(caveat) > 2400:
@@ -64,6 +72,7 @@ def validate_asof_lineage(lineage: dict, g1_view: dict, g1_graph: dict) -> dict:
     if len(entries) > 10000:
         raise ValueError("Too many claim lineage records")
     seen = set()
+    claim_ids_in_order = []
     cutoff = as_utc(g1_view["cutoff_at"])
     for row in entries:
         if not isinstance(row, dict) or set(row) != ENTRY_FIELDS:
@@ -72,6 +81,7 @@ def validate_asof_lineage(lineage: dict, g1_view: dict, g1_graph: dict) -> dict:
         if not isinstance(cid, str) or cid not in actual or cid in seen:
             raise ValueError("Missing, duplicate or unauthorized claim lineage")
         seen.add(cid)
+        claim_ids_in_order.append(cid)
         edge = actual[cid]
         source = sources[edge["source_version_id"]]
         expected = {
@@ -95,6 +105,8 @@ def validate_asof_lineage(lineage: dict, g1_view: dict, g1_graph: dict) -> dict:
         if (row["feature_known_at"] != source["available_at"]
                 or as_utc(row["feature_known_at"]) > cutoff):
             raise ValueError("Feature availability violates exact-only historical source cutoff")
+    if claim_ids_in_order != sorted(claim_ids_in_order):
+        raise ValueError("Claim lineage must have canonical claim-id ordering")
     return {
         "schema_version": CONTRACT_VERSION,
         "lineage_sha256": fingerprint(lineage),
