@@ -42,6 +42,10 @@ Furthermore, the updated prospects remain zero-supported in the actual evidence 
 - `scripts/screen_candidate_method.py` accepts backward-compatible v1 plus stricter `g1-v2-prospective-case-screen-v2`, where every peer must: be a named, distinct campaign subject; cite an allowed unapproved background source; use exact `USES tool:xmrig` as the target's candidate early feature; have a distinct candidate publisher group; include a bounded location cue; and explicitly indicate `evidence_byte_aligned=false` and `semantic_reviewed=false`. New adversarial tests reject forged case readiness, future reference sources, weak type conversions and grouping tricks.
 - Output still says `same_type_peer_verified=false`, `two_group_same_type_peer_claim_support_verified=false`, `g1_evaluation_eligible=false`, `research_ready=false`. The two typed peers are **unverified prospects**, not approved matching evidence or scoring inputs.
 
+## Original publisher archive intake under construction
+
+The [P1b Common Crawl CDX/WARC verifier](P1B_COMMONCRAWL_PRIMARY_WARC_INTAKE.md) now checks an investigator-supplied original HTML WARC member's size, URL, declared pre-cutoff time and exact CDX/WARC/HTTP content digests. The archive services were inaccessible here, so **no actual primary HTML capture has been obtained** and no case/source was approved. In particular, a Sysdig first-publication February 28 report needs an *extremely narrow* archive window before the March 1 UTC cutoff; a later March/April crawl is **not eligible early content**.
+
 ## Reproducible next empirical gate
 
 1. Independently recover original **February 2023 Sysdig** bytes with externally supportable earliest public-by UTC timing, plus **2021 Chimaera and 2022 Kiss-a-dog** versions. Only after source licenses, dates, exact hash and reviewer approval can they change status.
