@@ -1,6 +1,5 @@
 """P1a raw signed Git-tag identity tests (offline, no source promotion)."""
 import hashlib
-import json
 from pathlib import Path
 import subprocess
 import tempfile
