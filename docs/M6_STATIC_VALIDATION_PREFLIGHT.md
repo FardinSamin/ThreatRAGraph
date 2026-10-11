@@ -12,7 +12,7 @@ simple local import declarations, the declared minimum number of authored
 unittest methods, and a topologically ordered plan for the currently open
 draft PRs.
 
-The plan records 15 authored replay tests after the structural B0/citation hardening, but none of them has been executed. The plan is in docs/ENGINEERING_VALIDATION_PLAN.json and records two groups:
+The plan records 19 authored replay tests after persisting feature lineage and adding full deterministic G1 replay, but none of them has been executed. The plan is in docs/ENGINEERING_VALIDATION_PLAN.json and records two groups:
 
 - M6 dependent stack: PR #52, #53, #56, #57, #58, in merge-dependency order.
 - Independent drafts: PR #51 (original-source archive discovery),

@@ -137,6 +137,7 @@ def sample_outputs(case):
         },
         "source_manifest_sha256": metadata["source_manifest_sha256"],
         "case_manifest_sha256": metadata["case_manifest_sha256"],
+        "feature_lineage_sha256": fingerprint(lineage),
         "graph_sha256": {"B0": fingerprint(bg), "G1": fingerprint(gg)},
         "early_source_version_ids": run["paired_audit"]["early_source_version_ids"],
         "raw_claim_records": 3, "semantic_review_records": 3,
@@ -151,6 +152,7 @@ def sample_outputs(case):
     receipt["pipeline_id"] = "pipeline:" + fingerprint(receipt)
     return {
         "b0_view": b0v, "b0_graph": bg, "g1_view": g1v, "g1_graph": gg,
+        "feature_lineage": lineage,
         **run, "pipeline_receipt": receipt,
     }
 
@@ -208,11 +210,13 @@ class FrozenBatchReplayTests(unittest.TestCase):
     def test_two_real_synthetic_profile_runs_replay_structurally(self):
         report = replay_batch(self.root, self.batch_sha)
         self.assertEqual(2, report["case_count"])
-        self.assertEqual(19, report["artifact_count"])
+        self.assertEqual(21, report["artifact_count"])
         self.assertTrue(report["canonical_hashes_checked"])
         self.assertTrue(report["b0_deterministically_recomputed"])
         self.assertTrue(report["g1_historical_citations_checked"])
-        self.assertFalse(report["g1_ranking_recomputed"])
+        self.assertTrue(report["g1_ranking_recomputed"])
+        self.assertTrue(report["feature_lineage_artifact_reloaded"])
+        self.assertFalse(report["feature_lineage_original_bytes_reread"])
         self.assertFalse(report["raw_archive_bytes_reread"])
         self.assertFalse(report["heldout_labels_accessed"])
         self.assertFalse(report["research_ready"])
@@ -257,6 +261,38 @@ class FrozenBatchReplayTests(unittest.TestCase):
         reseal_case_links(outputs)
         receipt_sha = self.store_rehashed(outputs)
         with self.assertRaisesRegex(ValueError, "G1 support citation differs"):
+            replay_batch(self.root, receipt_sha)
+
+    def test_missing_feature_lineage_artifact_refused(self):
+        path = self.saved[("case-b", "feature_lineage")]
+        path.unlink()
+        with self.assertRaisesRegex(ValueError, "Missing"):
+            replay_batch(self.root, self.batch_sha)
+
+    def test_modified_feature_lineage_artifact_bytes_refused(self):
+        path = self.saved[("case-a", "feature_lineage")]
+        path.write_bytes(path.read_bytes() + b"\n")
+        with self.assertRaisesRegex(ValueError, "declared SHA-256"):
+            replay_batch(self.root, self.batch_sha)
+
+    def test_rehashed_g1_ranking_must_match_recomputation(self):
+        outputs = sample_outputs("case-ranking-attack")
+        predictions = outputs["g1_profile"]["predictions"]
+        self.assertTrue(predictions)
+        predictions[0]["ranking_score"] = 0.123456
+        reseal_case_links(outputs)
+        receipt_sha = self.store_rehashed(outputs)
+        with self.assertRaisesRegex(ValueError, "Saved G1 profile differs"):
+            replay_batch(self.root, receipt_sha)
+
+    def test_rehashed_g1_abstention_cannot_forge_recomputation(self):
+        outputs = sample_outputs("case-abstention-attack")
+        predictions = outputs["g1_profile"]["predictions"]
+        self.assertTrue(predictions)
+        outputs["g1_profile"]["abstention"]["reason"] = "fabricated"
+        reseal_case_links(outputs)
+        receipt_sha = self.store_rehashed(outputs)
+        with self.assertRaisesRegex(ValueError, "Saved G1 profile differs"):
             replay_batch(self.root, receipt_sha)
 
     def test_changed_stored_profile_bytes_refused(self):

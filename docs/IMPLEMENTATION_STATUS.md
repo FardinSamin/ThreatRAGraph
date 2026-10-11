@@ -20,11 +20,19 @@ implementation and authored tests, but GitHub Actions runners are unavailable.
 These changes have **not passed an executed test suite** and remain unmerged;
 the published `main` validation status must not be inflated.
 
-**Unmerged dependent draft note:** PR #56 adds 16 authored but unexecuted offline source-to-profile pipeline tests on top of drafts #52/#53. All scientific approval, date, review and validation gates remain open.
+**Unmerged dependent draft note:** PR #56 adds 18 authored but unexecuted offline source-to-profile pipeline tests on top of drafts #52/#53. All scientific approval, date, review and validation gates remain open.
 
-**Dependent PR #57:** Adds a multi-case unscored batch coordinator (17 authored tests), still UNEXECUTED. Source approval, independent date proof, researcher attestation and real metrics remain missing.
+**Dependent PR #57:** Adds a multi-case unscored batch coordinator (20 authored tests), still UNEXECUTED. Source approval, independent date proof, researcher attestation and real metrics remain missing.
 
-**Unmerged PR #58:** Adds a read-only batch-integrity replay checker with 15 synthetic/adversarial tests authored but not executed. Self-hashes and consistent metadata do not independently certify source chronology, reviewer identity or full computation replay.
+**Unmerged PR #58:** Adds a read-only batch-integrity replay checker with 19 synthetic/adversarial tests authored but not executed. Self-hashes and consistent metadata do not independently certify source chronology, reviewer identity or full computation replay.
+
+**Integration hardening (October 11, 2026):** The top stacked draft branch
+also freezes the complete exact-only G1 feature-lineage artifact, binds it
+to per-case and batch hashes, and enables deterministic offline recomputation
+of G1 ranking and abstention from frozen graph/view/lineage/config bytes.
+This is not a complete original-source computation replay, an attested
+timestamp, or approval of any historical source or reviewer. Newly added
+tests remain authored but NOT EXECUTED.
 
 ## Functional requirements FR-01–FR-36
 
@@ -56,9 +64,9 @@ the published `main` validation status must not be inflated.
 | FR-24 | Present/tested synthetic (only) | `scripts/profile_b0.py`, `tests/test_b0_baseline.py` | Real paired-run common extraction/output comparison |
 | FR-25 | Partial / synthetic-tested | G1 matching feature + early/historical claim evidence paths `similarity_g1.py` | Verified original-byte provenance of real paths and indirect multi-hop historical graph routes absent |
 | FR-26 | Optional/deferred | Architecture only | Opt-in, budget-gated, citation-validated synthesis with contamination disclosure |
-| FR-27 | **Partial / draft, tests not executed** | Existing source/case registries; dependent draft PR #57 adds a strict, unscored multi-case plan and deterministic per-case batch execution receipt with 17 authored tests | Independently approved 4–6 real case dataset, complete source version rights and cutoffs, external gold isolation and executed verification |
-| FR-28 | **Partial / draft, tests not executed** | Draft PR #52: paired B0/G1 profiler, audit and 29 authored tests; dependent draft PR #56: `run_offline_case_pipeline.py` binds original local archives, selected source/case manifests, reviewed claims, as-of lineage and paired profiles with 16 further authored tests; dependent draft PR #57 adds an unscored multi-case runner, 17 authored but unexecuted tests | Independently dated real corpus/claims, executed full test suite and reproducible empirical paired comparison remain absent |
-| FR-29 | **Partial / draft, tests not executed** | Draft PR #52: digest-bound paired run lock; dependent draft PR #56: locally checked source/case/review/dependency hashes, nine optional exclusive-create hash-addressed JSON outputs and unscored pipeline receipt; dependent draft PR #57 adds a hash-addressed multi-case receipt; stacked draft PR #58 adds a read-only persistence/structural replay checker and 15 authored adversarial tests | Publisher chronology, reviewer identity/rights, actual code revision, independently authenticated prediction freeze, real-case approval, completed tests and clean-room replay |
+| FR-27 | **Partial / draft, tests not executed** | Existing source/case registries; dependent draft PR #57 adds a strict, unscored multi-case plan and deterministic per-case batch execution receipt with 20 authored tests | Independently approved 4–6 real case dataset, complete source version rights and cutoffs, external gold isolation and executed verification |
+| FR-28 | **Partial / draft, tests not executed** | Draft PR #52: paired B0/G1 profiler, audit and 29 authored tests; dependent draft PR #56: `run_offline_case_pipeline.py` binds original local archives, selected source/case manifests, reviewed claims, as-of lineage and paired profiles with 18 further authored tests; dependent draft PR #57 adds an unscored multi-case runner, 20 authored but unexecuted tests | Independently dated real corpus/claims, executed full test suite and reproducible empirical paired comparison remain absent |
+| FR-29 | **Partial / draft, tests not executed** | Draft PR #52: digest-bound paired run lock; dependent draft PR #56: locally checked source/case/review/dependency hashes, ten optional exclusive-create hash-addressed JSON outputs (including full as-of lineage) and unscored pipeline receipt; dependent draft PR #57 adds a hash-addressed multi-case receipt; stacked draft PR #58 adds a read-only persistence/structural replay checker and 19 authored adversarial tests, with deterministic B0/G1 reconstruction from stored lineage | Publisher chronology, reviewer identity/rights, actual code revision, independently authenticated prediction freeze, real-case approval, completed tests and clean-room replay |
 | FR-30 | **Partial / draft, tests not executed** | Dependent draft PR #53: `heldout_evaluation.py` and isolated local scorer CLI validate separately hashed later reference partitions, explicit supported/contradicted/not-assessable/duplicate/out-of-scope decisions, reviewer and cutoff metadata, run-lock and exact output parity; 27 authored synthetic/adversarial tests | Authenticate later original source bytes/dates and reviewer identities, independently frozen predictions and reviewed real gold labels; validate scorer on actual cases |
 | FR-31 | **Partial / draft, tests not executed** | Dependent draft PR #53: candidate casewise relation ledger, assessable precision, not-assessable counts, positively labeled subset coverage, descriptive micro aggregate and offline aggregate CLI, deterministic hash IDs | Complete validated real case denominator set, extractor scores, independent case-level outcome review, leakage proof, uncertainty and final research reporting |
 | FR-32 | Partial | Source, archive, snapshot, graph and B0 CLIs | End-to-end ingest/extract/build/profile/evaluate/export orchestrator |

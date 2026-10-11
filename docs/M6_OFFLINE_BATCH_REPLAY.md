@@ -1,12 +1,12 @@
 # M6.5 — Offline integrity replay of frozen unscored multi-case batches
 
-**Status:** Engineering-only draft. Fifteen synthetic/adversarial unit tests
+**Status:** Engineering-only draft. Nineteen synthetic/adversarial unit tests
 authored, not yet executed. Depends on unmerged PR #57 (and #56/#53/#52).
 No actual historical case has been evaluated and research_ready remains false.
 
 ## Goal
 
-The batch runner from PR #57 can write nine individual hash-addressed
+The batch runner from PR #57 can write ten individual hash-addressed
 JSON artifacts for each case plus one batch receipt. This verifier RELOADS
 those files and independently checks structural consistency. It DOES NOT
 re-execute extractors, authenticate original publisher bytes or date evidence,
@@ -33,7 +33,7 @@ opens raw reports, source archives or future reference labels.
 - Load each required artifact ONLY from its 64-character SHA-256 filename
   beneath the specified artifact root; never interpolate case names or
   user-supplied absolute paths into read locations.
-- Require 1–100 sorted unique cases, exact nine-artifact inventories,
+- Require 1–100 sorted unique cases, exact ten-artifact inventories,
   canonical batch and pipeline IDs, unique run IDs, honest status flags
   and consistent source dataset/version and case/cutoff IDs.
 - Recheck both source-view/graph contracts and aligned claim status;
@@ -42,7 +42,7 @@ opens raw reports, source archives or future reference labels.
 - Regenerate the B0/G1 paired-output audit and verify both profiles match
   their frozen source-view SHA-256 digests and the source-bound run lock.
 - Verify run-lock schema, declared provenance syntax, exact five input
-  hashes, G1 exact-only feature-lineage report digest/flags, B0/G1 profile
+  hashes, stored G1 exact-only feature-lineage object and digest/flags, B0/G1 profile
   hashes, algorithm settings, observed/predicted counts and no-label flags.
 - Deterministically regenerate the saved B0 baseline directly from the
   stored early view/graph and exact development flag; refuse inconsistent
@@ -50,20 +50,28 @@ opens raw reports, source archives or future reference labels.
 - Bind G1 proposed-relation and matching-feature source paths to *exact*
   eligible, supported, positive, byte-aligned claims in the persisted early
   and background graphs. Reject forged witnesses and unsupported publisher
-  groups. G1 similarity ranking is NOT recomputed without original lineage.
+  groups. The now-persisted canonical feature lineage is reloaded and
+  checked against the run lock; the deterministic G1 builder is rerun
+  against frozen source views, early/background evidence graphs, the exact
+  lineage artifact, and the stored configuration. Full G1 predictions,
+  rankings, abstentions and diagnostics must agree byte-for-byte at the
+  canonical object level with the stored profile.
 - Verify the pipeline receipt's source/case/review/dependency declared hashes,
   graph SHA-256, run/audit/profile IDs, raw claim/review counts and research
   limitations; bind every result back to the per-case batch record.
 
 ## Important scientific limitations
 
-B0 recomputation and G1 citation-to-graph checks add genuine structural
-verification, but do **not** authenticate source truth or recompute the full
-G1 similarity ranking. The output exposes separate flags for those checks.
-Tests for rehashed fabricated B0 facts and false G1 support paths are authored
+B0 and G1 are now both deterministically recomputed from stored views,
+graphs, the exact persisted as-of lineage and run configuration. The output
+exposes separate true flags for G1 recomputation and the reloaded lineage
+artifact; it explicitly reports that the original researcher-supplied input
+path and original publisher archives are not reread. This adds stronger
+within-artifact consistency checks but remains neither source authentication
+nor an independent new extraction run. Adversarial replay tests are authored
 but remain unexecuted.
 
-The original feature-lineage file, source manifests, archival source bodies,
+The original researcher-supplied feature-lineage INPUT FILE (distinct from the canonical lineage artifact), source manifests, archival source bodies,
 reviews, dependency bytes and batch-plan file are NOT reread by this
 verifier. It tests only that existing metadata declarations and saved
 artifacts agree with each other. It does not independently prove that those
@@ -83,7 +91,7 @@ separate independent review before legitimate empirical evaluation.
 
 ## Test and integration gates
 
-- Author-only test coverage: 15 methods, including two real synthetic paired
+- Author-only test coverage: 19 methods, including two real synthetic paired
   profiler outputs, byte-stable readback, tampered canonical/sha hashes,
   missing files, symlinks, label smuggling, cross-case substitution and
   malformed JSON. **Tests have not been executed.**

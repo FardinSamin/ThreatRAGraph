@@ -1,6 +1,6 @@
 # M6.4 — Offline multi-case batch coordinator
 
-**Status:** Draft engineering build with 17 authored (not executed) synthetic
+**Status:** Draft engineering build with 20 authored (not executed) synthetic
 and adversarial tests. Depends on unfinished PR #56, #53 and #52. No real
 source or historical case has been scientifically approved or scored.
 
@@ -51,8 +51,8 @@ From the repository root:
     python -m scripts.run_offline_case_batch --plan artifacts/private/batch-plan.json --sources datasets/manifests/pilot.json --cases datasets/cases/pilot.json --input-root artifacts/private --archive-root artifacts/source_versions/sha256 --dependency-lock artifacts/private/dependencies.lock --development-only
 
 Default mode only previews immutable artifact SHA-256 digests, case IDs, and
-the batch ID. --write persists nine individually content-addressed artifacts
-per case plus one final batch receipt in artifacts/offline_case_batches.
+the batch ID. The per-case receipt refuses feature-lineage digests that do not match the exact input stored in the run lock, so claims cannot be replayed with a different lineage file. --write persists ten individually content-addressed artifacts
+per case, including an exact feature_lineage JSON record, plus one final batch receipt in artifacts/offline_case_batches.
 
 Every case is computed completely in memory BEFORE any output write, so
 failure of a later case cannot leave newly written outputs. Writes themselves
@@ -76,7 +76,7 @@ This batch step does not compute metrics or certify a real study.
 
 ## Deferred validation
 
-- Execute tests/test_offline_case_batch.py (17 authored tests) and the
+- Execute tests/test_offline_case_batch.py (20 authored tests) and the
   existing single-case, profiler and isolation suites locally.
 - Extend real end-to-end integration fixtures to two different synthetic
   cases, test deterministic preview/write byte parity and disk failures.

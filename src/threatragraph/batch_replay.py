@@ -20,6 +20,7 @@ from src.threatragraph.contracts import validate_graph_projection
 from src.threatragraph.evidence_graph import fingerprint, require_sha
 from src.threatragraph.paired_profile_audit import audit_paired_profiles
 from src.threatragraph.paired_run_freeze import RUN_LOCK_VERSION, _metadata
+from src.threatragraph.similarity_g1 import build_g1_profile
 
 REPLAY_VERSION = "unscored-batch-integrity-replay-v1"
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
@@ -53,7 +54,8 @@ PIPELINE_FIELDS = frozenset({
     "schema_version", "artifact_kind", "pipeline_version", "case_id",
     "cutoff_at", "run_id", "paired_audit_id", "b0_profile_id",
     "g1_profile_id", "input_file_sha256", "source_manifest_sha256",
-    "case_manifest_sha256", "graph_sha256", "early_source_version_ids",
+    "case_manifest_sha256", "feature_lineage_sha256",
+    "graph_sha256", "early_source_version_ids",
     "raw_claim_records", "semantic_review_records",
     "source_archive_bytes_checked_by_projection",
     "historical_publication_dates_independently_authenticated",
@@ -212,6 +214,7 @@ def _check_case(item, artifacts, batch):
     b0g, g1g = artifacts["b0_graph"], artifacts["g1_graph"]
     b0, g1 = artifacts["b0_profile"], artifacts["g1_profile"]
     audit, lock = artifacts["paired_audit"], artifacts["run_lock"]
+    lineage = artifacts["feature_lineage"]
     pipe = artifacts["pipeline_receipt"]
 
     for artifact in (b0v, g1v, b0g, g1g, b0, g1, audit, lock, pipe):
@@ -311,7 +314,20 @@ def _check_case(item, artifacts, batch):
     if b0 != build_b0_profile(
             b0v, b0g, development_only=lock["development_only"]):
         raise ValueError("Saved B0 facts differ from deterministic source graph")
+    if hashes["feature_lineage"] != fingerprint(lineage):
+        raise ValueError("Frozen feature lineage differs from run-lock digest")
+    # Check exact citations first, so forged witnesses receive a specific
+    # refusal even when a malicious operator also rehashes the full profile.
     _check_g1_support(g1, b0v, g1v, b0g, g1g)
+    # Recompute the FULL G1 profile from frozen graph/view/lineage records
+    # and the stored deterministic config. No reference labels are accessed.
+    expected_g1 = build_g1_profile(
+        b0v, b0g, g1v, g1g, feature_lineage=lineage,
+        development_only=lock["development_only"],
+        **lock["g1_algorithm_config"],
+    )
+    if g1 != expected_g1:
+        raise ValueError("Saved G1 profile differs from deterministic recomputation")
     if g1["feature_lineage_sha256"] != hashes["feature_lineage"]:
         raise ValueError("Lineage hash differs between G1 and run lock")
     lineage_report = g1.get("feature_lineage_contract")
@@ -332,7 +348,8 @@ def _check_case(item, artifacts, batch):
         raise ValueError("Unexpected pipeline input-file hashes")
     for value in file_hashes.values():
         require_sha(value, "declared pipeline input")
-    for field in ("source_manifest_sha256", "case_manifest_sha256"):
+    for field in ("source_manifest_sha256", "case_manifest_sha256",
+                  "feature_lineage_sha256"):
         require_sha(pipe[field], field)
     if (file_hashes["semantic_reviews_jsonl"] !=
             lock["declared_provenance"]["review_set_sha256"]
@@ -342,6 +359,7 @@ def _check_case(item, artifacts, batch):
             lock["declared_provenance"]["source_manifest_sha256"]
             or pipe["case_manifest_sha256"] !=
             lock["declared_provenance"]["case_manifest_sha256"]
+            or pipe["feature_lineage_sha256"] != hashes["feature_lineage"]
             or pipe["graph_sha256"] != {
                 "B0": fingerprint(b0g), "G1": fingerprint(g1g)}
             or pipe["cutoff_at"] != b0v["cutoff_at"]
@@ -437,7 +455,8 @@ def replay_batch(root, receipt_digest):
         "cross_case_linkage_checked": True,
         "b0_deterministically_recomputed": True,
         "g1_historical_citations_checked": True,
-        "g1_ranking_recomputed": False,
+        "g1_ranking_recomputed": True,
+        "feature_lineage_artifact_reloaded": True,
         "raw_archive_bytes_reread": False,
         "feature_lineage_original_bytes_reread": False,
         "batch_plan_bytes_reread": False,

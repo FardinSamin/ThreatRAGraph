@@ -67,7 +67,7 @@
       "test_paths": [
         "tests/test_offline_case_pipeline.py"
       ],
-      "min_authored_test_methods": 16,
+      "min_authored_test_methods": 18,
       "test_command": "python -m unittest discover -s tests -p 'test_offline_case_pipeline.py' -v",
       "manual_gates": [
         "Verify archive original bytes, evidence excerpts and source rights",
@@ -90,7 +90,7 @@
       "test_paths": [
         "tests/test_offline_case_batch.py"
       ],
-      "min_authored_test_methods": 17,
+      "min_authored_test_methods": 20,
       "test_command": "python -m unittest discover -s tests -p 'test_offline_case_batch.py' -v",
       "manual_gates": [
         "Run multi-case real-byte-backed synthetic fixture, not only stubs",
@@ -114,7 +114,7 @@
       "test_paths": [
         "tests/test_batch_replay.py"
       ],
-      "min_authored_test_methods": 15,
+      "min_authored_test_methods": 19,
       "test_command": "python -m unittest discover -s tests -p 'test_batch_replay.py' -v",
       "manual_gates": [
         "Verify exact byte hashes, case pointers and source/profiler parity",
