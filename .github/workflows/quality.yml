@@ -373,6 +373,47 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+  p1g-direct-raw-cdxj-archive-discovery:
+    name: Bounded direct 2023 CDXJ gzip index lookup without rate-limited search API
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Binary-search original Common Crawl 2023 cluster.idx HTTPS ranges
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.probe_direct_original_cdxj \
+            --targets cado-original-2022 crowdstrike-original-2022 \
+            --collections CC-MAIN-2023-06 \
+            > "$RUNNER_TEMP/p1g-original-crowdstrike-cado-direct-index.json"
+          python - "$RUNNER_TEMP/p1g-original-crowdstrike-cado-direct-index.json" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding="utf-8") as fp:
+              report = json.load(fp)
+          print("P1G_DIRECT_MATCHED_CANDIDATES", report["matching_pre_cutoff_candidate_count"])
+          for query in report["query_receipts"]:
+              print("P1G_DIRECT_QUERY", json.dumps(query, sort_keys=True))
+          for row in report["candidate_metadata_rows"]:
+              print("P1G_DIRECT_CDXJ_ROW", json.dumps(row, sort_keys=True))
+          assert report["source_version_approved"] is False
+          assert report["archive_article_bytes_acquired"] is False
+          assert report["research_ready"] is False
+          PY
+      - name: Retain only historic index candidate metadata, never article bodies
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1g-original-publisher-direct-cdxj-index-candidates
+          path: ${{ runner.temp }}/p1g-original-crowdstrike-cado-direct-index.json
+          retention-days: 14
+          if-no-files-found: error
+
   preflight-and-tests:
     strategy:
       fail-fast: false
@@ -422,6 +463,8 @@ jobs:
         run: python -m scripts.verify_kissadog_cado_public_push --help
       - name: Original 2022 campaign official Common Crawl CDX probe CLI smoke
         run: python -m scripts.probe_original_campaign_cdx --help
+      - name: Direct original compressed CDXJ index lookup CLI smoke
+        run: python -m scripts.probe_direct_original_cdxj --help
       - name: Real original 2023 Cado indexed WARC replay CLI smoke
         run: python -m scripts.replay_original_cado_20230206 --help
       - name: Original Dec 2022 Cado article pointer Git replay CLI smoke
