@@ -1,0 +1,55 @@
+{
+  "schema_version": "g1-v2-prospective-case-screen-v2",
+  "screen_id": "screen:scarleteel-campaign-exact-peer-prospects-2023-v2",
+  "target_entity_id": "campaign:SCARLETEEL",
+  "proposed_cutoff_at": "2023-03-01T00:00:00Z",
+  "early_source_version_ids": [
+    "candidate:scarleteel-sysdig-20230228:unfrozen"
+  ],
+  "date_corroboration_source_version_ids": [
+    "candidate:scarleteel-bleeping-20230228:unfrozen"
+  ],
+  "background_source_version_ids": [
+    "candidate:chimaera-alienlabs-20210908:unfrozen",
+    "candidate:kissadog-crowdstrike-20221026:unfrozen"
+  ],
+  "later_reference_source_version_ids": [
+    "candidate:scarleteel-sysdig-20230711:unfrozen"
+  ],
+  "early_feature_candidates": [
+    {
+      "subject_id": "campaign:SCARLETEEL",
+      "predicate": "USES",
+      "object_id": "tool:xmrig",
+      "source_version_id": "candidate:scarleteel-sysdig-20230228:unfrozen",
+      "evidence_location_note": "Sysdig original Feb 28 report, Technical analysis > Initial access, XMRig executable named. Current webpage only; exact 2023 bytes not retained.",
+      "evidence_byte_aligned": false,
+      "semantic_reviewed": false
+    }
+  ],
+  "same_type_background_peers_verified": false,
+  "two_group_peer_relation_support_verified": false,
+  "later_reference_preview_exposure": "search_result_summary_exposed",
+  "case_approved": false,
+  "research_ready": false,
+  "background_peer_candidates": [
+    {
+      "subject_id": "campaign:Chimaera",
+      "predicate": "USES",
+      "object_id": "tool:xmrig",
+      "source_version_id": "candidate:chimaera-alienlabs-20210908:unfrozen",
+      "evidence_location_note": "AT&T Alien Labs 2021 named Chimaera campaign, Windows miner and Kubernetes root payload analysis; CURRENT host LevelBlue text only, no independently byte-frozen 2021 source.",
+      "evidence_byte_aligned": false,
+      "semantic_reviewed": false
+    },
+    {
+      "subject_id": "campaign:Kiss-a-dog",
+      "predicate": "USES",
+      "object_id": "tool:xmrig",
+      "source_version_id": "candidate:kissadog-crowdstrike-20221026:unfrozen",
+      "evidence_location_note": "CrowdStrike 2022 named Kiss-a-dog campaign, Use of Dog Pools and Disguised Xmrig section; CURRENT website text only, no independently byte-frozen 2022 source.",
+      "evidence_byte_aligned": false,
+      "semantic_reviewed": false
+    }
+  ]
+}
