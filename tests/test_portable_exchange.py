@@ -196,6 +196,20 @@ class PortableGraphExchangeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Duplicate JSON"):
             parse_bundle_json(content)
 
+    def test_canonical_csv_rejects_ignored_blank_physical_rows(self):
+        original = bundle()
+        content = export_claims_csv(original) + "\n"
+        with self.assertRaisesRegex(ValueError, "canonical v1 export"):
+            verify_claims_csv(content, original)
+
+    def test_canonical_csv_rejects_equivalent_unquoted_row_format(self):
+        original = bundle()
+        content = export_claims_csv(original)
+        # Same CSV semantics, but first header column is not canonically quoted.
+        changed = content.replace('"claim_id"', "claim_id", 1)
+        with self.assertRaisesRegex(ValueError, "canonical v1 export"):
+            verify_claims_csv(changed, original)
+
     def test_extra_csv_column_refused(self):
         value = bundle()
         content = export_claims_csv(value)

@@ -196,6 +196,11 @@ def verify_claims_csv(text, bundle):
         actual.append(row)
     if actual != _claim_rows(bundle):
         raise ValueError("CSV claims differ from exact bundled graph evidence")
+    # DictReader can silently ignore blank physical rows and accepts
+    # alternative quoting/line endings. Matching parsed rows alone is not
+    # an exact canonical byte-for-byte exchange contract.
+    if text != export_claims_csv(bundle):
+        raise ValueError("CSV bytes differ from canonical v1 export")
     receipt["csv_sha256"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
     receipt["csv_claim_count"] = len(actual)
     receipt["csv_matches_bundle"] = True
