@@ -107,6 +107,21 @@ class CandidateWarcIntegrityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exact registered"):
             validate_capture(idx, raw, self.registry, CADO_ID)
 
+    def test_http_vary_and_set_cookie_repeats_are_legal_but_digest_headers_are_not(self):
+        from scripts.verify_candidate_warc_capture import _headers
+        http = (b"HTTP/1.1 200 OK\r\ncontent-type: text/html\r\n"
+                b"vary: Accept-Encoding\r\nvary: User-Agent\r\n"
+                b"set-cookie: abc=a\r\nset-cookie: def=b\r\n\r\n"
+                b"<html></html>")
+        headers, body = _headers(http, b"HTTP/1.", allow_repeated_http_fields=True)
+        self.assertEqual("text/html", headers["content-type"])
+        self.assertEqual(b"<html></html>", body)
+        for field in (b"content-type", b"content-length", b"content-encoding",
+                      b"transfer-encoding", b"warc-payload-digest"):
+            raw = b"HTTP/1.1 200 OK\r\n" + field + b": a\r\n" + field + b": b\r\n\r\nbody"
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, "Duplicate"):
+                _headers(raw, b"HTTP/1.", allow_repeated_http_fields=True)
+
     def test_payload_digest_is_verified_exactly(self):
         index, raw = self._fixture()
         index["digest"] = _b32(b"other body")
