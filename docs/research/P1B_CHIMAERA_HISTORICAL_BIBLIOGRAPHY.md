@@ -11,6 +11,8 @@ The original [Alien Labs “TeamTNT with new campaign aka Chimaera” article UR
 | Metarget's cloud-native-security curated README | [README.md at `9d68fc3a1e7a3790b12d59a120fb78ea2dd2b8d1`](https://github.com/Metarget/awesome-cloud-native-security/blob/9d68fc3a1e7a3790b12d59a120fb78ea2dd2b8d1/README.md) | `29f2948685b187be078a1d3f492d4a886e287e43` | TeamTNT with new campaign aka “Chimaera” (**2021-09-08**) plus original AT&T link | **2021-12-19T10:35:48Z** |
 | RealityNet's MITRE attack-coverage bibliography export | [20220505/attack_groups.txt at `a933255173c0d512f712e2cb81a2067aa99a75a7`](https://github.com/RealityNet/attack-coverage/blob/a933255173c0d512f712e2cb81a2067aa99a75a7/20220505/attack_groups.txt) | `c51a7ae9d06cc31451bf9cad5b60a102b6f92aab` | “AT&T Alien Labs. (2021, September 8). TeamTNT with new campaign aka Chimaera.” with original AT&T link, and a **Retrieved September 22, 2021** statement (self-declared bibliography text) | **2022-05-05T14:44:52Z** |
 
+**Upstream provenance update:** [MITRE's original November 2022 STIX TeamTNT record](P1B_MITRE_ORIGINAL_TEAMTNT_2022.md) independently confirms the very same `ATT TeamTNT Chimaera September 2020` **source-name** label and literal September **8, 2021** bibliographic citation within MITRE's publisher-controlled JSON. RealityNet's `attack_groups.txt` thus appears to reuse this MITRE-curated reference metadata; do **not** count the records as independent original threat investigations or assume the mistaken date originated independently.
+
 **Important anomaly:** The RealityNet record labels this item `ATT TeamTNT Chimaera September 2020` in its internal `source_name` field **while the citation sentence says September 8, 2021**. The export's own label therefore conflicts with its dated bibliographic citation. It cannot be used to assign a **2020** disclosure date. The byte-verifier explicitly flags this conflict in its metadata receipt.
 
 These are **two independently hosted reference collections**, not two original threat investigations. There is no inference that their author/committer timestamps were cryptographically timestamped when published, nor that the original 2021 article has the same bytes as the present LevelBlue version. Original Git commit metadata is mutable/self-reported for historical availability purposes. We have **not** independently recovered a contemporaneous public PushEvent for either bibliography commit, nor verified either repo's independent archival publication time.
@@ -40,7 +42,7 @@ python -m scripts.verify_historical_chimaera_bibliography --witness mitre-refere
 python -m unittest discover -s tests -v
 ```
 
-CI downloads them into the transient runner directory without publishing their raw bodies. The project's **28 candidate** source records and **0 approved** source records remain unchanged in status; `available_at`, `sha256` and `redistribution` approval fields for Chimaera stay unset.
+CI downloads them into the transient runner directory without publishing their raw bodies. The project's **29 candidate** source records and **0 approved** source records remain unchanged in status; `available_at`, `sha256` and `redistribution` approval fields for Chimaera stay unset.
 
 ## Why we still cannot run the SCARLETEEL experiment
 
