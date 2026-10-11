@@ -173,11 +173,11 @@ class HistoricalKissadogPublicPushTests(unittest.TestCase):
 
     def test_synthetic_fixture_can_exercise_strict_pinned_gate_without_claiming_real(self):
         original = _event()
-        line = json.dumps(original, sort_keys=True).encode() + b"\\n"
+        line = json.dumps(original, sort_keys=True).encode() + b"\n"
         raw = _jsonl(original)
         with patch.object(witness, "ARCHIVE_SHA256", hashlib.sha256(raw).hexdigest()), \
-             patch.object(witness, "EVENT_LINE_SHA256", hashlib.sha256(line).hexdigest()), \\
-             patch.object(witness, "PUBLIC_EVENT_ID", original["id"]), \\
+             patch.object(witness, "EVENT_LINE_SHA256", hashlib.sha256(line).hexdigest()), \
+             patch.object(witness, "PUBLIC_EVENT_ID", original["id"]), \
              patch.object(witness, "ARCHIVE_BYTES", len(raw)):
             def run(path):
                 report = verify_archive(path, require_original=True)
@@ -191,7 +191,7 @@ class HistoricalKissadogPublicPushTests(unittest.TestCase):
         original = _event()
         raw = _jsonl(original)
         with patch.object(witness, "ARCHIVE_SHA256", hashlib.sha256(raw).hexdigest()), \
-             patch.object(witness, "ARCHIVE_BYTES", len(raw)), \\
+             patch.object(witness, "ARCHIVE_BYTES", len(raw)), \
              patch.object(witness, "PUBLIC_EVENT_ID", original["id"]):
             with self.assertRaisesRegex(ValueError, "identity mismatch"):
                 self._with_archive(raw, lambda p: verify_archive(p, require_original=True))
