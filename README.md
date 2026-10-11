@@ -40,6 +40,7 @@
 - [P1b SCARLETEEL campaign screen](docs/research/P1B_SCARLETEEL_CAMPAIGN_SCREEN.md) — source-grounded, candidate-only Kubernetes/AWS campaign with tentative `USES` feature; explicitly refuses same-type peer/G1 eligibility without real evidence.
 - [P1b historical campaign peer follow-up](docs/research/P1B_SCARLETEEL_CAMPAIGN_PEERS.md) — separately names the Chimaera and Kiss-a-dog campaigns as exact XMRig-feature *unverified* peers, clarifying why G1 still requires two independent groups **within each candidate peer’s evidence path**.
 - [P1b original Chimaera URL in 2021/2022 pinned bibliographies](docs/research/P1B_CHIMAERA_HISTORICAL_BIBLIOGRAPHY.md) — real SHA-bound third-party Git reference bytes replayed in CI; the original AT&T 2021 article remains **unfrozen and unapproved**.
+- [P1b original 2022 MITRE ATT&CK TeamTNT STIX bytes](docs/research/P1B_MITRE_ORIGINAL_TEAMTNT_2022.md) — live CI replays a publisher-owned historical **intrusion-set** record and traces the September 2020/2021 Chimaera citation discrepancy, without retyping TeamTNT as a campaign or approving any real sources.
 - [P1b original-report Common Crawl WARC intake](docs/research/P1B_COMMONCRAWL_PRIMARY_WARC_INTAKE.md) — strict offline CDX/WARC HTTP-200 original-HTML byte-range verifier for the SCARLETEEL/Chimaera/Kiss-a-dog leads. No matching genuine primary archive capture has been recovered or approved yet.
 - [M5.2 exact-only as-of feature lineage](docs/M5_ASOF_FEATURE_LINEAGE.md) — mandatory per-claim graph/date and no-alias/no-external-taxonomy contract; **not independent evidence approval**.
 - [**M5 G1 explainable similarity v2**](docs/M5_G1_SIMILARITY.md) — synthetic-tested paired early-source parity, typed graph neighbors, independent provenance paths and provisional hypotheses; **no real empirical claim**. [Remaining M5 work](https://github.com/FardinSamin/ThreatRAGraph/issues/21).
@@ -48,7 +49,7 @@
 
 **Current research priority:** [P1a real historical case — Issue #24](https://github.com/FardinSamin/ThreatRAGraph/issues/24), with [case–method compatibility reviewed first](docs/research/P1A_CASE_METHOD_ELIGIBILITY.md). In parallel, finish [P0 CI/contract hardening — #23](https://github.com/FardinSamin/ThreatRAGraph/issues/23) and [M5 G1 v2 — #21](https://github.com/FardinSamin/ThreatRAGraph/issues/21), without claiming empirical effectiveness. [Details and exit gates](docs/BUILD_PLAN.md).
 
-No completed real-data GraphRAG comparison exists yet. The 28 source entries remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
+No completed real-data GraphRAG comparison exists yet. The 29 source entries remain *unapproved candidates* and the case manifest remains empty. Strict structural checks now **always return `research_ready: false`** until a separately reviewed empirical approval protocol exists; even a passing synthetic test is not historical or scientific evidence.
 
 ## Research plan
 
@@ -71,7 +72,7 @@ The historical `scripts/preflight_import.py` utility is optional for future exte
 
 ## Research manifests (draft only)
 
-The M1 **source registry now contains 21 preliminary source candidate entries**, but **zero approved/frozen source versions and zero selected evaluation cases**. These links require historical version, timestamp, rights and hash review before scientific use. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
+The M1 **source registry now contains 29 preliminary source candidate entries**, but **zero approved/frozen source versions and zero selected evaluation cases**. These links require historical version, timestamp, rights and hash review before scientific use. The offline validator checks identities, immutable source metadata, independently verified availability dates, and leakage-safe case partitions:
 
 ~~~powershell
 python scripts/validate_research_manifests.py datasets/manifests/pilot.json datasets/cases/pilot.json
