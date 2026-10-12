@@ -157,3 +157,18 @@ head therefore has 32 batch-publication tests and 27 replay tests,
 **59 authored but NOT EXECUTED**. Previously recorded research gates remain
 open. No gold access, original publisher authentication or trusted external
 freeze is claimed by these integrity checks.
+
+## Executed Linux storage subset (2026-10-11)
+
+Focused **actual** test execution on an isolated Linux/Python 3.13.5
+sandbox found and repaired a defect in the shared immutable writer:
+nonregular digest-named directories previously raised `IsADirectoryError`
+before the intended `ValueError` refusal. The corrected storage module
+(blob `41f4df7e3136df406e195b29f67fdd726b3f6704`) passed all 18
+writer tests. The unchanged shared local reader passed all 18 tests.
+40 four-writer concurrency rounds also passed. Test/module blob hashes,
+partial script-wrapper boundary and other limitations are recorded in
+`docs/LOCAL_STORAGE_COMPONENT_VALIDATION.md`. These results are narrower
+than full M6 integration testing; **no batch publication/replay tests or
+native Windows tests were executed**. The research remains unscored and
+unapproved, and PR #62 remains a draft.

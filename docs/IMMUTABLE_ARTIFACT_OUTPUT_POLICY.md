@@ -59,3 +59,17 @@ methods remain unchanged. The Windows input reader requests `O_BINARY`.
 These checks are **not atomic on Windows**: a malicious actor replacing
 an ancestor after inspection remains a documented limitation and requires
 platform-specific verification before release.
+
+## Targeted local Linux validation (2026-10-11)
+
+One genuine defect was uncovered by **executing** the isolated storage
+component tests: an existing digest-named directory raised
+`IsADirectoryError` while creating a Python file wrapper. The now-tested
+code checks the file descriptor's type first and refuses it with the
+contractual `ValueError`. **18/18 reader + 18/18 writer tests passed**
+(36 total, zero errors/skips) after this fix on Linux/Python 3.13.5.
+A separate 40-round × 4-thread same-artifact stress completed successfully.
+These tests used byte-identical Git source/test files and isolated script
+wrappers; the rest of the repository was not locally checked out or run.
+See `docs/LOCAL_STORAGE_COMPONENT_VALIDATION.md` for exact blob hashes,
+test boundary and remaining scientific/Windows gates.
