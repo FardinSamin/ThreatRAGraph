@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 import re
 
-from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256
+from scripts.freeze_case_snapshots import canonical_bytes
 from scripts.run_offline_case_batch import ARTIFACT_NAMES, MAX_CASES, VERSION
 from src.threatragraph.baseline_b0 import build_b0_profile
 from src.threatragraph.contracts import validate_graph_projection
@@ -21,6 +21,9 @@ from src.threatragraph.evidence_graph import fingerprint, require_sha
 from src.threatragraph.paired_profile_audit import audit_paired_profiles
 from src.threatragraph.paired_run_freeze import RUN_LOCK_VERSION, _metadata
 from src.threatragraph.similarity_g1 import build_g1_profile
+from src.threatragraph.local_file_inputs import (
+    is_linked_path_component, read_local_text,
+)
 
 REPLAY_VERSION = "unscored-batch-integrity-replay-v1"
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
@@ -85,34 +88,42 @@ def _root_directory(path):
     # must not rely on an implicit symlinked directory being safe.
     node = root.absolute()
     for segment in (node, *node.parents):
-        if segment.is_symlink():
-            raise ValueError("Symlinked batch artifact root/ancestor")
+        if is_linked_path_component(segment):
+            raise ValueError("Symlinked or reparse batch artifact root/ancestor")
     if not node.is_dir():
         raise ValueError("Batch artifact root must be a directory")
-    return node.resolve(strict=True)
+    # Keep the checked lexical path. Calling resolve() here creates a
+    # check-then-resolve race: a newly swapped symlink could be followed
+    # after the component checks. Each subsequent artifact open walks this
+    # path with the dedicated no-follow descriptor reader instead.
+    return node
 
 
 def _read_canonical(path, *, expected_hash=None):
-    file = Path(path)
-    if file.is_symlink() or not file.is_file():
-        raise ValueError("Missing, nonregular or symlinked batch artifact")
-    size = file.stat().st_size
-    if not 0 < size <= MAX_ARTIFACT_BYTES:
-        raise ValueError("Empty or oversized batch artifact")
-    body = file.read_bytes()
+    """Load a canonical JSON artifact from one no-follow bounded descriptor.
+
+    Avoid separate lstat/path.read_bytes checks: the shared reader opens
+    every POSIX path component without following symlinks, checks regular
+    file type and stable byte length around the read, and refuses non-UTF8.
+    No caller may treat a separate existence check as proof of safety.
+    """
+    try:
+        body = read_local_text(path, max_bytes=MAX_ARTIFACT_BYTES).encode("utf-8")
+    except FileNotFoundError as error:
+        raise ValueError("Missing, nonregular or symlinked batch artifact") from error
+    except UnicodeDecodeError as error:
+        raise ValueError("Batch artifact must be UTF-8") from error
     actual = hashlib.sha256(body).hexdigest()
     if expected_hash is not None and actual != expected_hash:
         raise ValueError("Batch artifact bytes differ from declared SHA-256")
-    try:
-        parsed = json.loads(body.decode("utf-8"),
-                            object_pairs_hook=_unique_keys,
-                            parse_constant=_no_constants)
-    except UnicodeDecodeError as error:
-        raise ValueError("Batch artifact must be UTF-8") from error
+    parsed = json.loads(
+        body.decode("utf-8"),
+        object_pairs_hook=_unique_keys,
+        parse_constant=_no_constants,
+    )
     if not isinstance(parsed, dict) or canonical_bytes(parsed) != body:
         raise ValueError("Noncanonical or nonobject batch artifact")
     return parsed, actual
-
 
 def _load_named(root, digest):
     if type(digest) is not str or not HEX64.fullmatch(digest):
@@ -394,10 +405,8 @@ def _check_case(item, artifacts, batch):
     }
 
 
-def replay_batch(root, receipt_digest):
-    """Recheck persisted *unscored* artifacts, not rerun source extraction."""
-    base = _root_directory(root)
-    batch = _load_named(base, receipt_digest)
+def _verify_batch_payload(base, batch, *, receipt_published):
+    """Validate one sealed receipt and every referenced persisted case artifact."""
     if not isinstance(batch, dict) or set(batch) != BATCH_FIELDS:
         raise ValueError("Unexpected batch receipt keys (possibly later labels)")
     _self_sealed(batch, "batch:", "batch_id", "batch")
@@ -449,7 +458,9 @@ def replay_batch(root, receipt_digest):
         "replay_version": REPLAY_VERSION,
         "batch_id": batch["batch_id"],
         "case_count": len(records),
-        "artifact_count": len(records) * len(ARTIFACT_NAMES) + 1,
+        "artifact_count": len(records) * len(ARTIFACT_NAMES)
+                          + int(receipt_published),
+        "receipt_published": receipt_published,
         "case_results": statuses,
         "canonical_hashes_checked": True,
         "cross_case_linkage_checked": True,
@@ -467,3 +478,20 @@ def replay_batch(root, receipt_digest):
         "empirical_evaluation": "not_performed",
         "research_ready": False,
     }
+
+
+def verify_unpublished_batch(root, receipt):
+    """Validate all stored leaves before making a final receipt visible.
+
+    The caller supplies the already sealed in-memory receipt; this check
+    intentionally does NOT require that its digest-named receipt file exists.
+    """
+    base = _root_directory(root)
+    return _verify_batch_payload(base, receipt, receipt_published=False)
+
+
+def replay_batch(root, receipt_digest):
+    """Require the exact final receipt AND all sealed per-case artifacts."""
+    base = _root_directory(root)
+    batch = _load_named(base, receipt_digest)
+    return _verify_batch_payload(base, batch, receipt_published=True)

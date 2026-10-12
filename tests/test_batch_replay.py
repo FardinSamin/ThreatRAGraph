@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256, write_immutable_view
 from scripts.run_offline_case_batch import ARTIFACT_NAMES, _receipt
-from src.threatragraph.batch_replay import _read_canonical, replay_batch
+from src.threatragraph.batch_replay import _read_canonical, _root_directory, replay_batch
 from src.threatragraph.evidence_graph import fingerprint
 from src.threatragraph.feature_lineage import (
     ARTIFACT_KIND, CONTRACT_VERSION, EXTRACTION, IDENTITY_POLICY,
@@ -332,6 +332,16 @@ class FrozenBatchReplayTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Nonfinite"):
                 _read_canonical(file)
 
+    def test_legacy_windows_reparse_root_without_junction_method_refused(self):
+        from types import SimpleNamespace
+        from src.threatragraph.local_file_inputs import WINDOWS_REPARSE_POINT
+        marker = SimpleNamespace(st_file_attributes=WINDOWS_REPARSE_POINT)
+        with (patch.object(Path, "is_symlink", return_value=False),
+              patch.object(Path, "is_junction", new=None, create=True),
+              patch.object(Path, "lstat", return_value=marker)):
+            with self.assertRaisesRegex(ValueError, "reparse"):
+                replay_batch(self.root, self.batch_sha)
+
     def test_symlinked_batch_root_refused(self):
         with tempfile.TemporaryDirectory() as folder:
             link = Path(folder) / "alias"
@@ -341,6 +351,104 @@ class FrozenBatchReplayTests(unittest.TestCase):
                 self.skipTest("OS does not allow symlinks")
             with self.assertRaisesRegex(ValueError, "Symlinked"):
                 replay_batch(link, self.batch_sha)
+
+    def test_no_follow_read_rejects_symlinked_artifact_leaf(self):
+        path = self.saved[("case-a", "g1_graph")]
+        backup = path.parent / "original-evidence.txt"
+        backup.write_bytes(path.read_bytes())
+        path.unlink()
+        try:
+            path.symlink_to(backup)
+        except (OSError, NotImplementedError):
+            self.skipTest("Symlinks are unavailable")
+        with self.assertRaisesRegex(ValueError, "Symlink"):
+            replay_batch(self.root, self.batch_sha)
+
+    def test_no_follow_read_rejects_symlinked_parent_directory(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source = base / "real"
+            source.mkdir()
+            record = source / "source.json"
+            record.write_text('{"a":1}\n', encoding="utf-8")
+            linked = base / "linked"
+            try:
+                linked.symlink_to(source, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("Directory symlinks are unavailable")
+            with self.assertRaisesRegex(ValueError, "Symlink"):
+                _read_canonical(linked / "source.json")
+
+    def test_replay_refuses_fifo_leaf_without_blocking(self):
+        import os
+        if not hasattr(os, "mkfifo"):
+            self.skipTest("Named pipes are not supported")
+        path = self.saved[("case-a", "g1_graph")]
+        path.unlink()
+        os.mkfifo(path)
+        with self.assertRaisesRegex(ValueError, "regular"):
+            replay_batch(self.root, self.batch_sha)
+
+    def test_replay_uses_descriptor_reader_not_racy_path_read_bytes(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / "canonical.json"
+            path.write_text('{"a":1}\n', encoding="utf-8")
+            with patch.object(Path, "read_bytes",
+                              side_effect=AssertionError("path read is racy")):
+                parsed, _ = _read_canonical(path)
+            self.assertEqual({"a": 1}, parsed)
+
+    def test_replay_rejects_file_replaced_with_symlink_before_read(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            path = base / "canonical.json"
+            other = base / "other.json"
+            path.write_text('{"a":1}\n', encoding="utf-8")
+            other.write_text('{"a":1}\n', encoding="utf-8")
+            path.unlink()
+            try:
+                path.symlink_to(other)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symlinks unavailable")
+            with self.assertRaisesRegex(ValueError, "Symlink"):
+                _read_canonical(path)
+
+    def test_swapped_leaf_symlink_during_descriptor_open_is_refused(self):
+        from src.threatragraph.local_file_inputs import _open_regular
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            leaf = base / "frozen.json"
+            replacement = base / "unrelated.json"
+            leaf.write_text('{"a":1}\n', encoding="utf-8")
+            replacement.write_text('{"a":1}\n', encoding="utf-8")
+            probe = base / "test-link"
+            try:
+                probe.symlink_to(replacement)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symlinks unavailable")
+            probe.unlink()
+            swapped = []
+
+            def swap_at_open(path):
+                if not swapped:
+                    leaf.unlink()
+                    leaf.symlink_to(replacement)
+                    swapped.append(True)
+                return _open_regular(path)
+
+            with patch("src.threatragraph.local_file_inputs._open_regular",
+                       side_effect=swap_at_open):
+                with self.assertRaisesRegex(ValueError, "Symlink"):
+                    _read_canonical(leaf)
+            self.assertEqual([True], swapped)
+
+    def test_root_check_never_resolves_path_after_nofollow_checks(self):
+        # An ancestor can be replaced between checking it and resolve();
+        # replay must hand the lexical path to the descriptor-based reader.
+        with patch.object(Path, "resolve",
+                          side_effect=AssertionError("must not resolve")):
+            checked = _root_directory(self.root)
+        self.assertEqual(self.root.absolute(), checked)
 
     def test_invalid_batch_digest_refused(self):
         with self.assertRaisesRegex(ValueError, "Invalid digest"):

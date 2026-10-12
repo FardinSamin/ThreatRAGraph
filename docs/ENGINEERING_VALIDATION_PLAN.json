@@ -189,7 +189,7 @@
         "Confirm exports contain no third-party source bodies or gold labels",
         "Check POSIX descriptor-relative no-follow behavior and Windows junction fallback; 18 shared input tests authored but not executed",
         "Verify staged/fsynced atomic no-replace publication, interrupted write cleanup and idempotent retry on Linux/Windows before approving any M6 batch writes",
-        "On pre-Python-3.12 Windows, reject st_file_attributes reparse points; confirm binary descriptor read preserves CRLF and exact artifact bytes"
+        "Check raw reparse attributes even without Path.is_junction, plus Windows O_BINARY byte preservation and race limitations"
       ]
     },
     {
@@ -243,6 +243,42 @@
         "Do not feed candidate historical aliases to G1 feature lineage or evaluate labels",
         "Reconcile competing status-document changes and verify PR #60 workflow proposal separately",
         "Check all six core files and optional CSV and alias sidecars reject linked ancestor directories and hardlink reuse"
+      ]
+    },
+    {
+      "id": "batch_completion",
+      "scope": "independent",
+      "pr_number": 62,
+      "head_branch": "feature/m6-batch-publication-recovery",
+      "base_branch": "feature/integration-research-sidecars",
+      "requires": [
+        "sidecar_integration"
+      ],
+      "source_paths": [
+        "src/threatragraph/batch_publication.py",
+        "scripts/check_batch_completion.py",
+        "scripts/run_offline_case_batch.py",
+        "src/threatragraph/batch_replay.py"
+      ],
+      "test_paths": [
+        "tests/test_batch_publication.py",
+        "tests/test_batch_replay.py"
+      ],
+      "min_authored_test_methods": 65,
+      "test_command": "python -m unittest discover -s tests -p 'test_batch_*.py' -v",
+      "manual_gates": [
+        "Execute two-case REAL synthetic B0/G1 full replay under exact branch head before trusting saved receipts",
+        "Fault inject interruption during second-case write and final receipt, then verify strict uncommitted state and safe identical retry",
+        "Tamper or delete persisted leaves after the final receipt and verify the completion probe fails closed",
+        "Verify pre-publication leaf replay does not import held-out labels, score models or authenticate publisher chronology",
+        "Run local and cross-platform output durability tests once Actions allowance recovers; no paid overages or automatic cleanup",
+        "Run two parallel same-batch publications and confirm only one new digest-named final receipt is created; validate no-write already-sealed retries",
+        "Check corrupt pre-existing receipts and missing associated leaves block retries before any new artifact writes",
+        "Reject symlinked and concurrently replaced replay leaf/parent paths with single no-follow descriptors; test named pipes and Windows junctions",
+        "Refuse replay-incompatible leaf/receipt sizes before creating an output directory",
+        "Simulate legacy Windows reparse-point roots without Path.is_junction and require read/publication refusal before leaf writes",
+        "Confirm replay root never calls resolve() after link checks; each leaf must be opened via no-follow path traversal",
+        "Reject forged or self-resealed approvals, foreign case fields, mismatched predictions/abstention, datasets, duplicate run IDs and case pointers before writing leaves"
       ]
     }
   ]

@@ -55,9 +55,28 @@ the batch ID. The per-case receipt refuses feature-lineage digests that do not m
 per case, including an exact feature_lineage JSON record, plus one final batch receipt in artifacts/offline_case_batches.
 
 Every case is computed completely in memory BEFORE any output write, so
-failure of a later case cannot leave newly written outputs. Writes themselves
-are exclusive-create but not an atomic group transaction; an I/O failure
-partway through can leave earlier complete, reusable hash-addressed files.
+failure of a later case cannot leave newly written outputs. On --write, the
+updated publication gate first validates all in-memory content against the
+sealed case inventory; then it writes or reuses ten immutable files per case.
+It rereads and independently recomputes B0 and G1 from ALL stored leaves
+before publishing the final batch receipt. It then rereads the published
+receipt and repeats the full structural replay check before reporting success.
+An I/O error can still leave complete reusable hash-addressed leaves because
+the multi-file operation is not atomic; those leaves **cannot** imply a
+committed batch without an exact persisted and verified final receipt.
+
+Run this read-only completion probe with the exact digest returned by preview:
+
+    python -m scripts.check_batch_completion --artifact-root artifacts/offline_case_batches --batch-receipt-sha256 YOUR_PREVIEW_RECEIPT_SHA256
+
+The response is `uncommitted` (nonzero exit) if the final digest-named
+receipt is absent. Corrupted receipts, missing leaves, tampered hashes and
+profile mismatches are refused (nonzero exit). The only zero-exit state is
+`sealed_unscored_batch_verified` with research_ready=false, and is **not**
+an empirically completed experiment or approved historical case. A retry
+reuses exact previously written leaves after confirming they match and
+attempts the receipt gate again; it does not delete orphan stages or
+partially written earlier batch outputs.
 
 The canonical batch receipt contains no raw source or label text or private
 paths, only case IDs, case/pipeline/run/profile/audit IDs, G1 novel prediction
@@ -86,3 +105,25 @@ This batch step does not compute metrics or certify a real study.
   and reviewed held-out labels before any empirical result is reported.
 
 FR-27, FR-28 and FR-29 remain PARTIAL, DRAFT and UNVERIFIED.
+
+### Retrying a previously published receipt
+
+When the expected digest-named batch receipt already exists, `--write`
+first replays that receipt and its full artifact inventory. If valid, it
+returns `existing_receipt_reused=true` without writing any new files.
+If the receipt or one of its leaves has been damaged, it fails before
+starting new writes; it never silently repairs an already published batch.
+If the receipt is absent, an interrupted run may safely reuse exact orphaned
+leaves and publish the receipt only after the full saved B0/G1 replay.
+The preview always reports `existing_receipt_reused=false` and remains
+read-only. This does not imply an authenticated external or pre-gold freeze.
+
+### Replay-compatible artifact size ceiling (dependent PR #62)
+
+When publishing a sealed M6 batch, the in-memory leaf and final receipt
+must each serialize to no more than **8 MiB**, matching the structural
+replay reader limit. The lower-level shared artifact writer is allowed
+to store larger unrelated objects, but an M6 receipt must never commit
+a leaf that its own offline replay cannot read. Oversize inventories
+fail before output-directory creation; two new synthetic tests are authored
+and unexecuted. The default nonwriting preview does not imply publication.

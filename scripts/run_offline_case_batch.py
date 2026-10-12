@@ -13,7 +13,7 @@ from pathlib import Path, PurePosixPath
 import sqlite3
 import sys
 
-from scripts.freeze_case_snapshots import snapshot_sha256, write_immutable_view
+from scripts.freeze_case_snapshots import snapshot_sha256
 from scripts.freeze_paired_run import _load as load_json
 from scripts.run_offline_case_pipeline import run_offline_case
 from src.threatragraph.evidence_graph import fingerprint
@@ -228,28 +228,26 @@ def main(argv=None):
             args.archive_root, args.dependency_lock,
             development_only=args.development_only,
         )
-        summary_cases = []
-        for spec, outputs in zip(plan["cases"], built["case_results"]):
-            pointers = {}
-            for key in ARTIFACT_NAMES:
-                artifact = outputs[key]
-                if args.write:
-                    digest, path, created = write_immutable_view(
-                        artifact, args.output_dir
-                    )
-                    pointers[key] = {
-                        "sha256": digest, "path": str(path), "created": created,
-                    }
-                else:
-                    pointers[key] = {"sha256": snapshot_sha256(artifact)}
-            summary_cases.append({"case_id": spec["case_id"],
-                                  "artifacts": pointers})
         receipt = built["batch_receipt"]
         if args.write:
-            digest, path, created = write_immutable_view(receipt, args.output_dir)
-            batch_output = {"sha256": digest, "path": str(path),
-                            "created": created}
+            # Import only here: the publication gate reuses the already
+            # defined batch schema, and reconstructs BOTH frozen profiles
+            # before emitting the final receipt.
+            from src.threatragraph.batch_publication import publish_batch
+            published = publish_batch(built, args.output_dir)
+            summary_cases = published["cases"]
+            batch_output = published["batch_receipt"]
         else:
+            summary_cases = [
+                {
+                    "case_id": spec["case_id"],
+                    "artifacts": {
+                        key: {"sha256": snapshot_sha256(outputs[key])}
+                        for key in ARTIFACT_NAMES
+                    },
+                }
+                for spec, outputs in zip(plan["cases"], built["case_results"])
+            ]
             batch_output = {"sha256": snapshot_sha256(receipt)}
         output = {
             "status": ("unscored_batch_written" if args.write
@@ -258,6 +256,11 @@ def main(argv=None):
             "case_count": receipt["case_count"],
             "cases": summary_cases,
             "batch_receipt": batch_output,
+            "receipt_published": args.write,
+            "stored_leaf_replay_verified": args.write,
+            "existing_receipt_reused": (
+                published["existing_receipt_reused"] if args.write else False
+            ),
             "later_reference_labels_accessed": False,
             "empirical_evaluation": "not_performed",
             "research_ready": False,
