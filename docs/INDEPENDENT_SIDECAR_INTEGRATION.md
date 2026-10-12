@@ -65,7 +65,7 @@ entity. Neither becomes a pipeline input or feature enrichment.
 ## Validation gates
 
 - 19 synthetic original-CDXJ tests, 24 exchange tests, 18 shared
-  local-file tests, 18 atomic-output tests, 21 alias tests, and 25 sidecar integration tests are **authored but not executed** in
+  local-file tests, 18 atomic-output tests, 21 alias tests, and 25 sidecar integration tests are **authored** in
   this branch. Those counts are inventories, not pass rates.
 - `python -m scripts.preflight_validation_plan --scope all` is a
   static check only; do not claim passing tests. Real unit/CLI tests,
@@ -150,3 +150,18 @@ writer tests are authored but **not executed**. Input/output safeguards
 remain observational on Windows, with a documented concurrent-replacement
 race until real platform validation. The portable validation inventory now
 contains 24 exchange + 18 reader + 18 writer = 60 authored tests.
+
+## Focused executable validation — October 11, 2026
+
+The independent storage PR #54 was locally tested on a temporary Linux
+Python 3.13.5 environment using byte-identical reader/writer modules and
+test files (Git blob hashes documented in
+`docs/LOCAL_STORAGE_COMPONENT_VALIDATION.md`). Initially 17 of 18
+writer tests passed and one failed because digest-named directories caused
+`IsADirectoryError` before the expected refusal; this is now fixed.
+**18 reader and 18 writer tests pass (36/36)** with no skips/errors after
+the repair, plus 40 successful four-writer concurrency rounds. Two small
+script wrappers were reproduced from their original function bodies, not
+imported via the entire project dependency graph. The full exchange,
+alias, sidecar, batch and native Windows suites have **not** been executed.
+This does not change the project's unapproved and unscored research status.
