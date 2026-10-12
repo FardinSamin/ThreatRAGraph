@@ -150,3 +150,14 @@ immutable-output fallback for ancestors and existing digest destinations.
 Three added synthetic reader tests and two writer tests are **unexecuted**:
 there are now 18 reader and 18 writer test methods. These observational
 checks DO NOT rule out malicious simultaneous Windows filesystem replacement.
+
+## Executed isolated storage checks (2026-10-11)
+
+The previously authored 18 reader and 18 atomic-writer tests were executed
+in a Linux/Python 3.13.5 isolated environment using byte-identical
+repository modules and test files. The writer initially had one real
+nonregular-directory refusal error, now fixed. After repair all 36 tests
+passed with no skips; 40 additional four-way concurrency rounds passed.
+This is **not** full repository, exchange, batch pipeline, CI or Windows
+validation; 24 exchange tests remain unexecuted. See the focused log in
+`docs/LOCAL_STORAGE_COMPONENT_VALIDATION.md`.

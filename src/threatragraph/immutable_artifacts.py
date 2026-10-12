@@ -83,6 +83,13 @@ def _verify_existing(root, name, data, *, dir_fd):
         if error.errno in (errno.ELOOP, errno.ENOTDIR):
             raise ValueError("Linked digest-named output artifact refused") from error
         raise
+    # A directory can be opened with O_RDONLY, but wrapping that fd with
+    # os.fdopen raises IsADirectoryError before the normal refusal check.
+    # Validate file type directly on the opened descriptor and close it on
+    # refusal, preserving the documented fail-closed ValueError contract.
+    if not stat.S_ISREG(os.fstat(fd).st_mode):
+        os.close(fd)
+        raise ValueError("Destination is not an exact standalone artifact")
     try:
         with os.fdopen(fd, "rb") as stream:
             info = os.fstat(stream.fileno())
