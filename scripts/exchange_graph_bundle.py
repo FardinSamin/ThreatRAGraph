@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Offline JSON/CSV graph exchange; neither import nor export modifies SQLite."""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+
+from scripts.freeze_case_snapshots import write_immutable_view
+from src.threatragraph.local_file_inputs import read_local_json, read_local_text, assert_distinct_input_files
+from src.threatragraph.portable_exchange import (
+    create_bundle, export_claims_csv, parse_bundle_json, verify_bundle,
+    verify_claims_csv,
+)
+
+MAX_INPUT = 8 * 1024 * 1024
+
+
+def _read_text(path):
+    return read_local_text(path, max_bytes=MAX_INPUT)
+
+
+def _read_json(path):
+    return read_local_json(path, max_bytes=MAX_INPUT)
+
+
+def _write_csv(content, output_dir):
+    """Atomically publish canonical CSV by digest, without rewriting bytes."""
+    from src.threatragraph.immutable_artifacts import write_immutable_bytes
+
+    if type(content) is not str:
+        raise ValueError("Canonical CSV export text required")
+    return write_immutable_bytes(content.encode("utf-8"), output_dir, ".csv")
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", required=True, choices=("export", "verify"))
+    parser.add_argument("--view")
+    parser.add_argument("--graph")
+    parser.add_argument("--reviewed", action="store_true")
+    parser.add_argument("--bundle")
+    parser.add_argument("--csv")
+    parser.add_argument("--write", action="store_true")
+    parser.add_argument("--output-dir", default="artifacts/portable_exchange")
+    args = parser.parse_args(argv)
+    try:
+        if args.mode == "export":
+            if not args.view or not args.graph or args.bundle or args.csv:
+                raise ValueError("Export requires only view and graph JSON")
+            assert_distinct_input_files([args.view, args.graph])
+            bundle = create_bundle(
+                _read_json(args.view), _read_json(args.graph),
+                reviewed=args.reviewed,
+            )
+            csv_data = export_claims_csv(bundle)
+            receipt = verify_claims_csv(csv_data, bundle)
+            result = {
+                "status": "portable_export_preview",
+                "bundle_id": bundle["bundle_id"],
+                "claim_count": receipt["claim_count"],
+                "csv_sha256": receipt["csv_sha256"],
+            }
+            if args.write:
+                sha, path, _ = write_immutable_view(bundle, args.output_dir)
+                csv_sha, csv_file, _ = _write_csv(csv_data, args.output_dir)
+                result.update({
+                    "status": "portable_export_written",
+                    "bundle_sha256": sha, "bundle_path": str(path),
+                    "csv_sha256": csv_sha, "csv_path": str(csv_file),
+                })
+        else:
+            if (not args.bundle or args.view or args.graph
+                    or args.reviewed or args.write):
+                raise ValueError("Verification requires a bundle, optional CSV")
+            if args.csv:
+                assert_distinct_input_files([args.bundle, args.csv])
+            bundle = parse_bundle_json(_read_text(args.bundle))
+            receipt = (verify_claims_csv(_read_text(args.csv), bundle)
+                       if args.csv else verify_bundle(bundle))
+            result = {
+                "status": "portable_exchange_verified",
+                "bundle_id": receipt["bundle_id"],
+                "claim_count": receipt["claim_count"],
+                "csv_verified": bool(args.csv),
+            }
+        result["research_ready"] = False
+    except (OSError, ValueError, TypeError, KeyError, OverflowError,
+            RecursionError, UnicodeError, json.JSONDecodeError) as exc:
+        print(json.dumps({
+            "status": "portable_exchange_refused",
+            "reason_category": type(exc).__name__,
+            "research_ready": False,
+        }, sort_keys=True))
+        return 2
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
