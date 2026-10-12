@@ -264,7 +264,7 @@
         "tests/test_batch_publication.py",
         "tests/test_batch_replay.py"
       ],
-      "min_authored_test_methods": 59,
+      "min_authored_test_methods": 65,
       "test_command": "python -m unittest discover -s tests -p 'test_batch_*.py' -v",
       "manual_gates": [
         "Execute two-case REAL synthetic B0/G1 full replay under exact branch head before trusting saved receipts",
@@ -278,7 +278,7 @@
         "Refuse replay-incompatible leaf/receipt sizes before creating an output directory",
         "Simulate legacy Windows reparse-point roots without Path.is_junction and require read/publication refusal before leaf writes",
         "Confirm replay root never calls resolve() after link checks; each leaf must be opened via no-follow path traversal",
-        "Reject self-resealed forged approval and foreign receipt/per-case fields before writing any leaves"
+        "Reject forged or self-resealed approvals, foreign case fields, mismatched predictions/abstention, datasets, duplicate run IDs and case pointers before writing leaves"
       ]
     }
   ]

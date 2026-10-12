@@ -1,6 +1,6 @@
 # M6.7 — Unscored batch publication and read-only recovery
 
-**Status:** Draft, 32 recovery tests plus 27 replay tests authored on this integration branch; NOT executed. Based on the
+**Status:** Draft, 38 recovery tests plus 27 replay tests authored on this integration branch; NOT executed. Based on the
 unmerged consolidated integration PR #61. No research case is approved, no
 gold labels are used, and no tests or real experiments have been verified.
 
@@ -76,7 +76,7 @@ who controls all stored data can still replace all self-hashes.
 ## Deferred gates
 
 - Execute `python -m unittest discover -s tests -p 'test_batch_publication.py' -v`
-  (32 synthetic/failure-injection tests authored, not run).
+  (38 synthetic/failure-injection tests authored, not run).
 - Run original `test_batch_replay.py`, `test_offline_case_batch.py`,
   `test_immutable_artifacts.py` and two-case byte-backed synthetic
   integration tests on the exact branch head.
@@ -120,7 +120,7 @@ lower-level immutable writer can support larger unrelated artifacts.
 Six additional replay tests cover leaf and parent symlinks, named pipes,
 replacing a file at descriptor open, and use of the descriptor reader instead
 of a racy pathname read. Two additional batch publication tests cover
-oversized in-memory leaves/receipts. **32 publication tests and 27 replay
+oversized in-memory leaves/receipts. **38 publication tests and 27 replay
 tests exist on this PR tip; all are authored and unexecuted.** The separate
 parent PR #58 retains its original 19 replay tests.
 
@@ -153,8 +153,8 @@ premature-approval metadata from leaving new orphan leaf files before replay.
 
 Five additional synthetic tests are authored: a no-resolve replay-root
 regression and four malformed/forged-receipt preflight refusals. The exact
-head therefore has 32 batch-publication tests and 27 replay tests,
-**59 authored but NOT EXECUTED**. Previously recorded research gates remain
+head therefore has 38 batch-publication tests and 27 replay tests,
+**65 authored but NOT EXECUTED**. Previously recorded research gates remain
 open. No gold access, original publisher authentication or trusted external
 freeze is claimed by these integrity checks.
 
@@ -172,3 +172,20 @@ partial script-wrapper boundary and other limitations are recorded in
 than full M6 integration testing; **no batch publication/replay tests or
 native Windows tests were executed**. The research remains unscored and
 unapproved, and PR #62 remains a draft.
+
+## Early per-case preflight for recovery integrity (draft)
+
+A receipt may be internally self-hashed while still disagreeing with its
+in-memory case outputs. Before this change, malformed case prediction counts,
+identity pointers, abstention status, duplicate run IDs, oversized case IDs,
+and source-view dataset mismatches could be caught only by full replay after
+writing some immutable leaves. The batch publisher now checks those fields
+against the in-memory artifacts **before any file writes**, then retains the
+full persisted B0/G1 replay as a separate mandatory final gate.
+
+Six additional synthetic regression tests are authored but NOT EXECUTED,
+including a deliberately self-resealed but wrong profile pointer and
+wrong-dataset source view. Branch inventory: 38 authored batch-publication
+methods plus 27 replay methods (65 total). This reduces unnecessary orphan
+files from invalid inputs; it does not make batches transactional, prove a
+third-party freeze, or authenticate any historical CTI source.

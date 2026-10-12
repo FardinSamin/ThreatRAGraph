@@ -58,6 +58,7 @@ def _expected_entries(built):
 
     records = []
     identifiers = []
+    seen_runs = set()
     for entry, outputs in zip(receipt["cases"], cases):
         if (not isinstance(entry, dict)
                 or set(entry) != CASE_FIELDS
@@ -67,9 +68,18 @@ def _expected_entries(built):
                 or set(entry["artifacts"]) != set(ARTIFACT_NAMES)):
             raise ValueError("Missing, extra or mislabeled batch artifact")
         case_id = entry.get("case_id")
-        if type(case_id) is not str or not case_id:
+        if type(case_id) is not str or not case_id or len(case_id) > 200:
             raise ValueError("Invalid batch case identifier")
         identifiers.append(case_id)
+        if (entry["research_ready"] is not False
+                or type(entry["g1_novel_proposal_count"]) is not int
+                or entry["g1_novel_proposal_count"] < 0
+                or type(entry["g1_abstained"]) is not bool):
+            raise ValueError("Invalid prepublication per-case status")
+        run_id = entry["run_id"]
+        if type(run_id) is not str or not run_id or run_id in seen_runs:
+            raise ValueError("Duplicate or invalid prepublication run identity")
+        seen_runs.add(run_id)
         bound = {}
         for name in ARTIFACT_NAMES:
             artifact = outputs[name]
@@ -85,6 +95,32 @@ def _expected_entries(built):
             if entry["artifacts"][name] != digest:
                 raise ValueError("Candidate artifact differs from sealed receipt")
             bound[name] = digest
+        # Do not leave newly written leaves behind for an already-invalid
+        # receipt: the replay verifier previously caught these mismatches
+        # only AFTER artifact publication. Preflight the inexpensive exact
+        # per-case pointers, counts, and source-dataset binding first.
+        for name, key, receipt_field in (
+            ("pipeline_receipt", "pipeline_id", "pipeline_id"),
+            ("run_lock", "run_id", "run_id"),
+            ("b0_profile", "profile_id", "b0_profile_id"),
+            ("g1_profile", "profile_id", "g1_profile_id"),
+            ("paired_audit", "audit_id", "paired_audit_id"),
+        ):
+            if outputs[name].get(key) != entry[receipt_field]:
+                raise ValueError("Prepublication case identity pointer mismatch")
+        predictions = outputs["g1_profile"].get("predictions")
+        abstention = outputs["g1_profile"].get("abstention")
+        if (not isinstance(predictions, list)
+                or not isinstance(abstention, dict)
+                or type(abstention.get("abstained")) is not bool
+                or len(predictions) != entry["g1_novel_proposal_count"]
+                or abstention["abstained"] is not entry["g1_abstained"]):
+            raise ValueError("Prepublication G1 count or abstention mismatch")
+        for name in ("b0_view", "g1_view"):
+            if (outputs[name].get("dataset_id") != receipt["dataset_id"]
+                    or outputs[name].get("dataset_version")
+                        != receipt["dataset_version"]):
+                raise ValueError("Prepublication source-view dataset mismatch")
         records.append((case_id, outputs, bound))
     if identifiers != sorted(set(identifiers)):
         raise ValueError("Noncanonical duplicate or unordered case identifiers")

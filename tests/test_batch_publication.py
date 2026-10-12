@@ -417,6 +417,68 @@ class BatchPublicationTests(unittest.TestCase):
             publish_batch(self.built, self.root)
         self.assertFalse(self.root.exists())
 
+    def test_preflight_rejects_forged_prediction_count_without_writing(self):
+        receipt = self.built["batch_receipt"]
+        receipt["cases"][0]["g1_novel_proposal_count"] = -1
+        receipt["batch_id"] = "batch:" + fingerprint({
+            key: value for key, value in receipt.items() if key != "batch_id"
+        })
+        with self.assertRaisesRegex(ValueError, "per-case status"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_preflight_rejects_duplicate_runs_without_writing(self):
+        receipt = self.built["batch_receipt"]
+        receipt["cases"][1]["run_id"] = receipt["cases"][0]["run_id"]
+        receipt["batch_id"] = "batch:" + fingerprint({
+            key: value for key, value in receipt.items() if key != "batch_id"
+        })
+        with self.assertRaisesRegex(ValueError, "run identity"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_preflight_rejects_resealed_wrong_profile_pointer(self):
+        receipt = self.built["batch_receipt"]
+        receipt["cases"][0]["g1_profile_id"] = "profile:" + "0" * 64
+        receipt["batch_id"] = "batch:" + fingerprint({
+            key: value for key, value in receipt.items() if key != "batch_id"
+        })
+        with self.assertRaisesRegex(ValueError, "identity pointer mismatch"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_preflight_rejects_resealed_abstention_status_mismatch(self):
+        receipt = self.built["batch_receipt"]
+        receipt["cases"][0]["g1_abstained"] = not receipt["cases"][0]["g1_abstained"]
+        receipt["batch_id"] = "batch:" + fingerprint({
+            key: value for key, value in receipt.items() if key != "batch_id"
+        })
+        with self.assertRaisesRegex(ValueError, "G1 count or abstention mismatch"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_preflight_rejects_wrong_source_dataset_before_writing(self):
+        outputs = self.built["case_results"]
+        outputs[0]["b0_view"]["dataset_id"] = "wrong-dataset"
+        plan = {
+            "dataset_id": "synthetic", "dataset_version": "v1",
+            "cases": [{"case_id": "case-a"}, {"case_id": "case-b"}],
+        }
+        self.built["batch_receipt"] = _receipt(outputs, plan)
+        with self.assertRaisesRegex(ValueError, "source-view dataset mismatch"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_preflight_rejects_oversized_case_identifier_without_writes(self):
+        receipt = self.built["batch_receipt"]
+        receipt["cases"][0]["case_id"] = "x" * 201
+        receipt["batch_id"] = "batch:" + fingerprint({
+            key: value for key, value in receipt.items() if key != "batch_id"
+        })
+        with self.assertRaisesRegex(ValueError, "case identifier"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
     def test_extra_uncommitted_staging_file_is_not_completion(self):
         self.root.mkdir()
         (self.root / ".stage-abandoned.partial").write_bytes(b"truncated")
