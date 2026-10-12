@@ -1,6 +1,6 @@
 # M6.7 — Unscored batch publication and read-only recovery
 
-**Status:** Draft, 28 recovery tests plus 26 replay tests authored on this integration branch; NOT executed. Based on the
+**Status:** Draft, 32 recovery tests plus 27 replay tests authored on this integration branch; NOT executed. Based on the
 unmerged consolidated integration PR #61. No research case is approved, no
 gold labels are used, and no tests or real experiments have been verified.
 
@@ -76,7 +76,7 @@ who controls all stored data can still replace all self-hashes.
 ## Deferred gates
 
 - Execute `python -m unittest discover -s tests -p 'test_batch_publication.py' -v`
-  (28 synthetic/failure-injection tests authored, not run).
+  (32 synthetic/failure-injection tests authored, not run).
 - Run original `test_batch_replay.py`, `test_offline_case_batch.py`,
   `test_immutable_artifacts.py` and two-case byte-backed synthetic
   integration tests on the exact branch head.
@@ -120,7 +120,7 @@ lower-level immutable writer can support larger unrelated artifacts.
 Six additional replay tests cover leaf and parent symlinks, named pipes,
 replacing a file at descriptor open, and use of the descriptor reader instead
 of a racy pathname read. Two additional batch publication tests cover
-oversized in-memory leaves/receipts. **28 publication tests and 26 replay
+oversized in-memory leaves/receipts. **32 publication tests and 27 replay
 tests exist on this PR tip; all are authored and unexecuted.** The separate
 parent PR #58 retains its original 19 replay tests.
 
@@ -134,3 +134,26 @@ those attributes indicate a junction or other reparse point. One new replay
 test and one new publication test simulate the legacy interpreter path;
 **both are authored, not executed**, making 26 and 28 methods respectively.
 Windows concurrent path replacement still requires live platform validation.
+
+## Receipt preflight and replay-root race review
+
+The replay root validator now keeps the checked **lexical absolute path**;
+it does not call `Path.resolve()` after detecting symlink/reparse components.
+Resolving after checking could follow a newly swapped symlink and silently
+move subsequent evidence reads outside the original root. Exact leaf reads
+continue to walk the checked lexical path with the bounded no-follow reader.
+This does not make cross-platform filesystem replacement atomic.
+
+The batch publisher now validates the final in-memory receipt's **exact
+field schema**, its self-sealed batch ID, declared dataset identity, plan
+SHA-256, unscored/independent-approval flags, and each case record's exact
+field schema BEFORE writing any per-case files. An oversized receipt is also
+rejected at the preflight boundary. This prevents malformed or self-resealed
+premature-approval metadata from leaving new orphan leaf files before replay.
+
+Five additional synthetic tests are authored: a no-resolve replay-root
+regression and four malformed/forged-receipt preflight refusals. The exact
+head therefore has 32 batch-publication tests and 27 replay tests,
+**59 authored but NOT EXECUTED**. Previously recorded research gates remain
+open. No gold access, original publisher authentication or trusted external
+freeze is claimed by these integrity checks.

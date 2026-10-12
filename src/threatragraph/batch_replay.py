@@ -92,7 +92,11 @@ def _root_directory(path):
             raise ValueError("Symlinked or reparse batch artifact root/ancestor")
     if not node.is_dir():
         raise ValueError("Batch artifact root must be a directory")
-    return node.resolve(strict=True)
+    # Keep the checked lexical path. Calling resolve() here creates a
+    # check-then-resolve race: a newly swapped symlink could be followed
+    # after the component checks. Each subsequent artifact open walks this
+    # path with the dedicated no-follow descriptor reader instead.
+    return node
 
 
 def _read_canonical(path, *, expected_hash=None):

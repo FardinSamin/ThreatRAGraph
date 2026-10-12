@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256, write_immutable_view
 from scripts.run_offline_case_batch import ARTIFACT_NAMES, _receipt
-from src.threatragraph.batch_replay import _read_canonical, replay_batch
+from src.threatragraph.batch_replay import _read_canonical, _root_directory, replay_batch
 from src.threatragraph.evidence_graph import fingerprint
 from src.threatragraph.feature_lineage import (
     ARTIFACT_KIND, CONTRACT_VERSION, EXTRACTION, IDENTITY_POLICY,
@@ -441,6 +441,14 @@ class FrozenBatchReplayTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "Symlink"):
                     _read_canonical(leaf)
             self.assertEqual([True], swapped)
+
+    def test_root_check_never_resolves_path_after_nofollow_checks(self):
+        # An ancestor can be replaced between checking it and resolve();
+        # replay must hand the lexical path to the descriptor-based reader.
+        with patch.object(Path, "resolve",
+                          side_effect=AssertionError("must not resolve")):
+            checked = _root_directory(self.root)
+        self.assertEqual(self.root.absolute(), checked)
 
     def test_invalid_batch_digest_refused(self):
         with self.assertRaisesRegex(ValueError, "Invalid digest"):

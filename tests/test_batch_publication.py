@@ -11,6 +11,7 @@ from scripts.check_batch_completion import main as completion_cli
 from src.threatragraph.batch_publication import (
     check_batch_completion, publish_batch,
 )
+from src.threatragraph.evidence_graph import fingerprint
 
 # The existing frozen-run synthetic fixture exercises the REAL deterministic
 # B0/G1 builders. No research data or held-out labels are loaded here.
@@ -381,6 +382,40 @@ class BatchPublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "reparse"):
                 publish_batch(self.built, self.root)
         self.assertEqual([], list(self.root.glob("*.json")))
+
+    def test_receipt_foreign_schema_field_rejected_before_any_write(self):
+        self.built["batch_receipt"]["later_labels"] = ["forbidden"]
+        with self.assertRaisesRegex(ValueError, "Unexpected batch receipt keys"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_unsealed_batch_identity_rejected_before_any_write(self):
+        self.built["batch_receipt"]["plan_sha256"] = "a" * 64
+        with self.assertRaisesRegex(ValueError, "Tampered or malformed batch"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_self_resealed_approval_claim_rejected_before_any_write(self):
+        receipt = self.built["batch_receipt"]
+        receipt["independent_study_approval"] = "verified"
+        receipt["batch_id"] = "batch:" + fingerprint({
+            key: value for key, value in receipt.items()
+            if key != "batch_id"
+        })
+        with self.assertRaisesRegex(ValueError, "Not an unscored"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
+
+    def test_resealed_per_case_foreign_field_rejected_before_write(self):
+        receipt = self.built["batch_receipt"]
+        receipt["cases"][0]["gold_label"] = "unknown"
+        receipt["batch_id"] = "batch:" + fingerprint({
+            key: value for key, value in receipt.items()
+            if key != "batch_id"
+        })
+        with self.assertRaisesRegex(ValueError, "Missing, extra"):
+            publish_batch(self.built, self.root)
+        self.assertFalse(self.root.exists())
 
     def test_extra_uncommitted_staging_file_is_not_completion(self):
         self.root.mkdir()

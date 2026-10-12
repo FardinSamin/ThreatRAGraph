@@ -12,8 +12,8 @@ from pathlib import Path
 from scripts.freeze_case_snapshots import canonical_bytes, snapshot_sha256, write_immutable_view
 from scripts.run_offline_case_batch import ARTIFACT_NAMES
 from src.threatragraph.batch_replay import (
-    HEX64, MAX_ARTIFACT_BYTES, _root_directory, replay_batch,
-    verify_unpublished_batch,
+    BATCH_FIELDS, CASE_FIELDS, HEX64, MAX_ARTIFACT_BYTES, _root_directory,
+    _self_sealed, replay_batch, verify_unpublished_batch,
 )
 
 MAX_PUBLICATION_CASES = 100
@@ -30,16 +30,38 @@ def _expected_entries(built):
             or not 1 <= len(cases) == len(receipt["cases"])
                     <= MAX_PUBLICATION_CASES):
         raise ValueError("Incomplete candidate batch inventory")
-    if (receipt.get("case_count") != len(cases)
-            or receipt.get("research_ready") is not False
-            or receipt.get("later_reference_labels_accessed") is not False
-            or receipt.get("empirical_evaluation") != "not_performed"):
+    # Enforce size before further schema parsing, so even a malformed
+    # oversized receipt never causes any leaf to be written.
+    if len(canonical_bytes(receipt)) > MAX_ARTIFACT_BYTES:
+        raise ValueError("Batch receipt exceeds replay reader size limit")
+    if set(receipt) != BATCH_FIELDS:
+        raise ValueError("Unexpected batch receipt keys before publication")
+    _self_sealed(receipt, "batch:", "batch_id", "batch")
+    if (receipt["schema_version"] != "1.0"
+            or receipt["artifact_kind"]
+                != "unscored_multicase_engineering_receipt"
+            or receipt["batch_version"] != "unscored-multicase-batch-v1"
+            or type(receipt["case_count"]) is not int
+            or receipt["case_count"] != len(cases)
+            or receipt["research_ready"] is not False
+            or receipt["later_reference_labels_accessed"] is not False
+            or receipt["independent_study_approval"] != "not_verified"
+            or receipt["empirical_evaluation"] != "not_performed"):
         raise ValueError("Not an unscored and unapproved batch receipt")
+    for field in ("dataset_id", "dataset_version"):
+        if (type(receipt[field]) is not str
+                or not receipt[field].strip()):
+            raise ValueError("Incomplete sealed batch dataset identity")
+    if (type(receipt["plan_sha256"]) is not str
+            or not HEX64.fullmatch(receipt["plan_sha256"])):
+        raise ValueError("Invalid sealed batch plan digest")
 
     records = []
     identifiers = []
     for entry, outputs in zip(receipt["cases"], cases):
-        if (not isinstance(entry, dict) or not isinstance(outputs, dict)
+        if (not isinstance(entry, dict)
+                or set(entry) != CASE_FIELDS
+                or not isinstance(outputs, dict)
                 or set(outputs) != set(ARTIFACT_NAMES)
                 or not isinstance(entry.get("artifacts"), dict)
                 or set(entry["artifacts"]) != set(ARTIFACT_NAMES)):
@@ -66,8 +88,6 @@ def _expected_entries(built):
         records.append((case_id, outputs, bound))
     if identifiers != sorted(set(identifiers)):
         raise ValueError("Noncanonical duplicate or unordered case identifiers")
-    if len(canonical_bytes(receipt)) > MAX_ARTIFACT_BYTES:
-        raise ValueError("Batch receipt exceeds replay reader size limit")
     return receipt, records
 
 

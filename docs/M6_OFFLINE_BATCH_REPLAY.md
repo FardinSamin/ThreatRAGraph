@@ -126,3 +126,12 @@ without depending on the newer `Path.is_junction` method. The replay
 suite on that branch has **26 authored, unexecuted** tests (the parent PR
 #58 remains at 19), including a synthetic missing-junction-method case.
 This is best-effort local filesystem hygiene, not an OS-wide sandbox.
+
+## Dependent PR #62: preserve lexical root after no-follow checks
+
+The integration branch now intentionally returns the checked lexical
+absolute path from `_root_directory` instead of resolving it a second
+time. A new test refuses a late `Path.resolve` call. Each opened artifact
+continues to be checked with no-follow descriptor traversal. The dependent
+branch holds **27 authored replay tests, unexecuted**; original PR #58
+remains unchanged. Windows concurrent replacement remains a manual gate.
